@@ -6,15 +6,16 @@ import com.exerciting.Exerciting.Exception.InvalidTimeException;
 import com.exerciting.Exerciting.Repository.MatchingRepository;
 import com.exerciting.Exerciting.dto.MatchingRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 
 import java.time.LocalDateTime;
-
-public class GroupService {
+@Service
+public class MatchService {
     private final MatchingRepository matchingRepository;
 
     @Autowired
-    public GroupService(MatchingRepository matchingRepository) {
+    public MatchService(MatchingRepository matchingRepository) {
         this.matchingRepository = matchingRepository;
 
     }
