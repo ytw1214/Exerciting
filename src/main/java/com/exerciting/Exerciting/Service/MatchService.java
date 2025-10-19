@@ -1,15 +1,18 @@
-package com.exerciting.Exerciting.Service.Group;
+package com.exerciting.Exerciting.Service;
 
 import com.exerciting.Exerciting.Entity.Matching;
 import com.exerciting.Exerciting.Exception.InvalidInputException;
 import com.exerciting.Exerciting.Exception.InvalidTimeException;
 import com.exerciting.Exerciting.Repository.MatchingRepository;
+import com.exerciting.Exerciting.dto.GetMatchingDto;
 import com.exerciting.Exerciting.dto.MatchingRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 public class MatchService {
     private final MatchingRepository matchingRepository;
@@ -33,5 +36,8 @@ public class MatchService {
         Matching matching = dto.toEntity(hostId);
         Matching savedMatching = matchingRepository.save(matching);
         return matching.getId();
+    }
+    public List<Matching> getAllMatching() {
+        return matchingRepository.findAll();
     }
 }

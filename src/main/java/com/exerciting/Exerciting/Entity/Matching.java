@@ -22,7 +22,7 @@ public class Matching {
     @ManyToOne
     private User hostId;
     private LocalDateTime matchTime;
-    private int currentParticipants; // 현재 인원 필드 추가
+    private int currentPerson; // 현재 인원 필드 추가
     //@Enumerated(EnumType.STRING)
     //private MatchingStatus status;
 
