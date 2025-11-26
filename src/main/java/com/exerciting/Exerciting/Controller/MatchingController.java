@@ -42,4 +42,8 @@ public class MatchingController {
         }
         return ResponseEntity.ok(getMatchingList);
     }
-}
+    @GetMapping("/")
+    public String HelloController() {
+        return "Yammy!~";
+    }
+    }
