@@ -20,9 +20,12 @@ public class Game {
     private String sportType;
     private String homeTeam;
     private String awayTeam;
-    private String stadiumName;
-    private String stadiumLocation;
+    private Stadium stadium;
     private LocalDateTime gameStartTime;
+    private String title;
+    private String description;
 
+    private int maxviewer;
+    private int currentviewer;
 
 }

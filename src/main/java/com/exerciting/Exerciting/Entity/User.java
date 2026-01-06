@@ -1,9 +1,6 @@
 package com.exerciting.Exerciting.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +14,9 @@ import java.util.List;
 @Table(name="User")
 public class User {
     @Id
-    private String Id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+    private Long Id;
 
     private String pw;
     private String nickname;
