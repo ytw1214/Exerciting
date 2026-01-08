@@ -14,16 +14,18 @@ public class Matching {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String matchName;
+    private String title;
     private String description;
     private int maxPerson;
-    @Enumerated(EnumType.STRING)
-    private Activity activity;
-    @ManyToOne
-    private User hostId;
-    private LocalDateTime matchTime;
     private int currentPerson; // 현재 인원 필드 추가
-    //@Enumerated(EnumType.STRING)
-    //private MatchingStatus status;
+    private Game game;
+    @ManyToOne
+    private User host;
+    private LocalDateTime meetTime;
+    /*
+    @Enumerated(EnumType.STRING)
+    private MatchingStatus status;
+
+     */
 
 }

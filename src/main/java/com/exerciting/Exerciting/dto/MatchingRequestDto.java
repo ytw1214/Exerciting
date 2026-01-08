@@ -1,6 +1,5 @@
 package com.exerciting.Exerciting.dto;
 
-import com.exerciting.Exerciting.Entity.Activity;
 import com.exerciting.Exerciting.Entity.Matching;
 import lombok.Getter;
 

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface StadiumRepository extends JpaRepository<Stadium, Long> {
-    List<Stadium> findbyAddressContaining(String address);
-    List<Stadium> findbyNameContaining(String name);
-    Optional<Stadium> findbyLatitudeAndLongitude(double latitude, double longitude);
+    List<Stadium> findByAddressContaining(String address);
+    List<Stadium> findByNameContaining(String name);
+    Optional<Stadium> findByLatitudeAndLongitude(double latitude, double longitude);
 }

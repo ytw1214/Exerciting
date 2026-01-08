@@ -15,7 +15,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
     //데이터 조회
-    public User getUserById(String id) {
+    public User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(()->new UserNotFoundException("id 못찾음"));
     }
