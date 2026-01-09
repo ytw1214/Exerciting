@@ -25,6 +25,7 @@ public class Game {
     private LocalDateTime gameStartTime;
     private String title;
     private String description;
+    @Enumerated(EnumType.STRING)
     private GameStatus gameStatus;
 
 

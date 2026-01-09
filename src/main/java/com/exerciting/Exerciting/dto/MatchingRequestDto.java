@@ -7,20 +7,18 @@ import java.time.LocalDateTime;
 @Getter
 public class MatchingRequestDto {
 
-    private String matchName;
+    private String title;
     private String description;
-    private int maxMember;
-    private LocalDateTime matchTime;
-    private Activity activity;
+    private int maxPerson;
+    private LocalDateTime meetTime;
 
 
     public Matching toEntity(Long hostId) {
         return Matching.builder()
-                .matchName(this.matchName)
+                .title(this.title)
                 .description(this.description)
-                .maxPerson(this.maxMember)
-                .activity(this.activity)
-                .matchTime(this.matchTime)
+                .maxPerson(this.maxPerson)
+                .meetTime(this.meetTime)
                 .build();
     }
 

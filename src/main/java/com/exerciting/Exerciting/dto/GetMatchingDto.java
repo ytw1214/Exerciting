@@ -8,20 +8,18 @@ import java.time.LocalDateTime;
 @Getter
 public class GetMatchingDto {
     private Long id;
-    private String matchName;
+    private String title;
     private String description;
     private int maxPerson;
     private int currentPerson;
-    private Activity activity;
-    private LocalDateTime matchTime;
+    private LocalDateTime meetTime;
 
     public GetMatchingDto(Matching matching) {
         this.id = matching.getId();
-        this.matchName = matching.getMatchName();
+        this.title = matching.getTitle();
         this.description = matching.getDescription();
         this.maxPerson = matching.getMaxPerson();
         this.currentPerson = matching.getCurrentPerson();
-        this.activity = matching.getActivity(); // Enum이므로 안전
-        this.matchTime = matching.getMatchTime();
+        this.meetTime = matching.getMeetTime();
     }
 }

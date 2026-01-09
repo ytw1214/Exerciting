@@ -18,8 +18,14 @@ public class Matching {
     private String description;
     private int maxPerson;
     private int currentPerson; // 현재 인원 필드 추가
+    @ManyToOne(
+            fetch = FetchType.LAZY
+            //CascadeType = CascadeType.
+            )
+    @JoinColumn(name="game_id")
     private Game game;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="host_id")
     private User host;
     private LocalDateTime meetTime;
     /*
