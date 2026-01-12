@@ -27,13 +27,13 @@ public class MatchingService {
 
     public Long createMatching(MatchingRequestDto dto, Long hostId) {
         // 1. 여기서부터 시작이다.
-        if (dto.getMatchTime().isBefore(LocalDateTime.now())) {
+        if (dto.getMeetTime().isBefore(LocalDateTime.now())) {
             throw new InvalidTimeException("시간 오류 ~");
         }
-        if (dto.getMaxMember() < 2) {
+        if (dto.getMaxPerson() < 2) {
             throw new InvalidInputException("인원 부족~");
         }
-        if (dto.getMatchName() == null || dto.getMatchName().isBlank()) {
+        if (dto.getTitle() == null || dto.getTitle().isBlank()) {
             throw new InvalidInputException("매칭 이름은 필수 입력이며, 공백으로만 이루어질 수 없습니다.");
         }
         Matching matching = dto.toEntity(hostId);

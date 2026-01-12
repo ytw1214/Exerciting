@@ -5,12 +5,12 @@ public enum InvitationStatus {
     ACCEPTED("수락됨"),
     REJECTED("거절됨");
 
-    private String Invitationstatus;
+    private String Status;
 
-    private InvitationStatus(String status) {
-        this.Invitationstatus = status;
+    InvitationStatus(String status) {
+        this.Status = status;
     }
     public String getInvitationStatus() {
-        return Invitationstatus;
+        return Status;
     }
 }
