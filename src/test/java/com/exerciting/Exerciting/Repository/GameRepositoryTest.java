@@ -38,8 +38,6 @@ class GameRepositoryTest {
                 .awayTeam("Tigers")
                 .stadium(stadium)
                 .gameStartTime(LocalDateTime.now())
-                .title("123")
-                .description("설명")
                 .build();
         gameRepository.save(game);
         /*

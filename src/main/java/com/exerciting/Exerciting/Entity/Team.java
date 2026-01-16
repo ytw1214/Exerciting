@@ -1,5 +1,37 @@
 package com.exerciting.Exerciting.Entity;
 
+import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Getter
+@NoArgsConstructor
 public class Team {
+    @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+    @ManyToOne(fetch= FetchType.LAZY)
+    @JoinColumn(name = "stadium_id")
+    private Stadium stadium;
+    private String sportType;
+    @OneToMany(mappedBy="team")
+    private List<Player> player = new ArrayList<Player>();
+
+
+
+    @Builder
+    public Team(String name, Stadium stadium, String sportType, List<Player> player) {
+        this.name = name;
+        this.stadium = stadium;
+        this.sportType = sportType;
+        this.player = player;
+    }
 
 }

@@ -1,10 +1,13 @@
 package com.exerciting.Exerciting.Controller;
 
+import com.exerciting.Exerciting.Entity.Player;
+import com.exerciting.Exerciting.Entity.Team;
 import com.exerciting.Exerciting.Repository.GameRepository;
 import com.exerciting.Exerciting.Service.GameService;
 import com.exerciting.Exerciting.dto.Game.GameSearchRequestDto;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,8 +22,14 @@ public class GameController {
         this.gameService = gameService;
         this.gameRepository = gameRepository;
     }
+/*
+    @PostMapping("/insert")
+    public String insert(Player player, Team team) {
+        String sql = "INSERT INTO "
+    }
 
-
+ */
+    /*
     public ResponseEntity<GameSearchRequestDto> getGames(
             @RequestParam(required = false) LocalDateTime start,
             @RequestParam(required = false) LocalDateTime end) {
@@ -28,6 +37,8 @@ public class GameController {
             return new ResponseEntity<>(HttpStatusCode.)
         }
     }
+
+     */
 
     /*
     public ResponseEntity<GameRequestDto> getGamesByTeam(String teamName) {

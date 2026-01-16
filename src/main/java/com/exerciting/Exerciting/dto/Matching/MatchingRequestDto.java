@@ -24,6 +24,7 @@ public class MatchingRequestDto {
     }
      */
 
+    /*
     public Matching toEntity(Long hostId) {
         return Matching.builder()
                 .id(this.id)
@@ -33,4 +34,6 @@ public class MatchingRequestDto {
                 .meetTime(this.meetTime)
                 .build();
     }
+
+     */
 }

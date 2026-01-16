@@ -25,6 +25,7 @@ public class MatchingRequestDto {
 
      */
 
+    /*
     public Matching toEntity(Matching matching) {
         return Matching.builder()
                 .id(matching.getId())
@@ -34,5 +35,7 @@ public class MatchingRequestDto {
                 .meetTime(matching.getMeetTime())
                 .build();
     }
+
+     */
 
 }
