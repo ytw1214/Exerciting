@@ -3,8 +3,11 @@ package com.exerciting.Exerciting.Service;
 import com.exerciting.Exerciting.Entity.Team;
 import com.exerciting.Exerciting.Repository.PlayerRepository;
 import com.exerciting.Exerciting.Repository.TeamRepository;
+import com.exerciting.Exerciting.dto.Team.TeamResponseDto;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class TeamService {
@@ -26,4 +29,11 @@ public class TeamService {
 
 
      */
+
+    public TeamResponseDto getTeam(Long teamId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 팀이 존재하지 않습니다."));
+
+        return TeamResponseDto.of(team);
+    }
 }

@@ -23,15 +23,16 @@ public class Team {
     private String sportType;
     @OneToMany(mappedBy="team")
     private List<Player> player = new ArrayList<Player>();
-
+    private String imgUrl;
 
 
     @Builder
-    public Team(String name, Stadium stadium, String sportType, List<Player> player) {
+    public Team(String name, Stadium stadium, String sportType, List<Player> player, String imgUrl) {
         this.name = name;
         this.stadium = stadium;
         this.sportType = sportType;
         this.player = player;
+        this.imgUrl = imgUrl;
     }
 
 }
