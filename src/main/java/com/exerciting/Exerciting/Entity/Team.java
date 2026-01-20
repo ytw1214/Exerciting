@@ -17,6 +17,8 @@ public class Team {
     private Long id;
 
     private String name;
+    @Column(name="name_en")
+    private String name_english;
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name = "stadium_id")
     private Stadium stadium;

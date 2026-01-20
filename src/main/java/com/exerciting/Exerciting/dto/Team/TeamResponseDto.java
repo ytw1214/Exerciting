@@ -5,10 +5,12 @@ import com.exerciting.Exerciting.Entity.Stadium;
 import com.exerciting.Exerciting.Entity.Team;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 @Getter
+@NoArgsConstructor
 public class TeamResponseDto {
     private Long id;
     private String name;

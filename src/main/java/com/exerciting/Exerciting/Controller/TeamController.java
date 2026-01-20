@@ -14,16 +14,18 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Optional;
 
-@Controller
+@RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/team")
 public class TeamController {
-    private final TeamRepository teamRepository;
     private final TeamService teamService;
-
+    /*
     public TeamController(TeamRepository teamRepository, TeamService teamService) {
         this.teamRepository = teamRepository;
         this.teamService = teamService;
     }
+
+     */
     /*
     @GetMapping("/search")
     public String searchTeam(@RequestParam("teamName") String teamName, Model model) {
@@ -37,6 +39,13 @@ public class TeamController {
         return "team"; // team.html
     }
      */
+
+    @GetMapping("/search")
+    public ResponseEntity<TeamResponseDto> getTeam(@RequestParam(name="name")String name) {
+        TeamResponseDto team = teamService.getTeam(name);
+
+        return ResponseEntity.ok(team);
+    }
     @GetMapping("/{teamId}")
     public ResponseEntity<TeamResponseDto> getTeam(@PathVariable Long teamId) {
 
