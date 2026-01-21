@@ -16,7 +16,7 @@ public class Game {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String sportType;
+    private SportType sportType;
     private String homeTeam;
     private String awayTeam;
     @ManyToOne(fetch = FetchType.LAZY) // 이 부분이 빠지면 에러가 납니다!
@@ -30,7 +30,7 @@ public class Game {
 
 
     @Builder
-    public Game(String sportType, String homeTeam, String awayTeam, Stadium stadium, LocalDateTime gameStartTime, String title, String description) {
+    public Game(SportType sportType, String homeTeam, String awayTeam, Stadium stadium, LocalDateTime gameStartTime, String title, String description) {
         this.sportType = sportType;
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
