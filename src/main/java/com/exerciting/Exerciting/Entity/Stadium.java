@@ -28,6 +28,5 @@ public class Stadium {
         this.latitude = latitude;
         this.longitude = longitude;
         this.address = address;
-
     }
 }

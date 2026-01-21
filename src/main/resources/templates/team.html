@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<h1>팀 검색</h1>
+
+<form th:action="@{/team/search}" method="get">
+    <input type="text" name="teamName" placeholder="팀명을 입력하세요">
+    <button type="submit">검색</button>
+</form>
+
+<hr>
+
+<div th:if="${team != null}">
+    <h3>검색 결과</h3>
+    <img th:src="@{/images/{p}(p=${team.logoPath})}" width="150">
+    <p>팀명: <span th:text="${team.name}">팀이름</span></p>
+    <p>홈구장: <span th:text="${team.stadium.name}">경기장</span></p>
+</div>
+
+<div th:if="${team == null && param.teamName != null}">
+    <p style="color: red;">해당 팀을 찾을 수 없습니다.</p>
+</div>
+</body>
+</html>

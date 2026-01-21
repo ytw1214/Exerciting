@@ -1,4 +1,4 @@
-package com.exerciting.Exerciting.dto;
+package com.exerciting.Exerciting.dto.Matching;
 
 import com.exerciting.Exerciting.Entity.Matching;
 import lombok.Getter;
@@ -22,20 +22,18 @@ public class MatchingRequestDto {
                 .meetTime(this.meetTime)
                 .build();
     }
-
      */
 
     /*
-    public Matching toEntity(Matching matching) {
+    public Matching toEntity(Long hostId) {
         return Matching.builder()
-                .id(matching.getId())
-                .title(matching.getTitle())
-                .description(matching.getDescription())
-                .maxPerson(matching.getMaxPerson())
-                .meetTime(matching.getMeetTime())
+                .id(this.id)
+                .title(this.title)
+                .description(this.description)
+                .maxPerson(this.maxPerson)
+                .meetTime(this.meetTime)
                 .build();
     }
 
      */
-
 }

@@ -23,21 +23,22 @@ public class Game {
     @JoinColumn(name = "stadium_id")
     private Stadium stadium;
     private LocalDateTime gameStartTime;
-    private String title;
-    private String description;
     @Enumerated(EnumType.STRING)
     private GameStatus gameStatus;
 
 
     @Builder
+<<<<<<< HEAD
     public Game(SportType sportType, String homeTeam, String awayTeam, Stadium stadium, LocalDateTime gameStartTime, String title, String description) {
+=======
+    public Game(String sportType, String homeTeam, String awayTeam, Stadium stadium, LocalDateTime gameStartTime, GameStatus gameStatus) {
+>>>>>>> e7a6db60a7c0ef7492a669e5d33960f5db9fffc2
         this.sportType = sportType;
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
         this.stadium = stadium;
         this.gameStartTime = gameStartTime;
-        this.title = title;
-        this.description = description;
+        this.gameStatus = gameStatus;
     }
 
 }

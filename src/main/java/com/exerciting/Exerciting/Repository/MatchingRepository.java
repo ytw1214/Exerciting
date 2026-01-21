@@ -13,7 +13,7 @@ public interface MatchingRepository extends JpaRepository<Matching, Long> {
     //Optional<Matching> findById(Long Id);
     //Optional<Matching> findByMatchName(String matchName);
     //Optional<Matching> findByMatchTime(LocalDateTime matchTime);
-    List<Matching> findByMatchTimeBefore(LocalDateTime meetTime);
+    List<Matching> findByMeetTimeBefore(LocalDateTime meetTime);
     List<Matching> findByTitle(String title);
     List<Matching> findByDescriptionContaining(String Description);
     @Query("Select m from Matching m where m.maxPerson > m.currentPerson")

@@ -32,11 +32,14 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	runtimeOnly 'mysql:mysql-connector-java:8.0.32'
-    implementation 'org.seleniumhq.selenium:selenium-java:4.38.0'
+    implementation 'org.jsoup:jsoup:1.17.2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testCompileOnly 'org.projectlombok:lombok:1.18.22'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
     testRuntimeOnly 'com.h2database:h2'
+    implementation 'org.seleniumhq.selenium:selenium-java:4.16.1'
+    // WebDriver Manager (드라이버 자동 관리)
+    implementation 'io.github.bonigarcia:webdrivermanager:5.6.3'
 }
 
 tasks.named('test') {

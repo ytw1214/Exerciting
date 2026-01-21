@@ -6,7 +6,6 @@ import lombok.*;
 import java.time.LocalDateTime;
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="matching")
@@ -25,13 +24,22 @@ public class Matching {
     @JoinColumn(name="game_id")
     private Game game;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="host_id")
-    private User host;
+    @JoinColumn(name="user_id")
+    private User user;
     private LocalDateTime meetTime;
     /*
     @Enumerated(EnumType.STRING)
     private MatchingStatus status;
 
      */
-
+    @Builder
+    public Matching(String title, String description, int maxPerson, int currentPerson, Game game, User usr, LocalDateTime localDateTime) {
+        this.title = title;
+        this.description = description;
+        this.maxPerson = maxPerson;
+        this.currentPerson = currentPerson;
+        this.game = game;
+        this.user = user;
+        this.meetTime = meetTime;
+    }
 }
