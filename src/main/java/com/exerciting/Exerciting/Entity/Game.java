@@ -16,6 +16,7 @@ public class Game {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Enumerated(EnumType.STRING)
     private SportType sportType;
     private String homeTeam;
     private String awayTeam;
@@ -28,11 +29,7 @@ public class Game {
 
 
     @Builder
-<<<<<<< HEAD
-    public Game(SportType sportType, String homeTeam, String awayTeam, Stadium stadium, LocalDateTime gameStartTime, String title, String description) {
-=======
-    public Game(String sportType, String homeTeam, String awayTeam, Stadium stadium, LocalDateTime gameStartTime, GameStatus gameStatus) {
->>>>>>> e7a6db60a7c0ef7492a669e5d33960f5db9fffc2
+    public Game(SportType sportType, String homeTeam, String awayTeam, Stadium stadium, LocalDateTime gameStartTime, GameStatus gameStatus) {
         this.sportType = sportType;
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;

@@ -22,14 +22,15 @@ public class Team {
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name = "stadium_id")
     private Stadium stadium;
-    private String sportType;
+    @Enumerated(EnumType.STRING)
+    private SportType sportType;
     @OneToMany(mappedBy="team")
     private List<Player> player = new ArrayList<Player>();
     private String imgUrl;
 
 
     @Builder
-    public Team(String name, Stadium stadium, String sportType, List<Player> player, String imgUrl) {
+    public Team(String name, Stadium stadium, SportType sportType, List<Player> player, String imgUrl) {
         this.name = name;
         this.stadium = stadium;
         this.sportType = sportType;

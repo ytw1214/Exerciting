@@ -7,13 +7,13 @@ public enum SportType {
     BASKETBALL("농구"),
     VOLLEYBALL("배구");
 
-    private final String name;
+    private final String type;
 
-    SportType(String name) {
-        this.name = name;
+    SportType(String type) {
+        this.type = type;
     }
 
-    public String getName() {
-        return name;
+    public String getSportName() {
+        return type;
     }
 }
