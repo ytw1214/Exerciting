@@ -1,9 +1,6 @@
 package com.exerciting.Exerciting.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,9 +16,12 @@ import java.time.LocalDateTime;
 public class TeamRank {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    private int rank;
+    @Enumerated(EnumType.STRING)
+    private SportType sportType;
+
+    private int teamRank;
     private String teamName;
     private int games;
     private int wins;

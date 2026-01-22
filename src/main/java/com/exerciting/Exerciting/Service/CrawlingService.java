@@ -1,6 +1,7 @@
 package com.exerciting.Exerciting.Service;
 
 import com.exerciting.Exerciting.Entity.TeamRank;
+import com.exerciting.Exerciting.Repository.TeamRankRepository;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +10,14 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+
+import javax.net.ssl.*;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +25,43 @@ import java.util.List;
 @Service
 @Slf4j
 public class CrawlingService {
+    private final TeamRankRepository teamRankRepository;
+
+    public CrawlingService(TeamRankRepository teamRankRepository) {
+        this.teamRankRepository = teamRankRepository;
+    }
     @PostConstruct
-    public static void getRank() {
+    public void init() {
+        try {
+            setSSL();
+            log.info("인증서 우회중");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public static void setSSL() throws NoSuchAlgorithmException, KeyManagementException {
+        TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
+                    public X509Certificate[] getAcceptedIssuers() { return null; }
+
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+                }
+        };
+
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, trustAllCerts, new SecureRandom());
+
+        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+            @Override
+            public boolean verify(String hostname, SSLSession session) { return true; }
+        });
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    }
+    public List<TeamRank> getRank() {
         try {
             String url = "https://www.koreabaseball.com/Record/TeamRank/TeamRankDaily.aspx";
             Document doc = Jsoup.connect(url)
@@ -29,10 +72,14 @@ public class CrawlingService {
                     .get();
 
             List<TeamRank> ranking = parseRankings(doc);
+            log.info("크롤링 완 : {}개", ranking.size());
+            ranking.forEach(r -> log.info("팀 순위 정보: {}", r));
+            teamRankRepository.saveAll(ranking);
 
-        } catch (InterruptedException e) {
-            throw new
-        } catch (IOException e) {
+            log.info("DB 저장 완료!");
+            return ranking;
+        }catch (IOException e) {
+            e.printStackTrace();
             throw new RuntimeException("순위 can't");
         }
     }
@@ -55,7 +102,7 @@ public class CrawlingService {
 
          */
 
-    private static List<TeamRank> parseRankings(Document doc) {
+    private List<TeamRank> parseRankings(Document doc) {
         List<TeamRank> rankings = new ArrayList<>();
 
         // KBO 순위 테이블 파싱
@@ -68,7 +115,7 @@ public class CrawlingService {
 
             try {
                 TeamRank ranking = TeamRank.builder()
-                        .rank(parseIntSafely(cols.get(0).text()))
+                        .teamRank(parseIntSafely(cols.get(0).text()))
                         .teamName(cols.get(1).text().trim())
                         .games(parseIntSafely(cols.get(2).text()))
                         .wins(parseIntSafely(cols.get(3).text()))
@@ -90,7 +137,7 @@ public class CrawlingService {
         return rankings;
     }
 
-    private static int parseIntSafely(String text) {
+    private int parseIntSafely(String text) {
         try {
             return Integer.parseInt(text.trim().replace(",", ""));
         } catch (NumberFormatException e) {
