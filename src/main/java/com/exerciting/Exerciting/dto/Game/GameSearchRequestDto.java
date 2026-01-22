@@ -1,6 +1,7 @@
 package com.exerciting.Exerciting.dto.Game;
 
 import com.exerciting.Exerciting.Entity.Game;
+import com.exerciting.Exerciting.Entity.SportType;
 import com.exerciting.Exerciting.Entity.Stadium;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 public class GameSearchRequestDto {
     private Long gameId;
     private LocalDateTime gameStartTime;
-    private String sportType;
+    private SportType sportType;
     private String team;
     private Stadium stadium;
 

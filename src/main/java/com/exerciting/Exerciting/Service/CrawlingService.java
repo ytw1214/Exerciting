@@ -1,18 +1,17 @@
 package com.exerciting.Exerciting.Service;
 
+import com.exerciting.Exerciting.Entity.TeamRank;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.stereotype.Service;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -20,38 +19,23 @@ import java.util.List;
 public class CrawlingService {
     @PostConstruct
     public static void getRank() {
-        WebDriverManager.chromedriver().setup();
-        String url = "https://www.koreabaseball.com/Record/TeamRank/TeamRankDaily.aspx";
-        WebDriver driver = new ChromeDriver();
         try {
-            // 3. 페이지 접속
-            driver.get(url);
+            String url = "https://www.koreabaseball.com/Record/TeamRank/TeamRankDaily.aspx";
+            Document doc = Jsoup.connect(url)
+                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    .header("Accept-Language", "ko-KR,ko;q=0.9")
+                    .header("Referer", "https://www.koreabaseball.com")
+                    .timeout(10000)
+                    .get();
 
-            // 데이터 로딩을 기다리기 위해 잠시 대기 (3초)
-            Thread.sleep(3000);
+            List<TeamRank> ranking = parseRankings(doc);
 
-            // 4. 데이터 추출 (CSS 선택자 사용)
-            // 셀레니엄의 findElements는 Jsoup의 select와 비슷합니다.
-            List<WebElement> rows = driver.findElements(By.cssSelector("tbody"));
-
-            for (WebElement row : rows) {
-                String content = row.getText();
-                String[] data = content.split(" ");
-                String rank = data[0];      // 순위
-                String teamName = data[1];  // 팀명
-                String win = data[3];       // 승
-                String loss = data[4];      // 패
-                String draw = data[5];      // 무
-                String winRate = data[6];   // 승률
-
-                log.info("{}위: {}, {}승 {}패 {}무 (승률: {})",
-                        rank, teamName, win, loss, draw, winRate);
-            }
-
-        } catch (Exception e) {
-            log.error("셀레니엄 크롤링 중 에러: {}", e.getMessage());
+        } catch (InterruptedException e) {
+            throw new
+        } catch (IOException e) {
+            throw new RuntimeException("순위 can't");
         }
-
+    }
         /*
         try {
             String url = "https://www.koreabaseball.com/Record/TeamRank/TeamRankDaily.aspx";
@@ -70,5 +54,59 @@ public class CrawlingService {
 
 
          */
+
+    private static List<TeamRank> parseRankings(Document doc) {
+        List<TeamRank> rankings = new ArrayList<>();
+
+        // KBO 순위 테이블 파싱
+        Elements rows = doc.select("table.tData tbody tr");
+
+        for (Element row : rows) {
+            Elements cols = row.select("td");
+
+            if (cols.isEmpty()) continue;
+
+            try {
+                TeamRank ranking = TeamRank.builder()
+                        .rank(parseIntSafely(cols.get(0).text()))
+                        .teamName(cols.get(1).text().trim())
+                        .games(parseIntSafely(cols.get(2).text()))
+                        .wins(parseIntSafely(cols.get(3).text()))
+                        .losses(parseIntSafely(cols.get(4).text()))
+                        .draws(parseIntSafely(cols.get(5).text()))
+                        .winRate(parseDoubleSafely(cols.get(6).text()))
+                        .gamesBehind(cols.get(7).text().trim())
+                        .dataSource("KBO 공식 홈페이지")
+                        .crawledAt(LocalDateTime.now())
+                        .build();
+
+                rankings.add(ranking);
+
+            } catch (Exception e) {
+                log.warn("행 파싱 실패: {}", row.text(), e);
+            }
+        }
+
+        return rankings;
+    }
+
+    private static int parseIntSafely(String text) {
+        try {
+            return Integer.parseInt(text.trim().replace(",", ""));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private static double parseDoubleSafely(String text) {
+        try {
+            String cleaned = text.trim();
+            if (cleaned.startsWith(".")) {
+                cleaned = "0" + cleaned;
+            }
+            return Double.parseDouble(cleaned);
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
     }
 }
