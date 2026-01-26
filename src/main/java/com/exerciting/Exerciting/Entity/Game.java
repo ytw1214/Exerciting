@@ -18,8 +18,12 @@ public class Game {
     private Long id;
     @Enumerated(EnumType.STRING)
     private SportType sportType;
-    private String homeTeam;
-    private String awayTeam;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "home_team_id")
+    private Team homeTeam;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name = "away_team_id")
+    private Team awayTeam;
     @ManyToOne(fetch = FetchType.LAZY) // 이 부분이 빠지면 에러가 납니다!
     @JoinColumn(name = "stadium_id")
     private Stadium stadium;
@@ -29,7 +33,7 @@ public class Game {
 
 
     @Builder
-    public Game(SportType sportType, String homeTeam, String awayTeam, Stadium stadium, LocalDateTime gameStartTime, GameStatus gameStatus) {
+    public Game(SportType sportType, Team homeTeam, Team awayTeam, Stadium stadium, LocalDateTime gameStartTime, GameStatus gameStatus) {
         this.sportType = sportType;
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
