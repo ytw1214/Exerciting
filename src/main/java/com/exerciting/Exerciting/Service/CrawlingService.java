@@ -34,7 +34,6 @@ public class CrawlingService {
     public CrawlingService(TeamRankRepository teamRankRepository) {
         this.teamRankRepository = teamRankRepository;
     }
-    @PostConstruct
     public void init() {
         try {
             setSSL();
@@ -110,6 +109,8 @@ public class CrawlingService {
                             .draws(Integer.parseInt(cells.get(5).text()))     // 무
                             .winRate(Double.parseDouble(cells.get(6).text())) // 승률
                             .gamesBehind(cells.get(7).text())
+                            .crawledAt(LocalDateTime.now())
+                            .dataSource("KBO 공식 홈페이지")
                             .build());
                     log.info("데이터 삽입 완료!");
                 }
@@ -154,25 +155,6 @@ public class CrawlingService {
 
 
          */
-    private int parseIntSafely(String text) {
-        try {
-            return Integer.parseInt(text.trim().replace(",", ""));
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-
-    private static double parseDoubleSafely(String text) {
-        try {
-            String cleaned = text.trim();
-            if (cleaned.startsWith(".")) {
-                cleaned = "0" + cleaned;
-            }
-            return Double.parseDouble(cleaned);
-        } catch (NumberFormatException e) {
-            return 0.0;
-        }
-    }
     /*
     private List<GameSearchRequestDto> getGameSchedule() {
         try {
