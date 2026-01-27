@@ -1,10 +1,10 @@
-package com.exerciting.Exerciting.Service;
+package com.exerciting.Exerciting.Service.Crawling;
 
 import com.exerciting.Exerciting.Entity.TeamRank;
+import com.exerciting.Exerciting.Repository.GameRepository;
 import com.exerciting.Exerciting.Repository.TeamRankRepository;
-import com.exerciting.Exerciting.dto.Game.GameSearchRequestDto;
-import io.github.bonigarcia.wdm.WebDriverManager;
-import jakarta.annotation.PostConstruct;
+import com.exerciting.Exerciting.dto.Game.GameCrawlRequestDto;
+import com.exerciting.Exerciting.dto.Team.TeamRankCrawlDto;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -25,10 +25,11 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class CrawlingService {
+public class CrawlingService extends CrawlService<T> {
     private static String KBORankUrl = "https://www.koreabaseball.com/Record/TeamRank/TeamRankDaily.aspx";
     private static String KBOScheduleUrl = "https://www.koreabaseball.com/Schedule/Schedule.aspx";
 
+    //private final GameRepository gameRepository;
     private final TeamRankRepository teamRankRepository;
 
     public CrawlingService(TeamRankRepository teamRankRepository) {
@@ -43,30 +44,14 @@ public class CrawlingService {
             e.printStackTrace();
         }
     }
-    //kbo 리그 순위 크롤링
-    public static void setSSL() throws NoSuchAlgorithmException, KeyManagementException {
-        TrustManager[] trustAllCerts = new TrustManager[] {
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() { return null; }
-
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
-
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
-                }
-        };
-
-        SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, trustAllCerts, new SecureRandom());
-
-        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-            @Override
-            public boolean verify(String hostname, SSLSession session) { return true; }
-        });
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+    public String getTargetUrl() {
+        return KBORankUrl;
     }
-    public List<TeamRank> getRank() {
+    @Override
+    protected void saveAll(List<TeamRank> data) {
+        teamRankRepository.saveAll(data);
+    }
+    public List<TeamRankCrawlDto> getRank() {
         try {
             Document doc = Jsoup.connect(KBORankUrl)
                     .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
@@ -88,8 +73,8 @@ public class CrawlingService {
         }
     }
 
-    private List<TeamRank> parseRankings(Document doc) {
-        List<TeamRank> rankings = new ArrayList<>();
+    public List<TeamRankCrawlDto> parse(Document doc) {
+        List<TeamRankCrawlDto> rankings = new ArrayList<>();
 
 
         try {
@@ -101,13 +86,13 @@ public class CrawlingService {
                     Elements cells = row.select("td");
 
                     rankings.add(TeamRank.builder()
-                            .teamRank(Integer.parseInt(cells.get(0).text()))      // 순위
-                            .teamName(cells.get(1).text())                   // 팀명
+                            .teamRank(Integer.parseInt(cells.get(0).text()))
+                            .teamName(cells.get(1).text())
                             .games(Integer.parseInt(cells.get(2).text()))
-                            .wins(Integer.parseInt(cells.get(3).text()))      // 승
-                            .losses(Integer.parseInt(cells.get(4).text()))     // 패
-                            .draws(Integer.parseInt(cells.get(5).text()))     // 무
-                            .winRate(Double.parseDouble(cells.get(6).text())) // 승률
+                            .wins(Integer.parseInt(cells.get(3).text()))
+                            .losses(Integer.parseInt(cells.get(4).text()))
+                            .draws(Integer.parseInt(cells.get(5).text()))
+                            .winRate(Double.parseDouble(cells.get(6).text()))
                             .gamesBehind(cells.get(7).text())
                             .crawledAt(LocalDateTime.now())
                             .dataSource("KBO 공식 홈페이지")

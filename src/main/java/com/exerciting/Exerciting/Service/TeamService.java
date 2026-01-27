@@ -18,18 +18,6 @@ public class TeamService {
         this.teamRepository = teamRepository;
         this.playerRepository = playerRepository;
     }
-    /*
-    @Transactional
-    public void insert() {
-        Team team = Team.Builer()
-                .name("삼성 라이온즈")
-                .logoImage("//6ptotvmi5753.edge.naverncp.com/KBO_IMAGE/emblem/regular/2025/emblem_OB.png")
-                .stadium()
-    }
-
-
-     */
-
     public TeamResponseDto getTeam(String teamName) {
         Team team = teamRepository.findByName(teamName)
                 .orElseThrow(() -> new IllegalArgumentException("해당하는 팀이 존재하지 않습니다."));

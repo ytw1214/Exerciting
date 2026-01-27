@@ -1,13 +1,11 @@
-package com.exerciting.Exerciting.Service;
+package com.exerciting.Exerciting.Service.Crawling;
 
-import com.exerciting.Exerciting.Entity.TeamRank;
 import com.exerciting.Exerciting.dto.Game.GameCrawlRequestDto;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import javax.net.ssl.*;
-import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -15,7 +13,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 @Slf4j
-public abstract class CrawlService {
+public abstract class CrawlService<T> {
     //크롤링 인증서 코드
     public static void setSSL() throws NoSuchAlgorithmException, KeyManagementException {
         TrustManager[] trustAllCerts = new TrustManager[] {
@@ -40,8 +38,8 @@ public abstract class CrawlService {
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
     }
     protected abstract String getTargetUrl();
-    protected abstract List<GameCrawlRequestDto> parse(Document doc);
-    protected abstract void saveAll(List<GameCrawlRequestDto> data);
+    protected abstract List<T> parse(Document doc);
+    protected abstract void saveAll(List<T> data);
 
     // 공통 실행 흐름 (기존 getRank의 구조를 가져옴)
     public List<GameCrawlRequestDto> execute() {

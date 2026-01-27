@@ -1,7 +1,7 @@
 package com.exerciting.Exerciting.Controller;
 
 import com.exerciting.Exerciting.Entity.TeamRank;
-import com.exerciting.Exerciting.Service.CrawlingService;
+import com.exerciting.Exerciting.Service.Crawling.CrawlingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

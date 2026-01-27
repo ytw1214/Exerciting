@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -27,8 +28,8 @@ public class TeamRank {
     private int wins;
     private int losses;
     private int draws;
-    private Double winRate;
-    private String gamesBehind;
+    private BigDecimal winRate;
+    private BigDecimal gamesBehind;
 
     private String dataSource;
     private LocalDateTime crawledAt;
