@@ -48,15 +48,17 @@ public abstract class CrawlService {
         try {
             setSSL(); // 공통 인증서 설정
 
-            Document doc = Jsoup.connect(getTargetUrl()) // 자식의 URL 사용
+            Document doc = Jsoup.connect(getTargetUrl())
+                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    .header("Accept-Language", "ko-KR,ko;q=0.9")
                     .userAgent("Mozilla/5.0 ...")
                     .timeout(10000)
                     .get();
 
-            List<GameCrawlRequestDto> dataList = parse(doc); // 자식의 파싱 로직 사용
+            List<GameCrawlRequestDto> dataList = parse(doc);
 
             log.info("크롤링 완 : {}개", dataList.size());
-            saveAll(dataList); // 자식의 레포지토리 사용
+            saveAll(dataList);
 
             log.info("DB 저장 완료!");
             return dataList;
