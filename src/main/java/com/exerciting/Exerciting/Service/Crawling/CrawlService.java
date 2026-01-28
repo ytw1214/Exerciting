@@ -42,7 +42,7 @@ public abstract class CrawlService<T> {
     protected abstract void saveAll(List<T> data);
 
     // 공통 실행 흐름 (기존 getRank의 구조를 가져옴)
-    public List<GameCrawlRequestDto> execute() {
+    public List<T> execute() {
         try {
             setSSL(); // 공통 인증서 설정
 
@@ -53,7 +53,7 @@ public abstract class CrawlService<T> {
                     .timeout(10000)
                     .get();
 
-            List<GameCrawlRequestDto> dataList = parse(doc);
+            List<T> dataList = parse(doc);
 
             log.info("크롤링 완 : {}개", dataList.size());
             saveAll(dataList);

@@ -14,6 +14,7 @@ import org.jsoup.nodes.Document;
 
 import javax.net.ssl.*;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -25,7 +26,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class CrawlingService extends CrawlService<T> {
+public class CrawlingService extends CrawlService<TeamRankCrawlDto> {
     private static String KBORankUrl = "https://www.koreabaseball.com/Record/TeamRank/TeamRankDaily.aspx";
     private static String KBOScheduleUrl = "https://www.koreabaseball.com/Schedule/Schedule.aspx";
 
@@ -48,8 +49,10 @@ public class CrawlingService extends CrawlService<T> {
         return KBORankUrl;
     }
     @Override
-    protected void saveAll(List<TeamRank> data) {
-        teamRankRepository.saveAll(data);
+    protected void saveAll(List<TeamRankCrawlDto> data) {
+        List<TeamRank> list = convertToEntity(data);
+        teamRankRepository.saveAll(convertToEntity(data));
+        log.info("kbo {}개 데이터 저장 완료",list.size());
     }
     public List<TeamRankCrawlDto> getRank() {
         try {
@@ -60,23 +63,23 @@ public class CrawlingService extends CrawlService<T> {
                     .timeout(10000)
                     .get();
 
-            List<TeamRank> ranking = parseRankings(doc);
+            List<TeamRankCrawlDto> ranking = parse(doc);
             log.info("크롤링 완 : {}개", ranking.size());
             ranking.forEach(r -> log.info("팀 순위 정보: {}", r));
-            teamRankRepository.saveAll(ranking);
+            List<TeamRank> list = convertToEntity(ranking);
+            teamRankRepository.saveAll(list);
 
-            log.info("DB 저장 완료!");
+
+            log.info("DB 저장 완료! {}건 저장됨",list.size());
             return ranking;
         }catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("순위 can't");
         }
     }
-
-    public List<TeamRankCrawlDto> parse(Document doc) {
+    @Override
+    protected List<TeamRankCrawlDto> parse(Document doc) {
         List<TeamRankCrawlDto> rankings = new ArrayList<>();
-
-
         try {
             Element rankTable = doc.selectFirst("table[summary*='순위']");
             if (rankTable != null) {
@@ -85,15 +88,15 @@ public class CrawlingService extends CrawlService<T> {
                 for (Element row : rows) {
                     Elements cells = row.select("td");
 
-                    rankings.add(TeamRank.builder()
-                            .teamRank(Integer.parseInt(cells.get(0).text()))
+                    rankings.add(TeamRankCrawlDto.builder()
+                            .rank(Integer.parseInt(cells.get(0).text()))
                             .teamName(cells.get(1).text())
                             .games(Integer.parseInt(cells.get(2).text()))
                             .wins(Integer.parseInt(cells.get(3).text()))
                             .losses(Integer.parseInt(cells.get(4).text()))
                             .draws(Integer.parseInt(cells.get(5).text()))
-                            .winRate(Double.parseDouble(cells.get(6).text()))
-                            .gamesBehind(cells.get(7).text())
+                            .winRate(new BigDecimal(cells.get(6).text()))
+                            .gamesBehind(new BigDecimal(cells.get(7).text()))
                             .crawledAt(LocalDateTime.now())
                             .dataSource("KBO 공식 홈페이지")
                             .build());
@@ -105,126 +108,10 @@ public class CrawlingService extends CrawlService<T> {
             }
             return rankings;
         }
-        /*
-        // KBO 순위 테이블 파싱
-        Elements rows = doc.select("tbody tr");
 
-        for (Element row : rows) {
-            Elements cols = row.select("td");
-
-            if (cols.isEmpty()) continue;
-
-            try {
-                TeamRank ranking = TeamRank.builder()
-                        .teamRank(parseIntSafely(cols.get(0).text()))
-                        .teamName(cols.get(1).text().trim())
-                        .games(parseIntSafely(cols.get(2).text()))
-                        .wins(parseIntSafely(cols.get(3).text()))
-                        .losses(parseIntSafely(cols.get(4).text()))
-                        .draws(parseIntSafely(cols.get(5).text()))
-                        .winRate(parseDoubleSafely(cols.get(6).text()))
-                        .gamesBehind(cols.get(7).text().trim())
-                        .dataSource("KBO 공식 홈페이지")
-                        .crawledAt(LocalDateTime.now())
-                        .build();
-
-                rankings.add(ranking);
-
-            } catch (Exception e) {
-                log.warn("행 파싱 실패: {}", row.text(), e);
-            }
+        private List<TeamRank> convertToEntity(List<TeamRankCrawlDto> list) {
+            return list.stream()
+                    .map(TeamRankCrawlDto::toEntity)
+                    .toList();
         }
-
-        return rankings;
-    }
-
-
-         */
-    /*
-    private List<GameSearchRequestDto> getGameSchedule() {
-        try {
-            Document doc = Jsoup.connect(KBOScheduleUrl)
-                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-                    .header("Accept-Language", "ko-KR,ko;q=0.9")
-                    .header("Referer", "https://www.koreabaseball.com")
-                    .timeout(10000)
-                    .get();
-
-            List<GameSearchRequestDto> ranking = parseGames(doc);
-            log.info("크롤링 완 : {}개", ranking.size());
-            ranking.forEach(r -> log.info("팀 순위 정보: {}", r));
-            teamRankRepository.saveAll(ranking);
-
-            log.info("DB 저장 완료!");
-            return ranking;
-        }catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("순위 can't");
-        }
-    }
-    public List<KboCrawlRequest> crawlSchedule(int year, int month) {
-        WebDriver driver = new ChromeDriver(options);
-        try {
-            driver.get("https://www.koreabaseball.com/Schedule/Schedule.aspx");
-
-            // 1. 연도 선택 (2026년)
-            new Select(driver.findElement(By.id("ddlYear"))).selectByValue(String.valueOf(year));
-            // 2. 월 선택
-            new Select(driver.findElement(By.id("ddlMonth"))).selectByValue(String.format("%02d", month));
-
-            // 3. 데이터 로딩 대기
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.className("tbl-schedule")));
-
-            // 4. Jsoup 파싱 (속도를 위해 HTML만 넘김)
-            Document doc = Jsoup.parse(driver.getPageSource());
-            Elements rows = doc.select(".tbl-schedule tbody tr");
-
-            return rows.stream().map(row -> {
-                // 날짜, 시간, 팀, 구장 추출 로직 수행
-                return new KboCrawlRequest(...);
-            }).toList();
-
-        } finally {
-            driver.quit(); // 메모리 누수 방지 (중요!)
-        }
-    }
-    private List<GameSearchRequestDto> parseGames(Document doc) {
-        List<TeamRank> rankings = new ArrayList<>();
-
-        // KBO 순위 테이블 파싱
-        Elements rows = doc.select("table.tData tbody tr");
-
-        for (Element row : rows) {
-            Elements cols = row.select("td");
-
-            if (cols.isEmpty()) continue;
-
-            try {
-                TeamRank ranking = TeamRank.builder()
-                        .teamRank(parseIntSafely(cols.get(0).text()))
-                        .teamName(cols.get(1).text().trim())
-                        .games(parseIntSafely(cols.get(2).text()))
-                        .wins(parseIntSafely(cols.get(3).text()))
-                        .losses(parseIntSafely(cols.get(4).text()))
-                        .draws(parseIntSafely(cols.get(5).text()))
-                        .winRate(parseDoubleSafely(cols.get(6).text()))
-                        .gamesBehind(cols.get(7).text().trim())
-                        .dataSource("KBO 공식 홈페이지")
-                        .crawledAt(LocalDateTime.now())
-                        .build();
-                GameSearchRequestDto gameSearchRequestDto = GameSearchRequestDto.builder()
-                        .gameStartTime()
-                        .build()
-                rankings.add(ranking);
-
-            } catch (Exception e) {
-                log.warn("행 파싱 실패: {}", row.text(), e);
-            }
-        }
-
-        return rankings;
-    }
-
-
-     */
 }

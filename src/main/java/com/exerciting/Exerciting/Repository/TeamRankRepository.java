@@ -9,6 +9,4 @@ import java.util.List;
 
 @Repository
 public interface TeamRankRepository extends JpaRepository<TeamRank, Long> {
-    //List<TeamRank> saveAll(TeamRank ranking);
-    void saveAll(List<TeamRankCrawlDto> ranking);
 }

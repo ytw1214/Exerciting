@@ -18,9 +18,13 @@ public class TeamRankController {
     private final CrawlingService crawlingService;
 
     // 사용자가 http://localhost:8080/api/ranks/update 접속 시 실행
+
+    /*
     @GetMapping("/update")
     public ResponseEntity<List<TeamRank>> updateRankings() {
-        List<TeamRank> updatedData = crawlingService.getRank();
+        //List<TeamRank> updatedData = crawlingService.getRank();
         return ResponseEntity.ok(updatedData);
     }
+
+     */
 }

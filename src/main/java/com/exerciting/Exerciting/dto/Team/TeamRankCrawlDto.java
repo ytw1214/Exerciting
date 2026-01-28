@@ -21,14 +21,13 @@ public class TeamRankCrawlDto {
     private int draws;
     private int losses;
     private LocalDateTime crawledAt; //크롤링 시간
-
+    private String dataSource;
     //종목별 세부필드
-    private BigDecimal winrate; // 야구 : 승률, 축구 : 승점, 배구 : 승점
+    private BigDecimal winRate; // 야구 : 승률, 축구 : 승점, 배구 : 승점
     private BigDecimal gamesBehind; // 야구 : 게임차, 축구 : 득실차, 배구 : 세트득실률
 
     public TeamRank toEntity() {
         return TeamRank.builder()
-                .sportType(sportType)
                 .teamName(teamName)
                 .teamRank(rank)
                 .games(games)
@@ -36,8 +35,10 @@ public class TeamRankCrawlDto {
                 .draws(draws)
                 .losses(losses)
                 .crawledAt(crawledAt)
-                .winRate(winrate)
+                .winRate(winRate)
                 .gamesBehind(gamesBehind)
+                .sportType(sportType)
+                .dataSource(dataSource)
                 .build();
     }
 }
