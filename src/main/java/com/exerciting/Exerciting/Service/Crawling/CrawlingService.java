@@ -5,6 +5,7 @@ import com.exerciting.Exerciting.Repository.GameRepository;
 import com.exerciting.Exerciting.Repository.TeamRankRepository;
 import com.exerciting.Exerciting.dto.Game.GameCrawlRequestDto;
 import com.exerciting.Exerciting.dto.Team.TeamRankCrawlDto;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -36,11 +37,18 @@ public class CrawlingService extends CrawlService<TeamRankCrawlDto> {
     public CrawlingService(TeamRankRepository teamRankRepository) {
         this.teamRankRepository = teamRankRepository;
     }
+    @PostConstruct
     public void init() {
+        org.springframework.util.StopWatch stopWatch = new org.springframework.util.StopWatch();
         try {
             setSSL();
             log.info("인증서 우회중");
-            getRank();
+            stopWatch.start();
+            //getRank();
+            this.execute();
+            stopWatch.stop();
+            log.info("총 소요시간 {}ms", stopWatch.getTotalTimeMillis());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
