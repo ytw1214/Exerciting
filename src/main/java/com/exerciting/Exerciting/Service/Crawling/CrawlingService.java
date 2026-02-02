@@ -37,7 +37,7 @@ public class CrawlingService extends CrawlService<TeamRankCrawlDto> {
     public CrawlingService(TeamRankRepository teamRankRepository) {
         this.teamRankRepository = teamRankRepository;
     }
-    @PostConstruct
+    //@PostConstruct
     public void init() {
         org.springframework.util.StopWatch stopWatch = new org.springframework.util.StopWatch();
         try {
