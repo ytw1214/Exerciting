@@ -24,7 +24,7 @@ public class Game {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "away_team_id")
     private Team awayTeam;
-    @ManyToOne(fetch = FetchType.LAZY) // 이 부분이 빠지면 에러가 납니다!
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stadium_id")
     private Stadium stadium;
     private LocalDateTime gameStartTime;

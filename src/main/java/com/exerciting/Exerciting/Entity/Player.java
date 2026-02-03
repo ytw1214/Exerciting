@@ -16,6 +16,7 @@ public class Player {
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;
+    private String teamName;
     private String name;
     @Enumerated(EnumType.STRING)
     private SportType sportType;
@@ -23,8 +24,9 @@ public class Player {
     private int age;
 
     @Builder
-    public Player(Team team, String name, SportType sportType, String position, int age) {
+    public Player(Team team, String teamName, String name, SportType sportType, String position, int age) {
         this.team = team;
+        this.teamName = teamName;
         this.name = name;
         this.sportType = sportType;
         this.position = position;
