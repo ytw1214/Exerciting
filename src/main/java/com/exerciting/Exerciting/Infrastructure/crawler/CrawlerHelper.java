@@ -1,4 +1,4 @@
-package com.exerciting.Exerciting.Infrastructure.Crawler;
+package com.exerciting.Exerciting.Infrastructure.crawler;
 
 import com.exerciting.Exerciting.Exception.CrawlingException;
 import org.jsoup.Connection;
@@ -27,6 +27,7 @@ public class CrawlerHelper {
             throw new CrawlingException("연걸 실패" + url, e);
         }
     }
+
     private void applySetting() throws NoSuchAlgorithmException, KeyManagementException {
         TrustManager[] trustAllCerts = new TrustManager[] {
                 new X509TrustManager() {
