@@ -1,7 +1,8 @@
 package com.exerciting.Exerciting.Repository;
 
-import com.exerciting.Exerciting.Entity.Game;
-import com.exerciting.Exerciting.Entity.Stadium;
+import com.exerciting.Exerciting.Domain.game.entity.Game;
+import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
+import com.exerciting.Exerciting.Domain.stadium.entity.Stadium;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
