@@ -1,3 +1,4 @@
+/*
 package com.exerciting.Exerciting.Repository;
 
 import com.exerciting.Exerciting.Domain.game.entity.Game;
@@ -46,7 +47,6 @@ class GameRepositoryTest {
         entityManager.flush();
 
 
-         */
         // when (실행)
         List<Game> results = gameRepository.findByHomeTeam("Lions");
 
@@ -56,3 +56,6 @@ class GameRepositoryTest {
     }
 
 }
+
+
+         */

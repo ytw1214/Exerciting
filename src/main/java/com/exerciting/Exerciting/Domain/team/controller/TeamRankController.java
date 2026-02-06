@@ -1,6 +1,6 @@
 package com.exerciting.Exerciting.Domain.team.controller;
 
-import com.exerciting.Exerciting.Service.Crawling.BaseballCrawlingService;
+import com.exerciting.Exerciting.Infrastructure.crawler.fetcher.KboRankFetcher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class TeamRankController {
 
-    private final BaseballCrawlingService crawlingService;
+    private final KboRankFetcher kboRankFetcher;
 
     // 사용자가 http://localhost:8080/api/ranks/update 접속 시 실행
 

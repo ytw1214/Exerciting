@@ -1,6 +1,7 @@
 package com.exerciting.Exerciting.Domain.team.dto;
 
 import com.exerciting.Exerciting.Domain.global.SportType;
+import com.exerciting.Exerciting.Domain.team.entity.Team;
 import com.exerciting.Exerciting.Domain.team.entity.TeamRank;
 import lombok.Builder;
 import lombok.Getter;

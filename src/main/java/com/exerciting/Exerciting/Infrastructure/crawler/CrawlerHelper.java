@@ -3,6 +3,7 @@ package com.exerciting.Exerciting.Infrastructure.crawler;
 import com.exerciting.Exerciting.Exception.CrawlingException;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 
 import javax.net.ssl.*;
@@ -16,13 +17,14 @@ import java.security.cert.X509Certificate;
 public class CrawlerHelper {
 
 
-    public Connection createSafeConnection(String url) {
+    public Document createSafeConnection(String url) {
         try {
             applySetting();
             return Jsoup.connect(url)
                     .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
                     .header("Accept-Language", "ko-KR,ko;q=0.9")
-                    .timeout(10000);
+                    .timeout(10000)
+                    .get();
         } catch (Exception e) {
             throw new CrawlingException("연걸 실패" + url, e);
         }
