@@ -9,7 +9,6 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 @Getter
 public class GameResponseDto {
-    private Long gameId;
     private LocalDateTime gameStartTime;
     private Stadium stadium;
     private Team homeTeam;
@@ -17,7 +16,6 @@ public class GameResponseDto {
 
     @Builder
     public GameResponseDto(Game game) {
-        this.gameId = game.getId();
         this.gameStartTime = game.getGameStartTime();
         this.stadium = game.getStadium();
         this.homeTeam = game.getHomeTeam();

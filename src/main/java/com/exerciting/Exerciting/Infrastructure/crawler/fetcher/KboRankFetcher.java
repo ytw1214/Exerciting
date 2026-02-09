@@ -28,14 +28,7 @@ public class KboRankFetcher implements RankFetcher {
     public List<TeamRankCrawlDto> fetch() {
         String url = SportType.BASEBALL.getRankUrl();
         Document document = crawlerHelper.createSafeConnection(url);
-        List<TeamRankCrawlDto> list = new ArrayList<>();
-        /*
-        Document document = crawlerHelper.createSafeConnection(url);
-
-        return document;
-
-         */
-        return list;
+        return parseKboRank(document);
     }
     //
     private List<TeamRankCrawlDto> parseKboRank(Document document) {
