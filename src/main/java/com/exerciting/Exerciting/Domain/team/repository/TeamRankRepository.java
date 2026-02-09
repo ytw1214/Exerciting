@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface TeamRankRepository extends JpaRepository<TeamRank, Long> {
-    List<TeamRank> findByTeamNameContaining(String teamName);
+    List<TeamRank> findByTeamNameContaining(String name);
     List<TeamRank> findByTeamName();
 }

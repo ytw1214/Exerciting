@@ -25,4 +25,10 @@ public class TeamRankService {
                 .sorted(Comparator.comparing(TeamRank::getTeamRank))
                 .toList();
     }
+
+    public List<TeamRank> getTeamContainingName(String name) {
+        return teamRankRepository.findByTeamNameContaining(name)
+                .stream()
+                .toList();
+    }
 }
