@@ -19,10 +19,12 @@ public class CrawlerHelper {
 
     public Document createSafeConnection(String url) {
         try {
-            applySetting();
             return Jsoup.connect(url)
                     .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
                     .header("Accept-Language", "ko-KR,ko;q=0.9")
+                    .referrer("https://www.koreabaseball.com/")
+                    .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
+                    .header("Cache-Control", "max-age=0")
                     .timeout(10000)
                     .get();
         } catch (Exception e) {
@@ -30,26 +32,4 @@ public class CrawlerHelper {
         }
     }
 
-    private void applySetting() throws NoSuchAlgorithmException, KeyManagementException {
-        TrustManager[] trustAllCerts = new TrustManager[] {
-                new X509TrustManager() {
-                    public X509Certificate[] getAcceptedIssuers() { return null; }
-
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
-
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
-                }
-        };
-
-        SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, trustAllCerts, new SecureRandom());
-
-        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-            @Override
-            public boolean verify(String hostname, SSLSession session) { return true; }
-        });
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-    }
 }

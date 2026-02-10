@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -24,15 +26,17 @@ public class Player {
     private SportType sportType;
     private String position;
     private int age;
+    private List<String> history;
 
     @Builder
-    public Player(Team team, String teamName, String name, SportType sportType, String position, int age) {
+    public Player(Team team, String teamName, String name, SportType sportType, String position, int age, List<String> history) {
         this.team = team;
         this.teamName = teamName;
         this.name = name;
         this.sportType = sportType;
         this.position = position;
         this.age = age;
+        this.history = history;
     }
 
 }
