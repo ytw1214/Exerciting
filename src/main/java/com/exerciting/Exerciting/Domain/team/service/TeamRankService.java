@@ -8,8 +8,10 @@ import com.exerciting.Exerciting.Infrastructure.crawler.CrawlerHelper;
 import com.exerciting.Exerciting.Infrastructure.crawler.fetcher.KboRankFetcher;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TeamRankService {
@@ -35,7 +37,16 @@ public class TeamRankService {
                 .toList();
     }
 
-    public List<TeamRank> compareingData() {
-        
+    public List<TeamRank> comparingData() {
+        List<TeamRankCrawlDto> rankings = kboRankFetcher.fetch();
+        List<TeamRank> changeLists = new ArrayList<>();
+        for(TeamRankCrawlDto dto : rankings) {
+            Optional<TeamRank> current = teamRankRepository.findTeamByTeamName(dto.getTeamName());
+            if(current.isEmpty() || isChanged(current)) {
+                changeLists.add(dto.toEntity());
+            }
+
+        }
+        return changeLists;
     }
 }

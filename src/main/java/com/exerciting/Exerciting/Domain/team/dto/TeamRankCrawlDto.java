@@ -19,13 +19,16 @@ public class TeamRankCrawlDto {
     // 공통 필드
     private int games;
     private int wins;
-    private int draws;
     private int losses;
-    private LocalDateTime crawledAt; //크롤링 시간
-    private String dataSource;
+    private int draws;
+
     //종목별 세부필드
     private BigDecimal winRate; // 야구 : 승률, 축구 : 승점, 배구 : 승점
     private BigDecimal gamesBehind; // 야구 : 게임차, 축구 : 득실차, 배구 : 세트득실률
+
+    private LocalDateTime crawledAt; //크롤링 시간
+    private String dataSource;
+
 
     public TeamRank toEntity() {
         return TeamRank.builder()
