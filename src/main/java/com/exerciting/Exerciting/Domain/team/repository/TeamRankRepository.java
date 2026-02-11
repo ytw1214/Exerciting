@@ -3,6 +3,7 @@ package com.exerciting.Exerciting.Domain.team.repository;
 import com.exerciting.Exerciting.Domain.team.dto.TeamRankCrawlDto;
 import com.exerciting.Exerciting.Domain.team.entity.TeamRank;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,5 +15,6 @@ public interface TeamRankRepository extends JpaRepository<TeamRank, Long> {
     TeamRank findTeamByTeamName(String teamName);
     List<TeamRank> findTeamsByTeamName(String teamName);
     List<TeamRank> findAll();
-    List<TeamRank> findByRanking();
+    List<TeamRank> findAllByOrderByTeamRankAsc();
+    List<TeamRank> findAllByTeamNameContaining(List<String> list);
 }

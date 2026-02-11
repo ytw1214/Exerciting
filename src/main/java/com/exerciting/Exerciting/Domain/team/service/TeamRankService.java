@@ -8,10 +8,7 @@ import com.exerciting.Exerciting.Infrastructure.crawler.CrawlerHelper;
 import com.exerciting.Exerciting.Infrastructure.crawler.fetcher.KboRankFetcher;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,10 +23,7 @@ public class TeamRankService {
     }
 
     public List<TeamRank> getAllTeamByRank() {
-        return teamRankRepository.findByRanking()
-                .stream()
-                .sorted(Comparator.comparing(TeamRank::getTeamRank))
-                .toList();
+        return teamRankRepository.findAllByOrderByTeamRankAsc();
     }
 
     public List<TeamRank> getTeamContainingName(String name) {
@@ -44,8 +38,15 @@ public class TeamRankService {
         List<String> teamNames = rankings.stream()
                 .map(TeamRankCrawlDto::getTeamName)
                 .toList();
+        /*
+        Map<String,TeamRank> map = teamRankRepository.findAllByTeamNameIn(teamNames)
+                .stream()
+                .collect(Collectors.toMap(TeamRank::getTeamName, team -> team));
+
+
+         */
         for(TeamRankCrawlDto dto : rankings) {
-            TeamRank current = dto.toEntity(teamNames.indexOf(dto.getTeamName()));
+            TeamRank current = dto.toEntity();
             if(current == null || current.isChanged(dto)) {
                 changeLists.add(dto.toEntity());
             }
