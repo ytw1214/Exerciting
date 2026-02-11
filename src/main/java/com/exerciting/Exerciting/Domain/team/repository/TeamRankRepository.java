@@ -11,6 +11,8 @@ import java.util.Optional;
 @Repository
 public interface TeamRankRepository extends JpaRepository<TeamRank, Long> {
     List<TeamRank> findByTeamNameContaining(String name);
-    Optional<TeamRank> findTeamByTeamName(String teamName);
+    TeamRank findTeamByTeamName(String teamName);
     List<TeamRank> findTeamsByTeamName(String teamName);
+    List<TeamRank> findAll();
+    List<TeamRank> findByRanking();
 }

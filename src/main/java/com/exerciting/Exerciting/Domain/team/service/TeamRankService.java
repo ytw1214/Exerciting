@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TeamRankService {
@@ -25,7 +26,7 @@ public class TeamRankService {
     }
 
     public List<TeamRank> getAllTeamByRank() {
-        return teamRankRepository.findByTeamName()
+        return teamRankRepository.findByRanking()
                 .stream()
                 .sorted(Comparator.comparing(TeamRank::getTeamRank))
                 .toList();
@@ -40,12 +41,14 @@ public class TeamRankService {
     public List<TeamRank> comparingData() {
         List<TeamRankCrawlDto> rankings = kboRankFetcher.fetch();
         List<TeamRank> changeLists = new ArrayList<>();
+        List<String> teamNames = rankings.stream()
+                .map(TeamRankCrawlDto::getTeamName)
+                .toList();
         for(TeamRankCrawlDto dto : rankings) {
-            Optional<TeamRank> current = teamRankRepository.findTeamByTeamName(dto.getTeamName());
-            if(current.isEmpty() || isChanged(current)) {
+            TeamRank current = dto.toEntity(teamNames.indexOf(dto.getTeamName()));
+            if(current == null || current.isChanged(dto)) {
                 changeLists.add(dto.toEntity());
             }
-
         }
         return changeLists;
     }

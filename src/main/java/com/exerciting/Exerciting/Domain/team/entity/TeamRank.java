@@ -1,6 +1,7 @@
 package com.exerciting.Exerciting.Domain.team.entity;
 
 import com.exerciting.Exerciting.Domain.global.SportType;
+import com.exerciting.Exerciting.Domain.team.dto.TeamRankCrawlDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,4 +35,11 @@ public class TeamRank {
 
     private String dataSource;
     private LocalDateTime crawledAt;
+
+    public boolean isChanged(TeamRankCrawlDto dto) {
+        return !(dto.getGames() == this.games) ||
+                !(dto.getWins() == this.wins) ||
+                !(dto.getLosses() == this.losses) ||
+                !(dto.getWinRate() == this.winRate);
+    }
 }
