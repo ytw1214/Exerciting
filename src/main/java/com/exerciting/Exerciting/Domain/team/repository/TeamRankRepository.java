@@ -17,4 +17,5 @@ public interface TeamRankRepository extends JpaRepository<TeamRank, Long> {
     List<TeamRank> findAll();
     List<TeamRank> findAllByOrderByTeamRankAsc();
     List<TeamRank> findAllByTeamNameContaining(List<String> list);
+    List<TeamRank> findAllByTeamNameIn(List<String> teamNames);
 }

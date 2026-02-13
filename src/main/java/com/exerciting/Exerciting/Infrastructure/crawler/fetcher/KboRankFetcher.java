@@ -30,7 +30,6 @@ public class KboRankFetcher implements RankFetcher {
         Document document = crawlerHelper.createSafeConnection(url);
         return parseKboRank(document);
     }
-    //
     private List<TeamRankCrawlDto> parseKboRank(Document document) {
         List<TeamRankCrawlDto> rankings = new ArrayList<>();
 

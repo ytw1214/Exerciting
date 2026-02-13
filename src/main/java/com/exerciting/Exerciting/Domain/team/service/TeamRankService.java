@@ -38,16 +38,14 @@ public class TeamRankService {
         List<String> teamNames = rankings.stream()
                 .map(TeamRankCrawlDto::getTeamName)
                 .toList();
-        /*
-        Map<String,TeamRank> map = teamRankRepository.findAllByTeamNameIn(teamNames)
+
+        Map<String,TeamRank> map = teamRankRepository.findAllByTeamNameIn(List teamNames)
                 .stream()
                 .collect(Collectors.toMap(TeamRank::getTeamName, team -> team));
 
-
-         */
         for(TeamRankCrawlDto dto : rankings) {
-            TeamRank current = dto.toEntity();
-            if(current == null || current.isChanged(dto)) {
+            TeamRank crawlingTeamRank = map.get(dto.getTeamName());
+            if(crawlingTeamRank == null || crawlingTeamRank.isChanged(dto)) {
                 changeLists.add(dto.toEntity());
             }
         }
