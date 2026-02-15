@@ -1,25 +1,32 @@
 package com.exerciting.Exerciting.Domain.team.controller;
 
+import com.exerciting.Exerciting.Domain.team.dto.TeamRankResponseDto;
+import com.exerciting.Exerciting.Domain.team.entity.TeamRank;
+import com.exerciting.Exerciting.Domain.team.service.TeamRankService;
+import com.exerciting.Exerciting.Exception.DisMatchedSizeException;
 import com.exerciting.Exerciting.Infrastructure.crawler.fetcher.KboRankFetcher;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/ranks")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class TeamRankController {
 
     private final KboRankFetcher kboRankFetcher;
+    private final TeamRankService teamRankService;
 
-    // 사용자가 http://localhost:8080/api/ranks/update 접속 시 실행
-
-    /*
-    @GetMapping("/update")
-    public ResponseEntity<List<TeamRank>> updateRankings() {
-        //List<TeamRank> updatedData = crawlingService.getRank();
-        return ResponseEntity.ok(updatedData);
+    @GetMapping("/ranks")
+    public ResponseEntity<List<TeamRank>> getTeamRank() {
+        List<TeamRank> rankList = teamRankService.getAllTeamByRank();
+        if(rankList.isEmpty()) {
+            throw new DisMatchedSizeException("데이터 내용이 잘못되었습니다.");
+        }
+        return ResponseEntity.ok(rankList);
     }
-
-     */
 }

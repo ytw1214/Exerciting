@@ -39,7 +39,7 @@ public class TeamRankService {
                 .map(TeamRankCrawlDto::getTeamName)
                 .toList();
 
-        Map<String,TeamRank> map = teamRankRepository.findAllByTeamNameIn(List teamNames)
+        Map<String,TeamRank> map = teamRankRepository.findAllByTeamNameIn(teamNames)
                 .stream()
                 .collect(Collectors.toMap(TeamRank::getTeamName, team -> team));
 
