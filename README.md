@@ -18,3 +18,7 @@ https://jojoldu.tistory.com/493
 <img width="202" height="71" alt="image" src="https://github.com/user-attachments/assets/faaf3b2e-8225-4977-8df2-1da93292fc4e" />
 <br>
 멀티쓰레드 사용전 걸리는 시간 / 멀티스레드를 사용해 선수들의 기록도 저장해보고 차이를 작성할 계획.
+<br>
+2/23 - teamrank 엔티티에서 종목별로 나눠서 구현해보기 & 비교해서 어떤게 더 좋은 결과인지 생각해보기
+<br>
+<&nbsp><&nbsp><&nbsp>크롤링하는 과정에서 asp.net과 selenium 사용으로 크롤링 시간이 오래걸림(해결방안 제시해야함)
