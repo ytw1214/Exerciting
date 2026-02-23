@@ -2,12 +2,13 @@ package com.exerciting.Exerciting.Domain.player.dto;
 
 import com.exerciting.Exerciting.Domain.player.entity.Player;
 import com.exerciting.Exerciting.Domain.global.SportType;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-
+@AllArgsConstructor
 public class PlayerCrawlDto {
     private String teamName;
     private String name;

@@ -5,8 +5,8 @@ import com.exerciting.Exerciting.Domain.team.dto.TeamRankCrawlDto;
 
 import java.util.List;
 
-public interface RankFetcher {
+public interface Fetcher<T> {
     boolean supports(SportType sportType);
-    List<TeamRankCrawlDto> fetch();
+    List<T> fetch();
 
 }

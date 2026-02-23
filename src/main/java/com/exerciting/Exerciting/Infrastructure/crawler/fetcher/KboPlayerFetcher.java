@@ -1,13 +1,12 @@
 package com.exerciting.Exerciting.Infrastructure.crawler.fetcher;
 
 import com.exerciting.Exerciting.Domain.global.SportType;
+import com.exerciting.Exerciting.Domain.player.dto.PlayerCrawlDto;
 import com.exerciting.Exerciting.Domain.team.dto.TeamRankCrawlDto;
 import com.exerciting.Exerciting.Exception.CrawlingException;
 import com.exerciting.Exerciting.Infrastructure.crawler.CrawlerHelper;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -19,36 +18,41 @@ import java.util.ArrayList;
 import java.util.List;
 @Slf4j
 @Component
-public class KboRankFetcher implements Fetcher {
+public class KboPlayerFetcher implements Fetcher {
     private final CrawlerHelper crawlerHelper;
 
-    public KboRankFetcher(CrawlerHelper crawlerHelper) {
+    public KboPlayerFetcher(CrawlerHelper crawlerHelper) {
         this.crawlerHelper = crawlerHelper;
     }
-
-    public List<TeamRankCrawlDto> fetch() {
-        String url = SportType.BASEBALL.getRankUrl();
-        Document document = crawlerHelper.createSafeConnection(url);
-        return parseKboRank(document);
+    public boolean supports(SportType sportType) {
+        return sportType.equals("야구");
     }
 
-    private List<TeamRankCrawlDto> parseKboRank(Document document) {
-        List<TeamRankCrawlDto> rankings = new ArrayList<>();
+    @PostConstruct
+    public List<PlayerCrawlDto> fetch() {
+        String url = SportType.BASEBALL.getPlayerUrl();
+        Document document = crawlerHelper.createSafeConnection(url);
+
+        return parseKboPlayer(document);
+    }
+    public List<PlayerCrawlDto> parseKboPlayer(Document document) {
+        List<PlayerCrawlDto> rankings = new ArrayList<>();
 
         try {
-            Element rankTable = document.selectFirst("table[summary*='순위']");
+            Element rankTable = document.selectFirst("table[summary*='경기내용']");
+            System.out.println("랭크테이블 : " + rankTable != null);
             if (rankTable != null) {
                 Elements rows = rankTable.select("tbody tr");
+                System.out.println(rows.size());
                 for (Element row : rows) {
                     Elements cells = row.select("td");
                     if(cells.isEmpty()) {
                         log.error("데이터값이 유효하지 않습니다.");
                     }
-                    if(cells.size() < 8) {
-                        log.error("크롤링 데이터 부족");
-                        continue;
+                    for(int i = 0; i < 6; i++) {
+                        System.out.println(cells.get(i));
                     }
-
+                    /*
                     rankings.add(TeamRankCrawlDto.builder()
                             .rank(Integer.parseInt(cells.get(0).text()))
                             .teamName(cells.get(1).text())
@@ -63,19 +67,18 @@ public class KboRankFetcher implements Fetcher {
                             .build());
                     //System.out.println(rankings.get(rankings.size()-1));
 
+
+                     */
                 }
             }
         }catch(Exception e) {
             throw new CrawlingException("크롤링 오류",e);
         }
         log.info("크롤링 완료");
-        for(TeamRankCrawlDto s : rankings) {
+        for(PlayerCrawlDto s : rankings) {
             System.out.println(s);
         }
         return rankings;
-    }
-    public boolean supports(SportType sportType) {
-        return sportType == SportType.BASEBALL;
     }
 
 
