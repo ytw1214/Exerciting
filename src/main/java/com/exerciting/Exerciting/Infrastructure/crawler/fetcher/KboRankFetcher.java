@@ -4,6 +4,7 @@ import com.exerciting.Exerciting.Domain.global.SportType;
 import com.exerciting.Exerciting.Domain.team.dto.TeamRankCrawlDto;
 import com.exerciting.Exerciting.Exception.CrawlingException;
 import com.exerciting.Exerciting.Infrastructure.crawler.CrawlerHelper;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
@@ -30,6 +31,7 @@ public class KboRankFetcher implements RankFetcher {
         Document document = crawlerHelper.createSafeConnection(url);
         return parseKboRank(document);
     }
+
     private List<TeamRankCrawlDto> parseKboRank(Document document) {
         List<TeamRankCrawlDto> rankings = new ArrayList<>();
 
@@ -42,7 +44,6 @@ public class KboRankFetcher implements RankFetcher {
                     if(cells.isEmpty()) {
                         log.error("데이터값이 유효하지 않습니다.");
                     }
-                    log.info("데이터 사이즈 : {}개",cells.size());
                     if(cells.size() < 8) {
                         log.error("크롤링 데이터 부족");
                         continue;
@@ -55,15 +56,21 @@ public class KboRankFetcher implements RankFetcher {
                             .wins(Integer.parseInt(cells.get(3).text()))
                             .losses(Integer.parseInt(cells.get(4).text()))
                             .draws(Integer.parseInt(cells.get(5).text()))
-                            .winRate(new BigDecimal(cells.get(6).text()))
-                            .gamesBehind(new BigDecimal(cells.get(7).text()))
+                            .winRate(new BigDecimal(cells.get(6).text()).setScale(3))
+                            .gamesBehind(new BigDecimal(cells.get(7).text()).setScale(3))
                             .crawledAt(LocalDateTime.now())
                             .dataSource("KBO 공식 홈페이지")
                             .build());
+                    //System.out.println(rankings.get(rankings.size()-1));
+
                 }
             }
         }catch(Exception e) {
             throw new CrawlingException("크롤링 오류",e);
+        }
+        log.info("크롤링 완료");
+        for(TeamRankCrawlDto s : rankings) {
+            System.out.println(s);
         }
         return rankings;
     }

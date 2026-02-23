@@ -5,12 +5,14 @@ import com.exerciting.Exerciting.Domain.team.entity.Team;
 import com.exerciting.Exerciting.Domain.team.entity.TeamRank;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@ToString
 public class TeamRankCrawlDto {
     // 종목별 필드
     private SportType sportType;

@@ -30,7 +30,9 @@ public class TeamRank {
     private int wins;
     private int losses;
     private int draws;
+    @Column(scale = 3)
     private BigDecimal winRate;
+    @Column(scale = 3)
     private BigDecimal gamesBehind;
 
     private String dataSource;
