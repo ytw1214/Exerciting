@@ -28,7 +28,7 @@ public class KboPlayerFetcher implements Fetcher {
         return sportType.equals("야구");
     }
 
-    @PostConstruct
+    //@PostConstruct
     public List<PlayerCrawlDto> fetch() {
         String url = SportType.BASEBALL.getPlayerUrl();
         Document document = crawlerHelper.createSafeConnection(url);
