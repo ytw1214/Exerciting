@@ -1,6 +1,8 @@
 package com.exerciting.Exerciting.Domain.matching.repository;
 
+import com.exerciting.Exerciting.Domain.matching.dto.MatchingRequestDto;
 import com.exerciting.Exerciting.Domain.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.team.entity.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -16,4 +18,5 @@ public interface MatchingRepository extends JpaRepository<Matching, Long> {
     List<Matching> findByDescriptionContaining(String Description);
     @Query("Select m from Matching m where m.maxPerson > m.currentPerson")
     List<Matching> findAvailableMatching();
+    List<MatchingRequestDto> findByTeam(Team team);
 }

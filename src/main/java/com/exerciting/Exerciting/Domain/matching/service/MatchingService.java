@@ -1,8 +1,10 @@
 package com.exerciting.Exerciting.Domain.matching.service;
 
+import com.exerciting.Exerciting.Domain.matching.dto.MatchingRequestDto;
 import com.exerciting.Exerciting.Domain.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
 import com.exerciting.Exerciting.Domain.matching.repository.MatchingRepository;
+import com.exerciting.Exerciting.Domain.team.entity.Team;
 import org.springframework.stereotype.Service;
 
 
@@ -37,7 +39,9 @@ public class MatchingService {
     }
 
      */
-
+    public List<MatchingRequestDto> getMatchingByTeam(Team team) {
+        return matchingRepository.findByTeam(team);
+    }
     public List<Matching> getAllMatching() {
         return matchingRepository.findAll();
     }
