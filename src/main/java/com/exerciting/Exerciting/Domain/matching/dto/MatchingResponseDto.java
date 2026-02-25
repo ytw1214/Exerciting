@@ -6,7 +6,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Getter
-public class GetMatchingDto {
+public class MatchingResponseDto {
     private Long id;
     private String title;
     private String description;
@@ -14,7 +14,7 @@ public class GetMatchingDto {
     private int currentPerson;
     private LocalDateTime meetTime;
 
-    public GetMatchingDto(Matching matching) {
+    public MatchingResponseDto(Matching matching) {
         this.id = matching.getId();
         this.title = matching.getTitle();
         this.description = matching.getDescription();

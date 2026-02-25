@@ -1,13 +1,18 @@
 package com.exerciting.Exerciting.Domain.matching.service;
 
+import com.exerciting.Exerciting.Domain.User.entity.User;
+import com.exerciting.Exerciting.Domain.User.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.matching.dto.MatchingRequestDto;
 import com.exerciting.Exerciting.Domain.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
 import com.exerciting.Exerciting.Domain.matching.repository.MatchingRepository;
 import com.exerciting.Exerciting.Domain.team.entity.Team;
+import com.exerciting.Exerciting.Exception.InvalidInputException;
+import com.exerciting.Exerciting.Exception.InvalidTimeException;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,15 +20,15 @@ import java.util.List;
 public class MatchingService {
     private final MatchingRepository matchingRepository;
     private final GameRepository gameRepository;
+    private final UserRepository userRepository;
 
-    public MatchingService(MatchingRepository matchingRepository, GameRepository gameRepository) {
+    public MatchingService(MatchingRepository matchingRepository, GameRepository gameRepository, UserRepository userRepository) {
         this.matchingRepository = matchingRepository;
         this.gameRepository = gameRepository;
+        this.userRepository = userRepository;
     }
 
-    /*
     public Long createMatching(MatchingRequestDto dto, Long hostId) {
-        // 1. 여기서부터 시작이다.
         if (dto.getMeetTime().isBefore(LocalDateTime.now())) {
             throw new InvalidTimeException("시간 오류 ~");
         }
@@ -33,15 +38,16 @@ public class MatchingService {
         if (dto.getTitle() == null || dto.getTitle().isBlank()) {
             throw new InvalidInputException("매칭 이름은 필수 입력이며, 공백으로만 이루어질 수 없습니다.");
         }
+        User host = userRepository.findById(hostId)
+                .orElseThrow(() -> new InvalidInputException("존재하지 않는 사용자입니다."));
 
-        Matching matching = dto.toEntity(hostId);
+        Matching matching = dto.toEntity(host);
         Matching savedMatching = matchingRepository.save(matching);
         return matching.getId();
     }
 
-     */
-    public List<MatchingRequestDto> getMatchingByTeam(Team team) {
-        List<Matching> list = matchingRepository.findByTeam(team);
+    public List<MatchingRequestDto> getMatchingByTeam(String teamName) {
+        List<Matching> list = matchingRepository.findByTeamName(teamName);
         List<MatchingRequestDto> requestList = new ArrayList<>();
         for(Matching matching : list) {
             MatchingRequestDto dto = MatchingRequestDto.fromEntity(matching);
@@ -52,4 +58,6 @@ public class MatchingService {
     public List<Matching> getAllMatching() {
         return matchingRepository.findAll();
     }
+
+
 }

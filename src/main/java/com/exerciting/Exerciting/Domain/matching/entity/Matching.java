@@ -29,13 +29,14 @@ public class Matching {
     @JoinColumn(name="user_id")
     private User user;
     private LocalDateTime meetTime;
+    private LocalDateTime createdAt;
     /*
     @Enumerated(EnumType.STRING)
     private MatchingStatus status;
 
      */
     @Builder
-    public Matching(String title, String description, int maxPerson, int currentPerson, Game game, User usr, LocalDateTime localDateTime) {
+    public Matching(String title, String description, int maxPerson, int currentPerson, Game game, User user, LocalDateTime meetTime, LocalDateTime createdAt) {
         this.title = title;
         this.description = description;
         this.maxPerson = maxPerson;
@@ -43,5 +44,6 @@ public class Matching {
         this.game = game;
         this.user = user;
         this.meetTime = meetTime;
+        this.createdAt = createdAt;
     }
 }

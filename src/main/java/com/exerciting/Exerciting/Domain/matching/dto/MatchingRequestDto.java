@@ -1,5 +1,6 @@
 package com.exerciting.Exerciting.Domain.matching.dto;
 
+import com.exerciting.Exerciting.Domain.User.entity.User;
 import com.exerciting.Exerciting.Domain.matching.entity.Matching;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,7 +9,6 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class MatchingRequestDto {
-    private Long id;
     private String title;
     private String description;
     private int maxPerson;
@@ -28,6 +28,15 @@ public class MatchingRequestDto {
                 .meetTime(matching.getMeetTime())
                 .build();
 
+    }
+    public Matching toEntity(User user) {
+        return Matching.builder()
+                .title(this.getTitle())
+                .description(this.getDescription())
+                .maxPerson(this.getMaxPerson())
+                .user(user)
+                .currentPerson(1)
+                .build();
     }
     /*
     public Matching toEntity(Long hostId) {

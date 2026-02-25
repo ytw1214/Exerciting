@@ -2,7 +2,7 @@ package com.exerciting.Exerciting.Domain.matching.controller;
 
 import com.exerciting.Exerciting.Domain.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.matching.service.MatchingService;
-import com.exerciting.Exerciting.Domain.matching.dto.GetMatchingDto;
+import com.exerciting.Exerciting.Domain.matching.dto.MatchingResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,13 +30,13 @@ public class MatchingController {
 
      */
     @GetMapping("/api/v1/Matching")
-    public ResponseEntity<List<GetMatchingDto>> getMatching() {
+    public ResponseEntity<List<MatchingResponseDto>> getMatching() {
         List<Matching> list = matchingService.getAllMatching();
 
-        List<GetMatchingDto> getMatchingList = new ArrayList<GetMatchingDto>();
+        List<MatchingResponseDto> getMatchingList = new ArrayList<MatchingResponseDto>();
 
         for(Matching element : list) {
-            getMatchingList.add(new GetMatchingDto(element));
+            getMatchingList.add(new MatchingResponseDto(element));
         }
 
         if(getMatchingList.isEmpty()) {
