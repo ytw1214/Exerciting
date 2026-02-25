@@ -8,6 +8,7 @@ import com.exerciting.Exerciting.Domain.team.entity.Team;
 import org.springframework.stereotype.Service;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -40,12 +41,15 @@ public class MatchingService {
 
      */
     public List<MatchingRequestDto> getMatchingByTeam(Team team) {
-        return matchingRepository.findByTeam(team);
+        List<Matching> list = matchingRepository.findByTeam(team);
+        List<MatchingRequestDto> requestList = new ArrayList<>();
+        for(Matching matching : list) {
+            MatchingRequestDto dto = MatchingRequestDto.fromEntity(matching);
+            requestList.add(dto);
+        }
+        return requestList;
     }
     public List<Matching> getAllMatching() {
         return matchingRepository.findAll();
     }
-
-
-
 }

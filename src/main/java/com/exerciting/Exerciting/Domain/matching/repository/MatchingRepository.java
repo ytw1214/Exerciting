@@ -18,5 +18,5 @@ public interface MatchingRepository extends JpaRepository<Matching, Long> {
     List<Matching> findByDescriptionContaining(String Description);
     @Query("Select m from Matching m where m.maxPerson > m.currentPerson")
     List<Matching> findAvailableMatching();
-    List<MatchingRequestDto> findByTeam(Team team);
+    List<Matching> findByTeam(Team team);
 }
