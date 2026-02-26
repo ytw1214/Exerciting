@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface MatchingRepository extends JpaRepository<Matching, Long> {
     //Optional<Matching> findById(Long Id);
@@ -19,4 +20,5 @@ public interface MatchingRepository extends JpaRepository<Matching, Long> {
     @Query("Select m from Matching m where m.maxPerson > m.currentPerson")
     List<Matching> findAvailableMatchingbyPerson();
     List<Matching> findByTeamName(String teamName);
+    Optional<Matching> findById(Long id);
 }

@@ -33,7 +33,6 @@ public class Matching {
     /*
     @Enumerated(EnumType.STRING)
     private MatchingStatus status;
-
      */
     @Builder
     public Matching(String title, String description, int maxPerson, int currentPerson, Game game, User user, LocalDateTime meetTime, LocalDateTime createdAt) {

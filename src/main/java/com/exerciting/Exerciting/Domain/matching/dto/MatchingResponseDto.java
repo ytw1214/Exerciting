@@ -1,11 +1,13 @@
 package com.exerciting.Exerciting.Domain.matching.dto;
 
 import com.exerciting.Exerciting.Domain.matching.entity.Matching;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Builder
 public class MatchingResponseDto {
     private Long id;
     private String title;
@@ -13,6 +15,7 @@ public class MatchingResponseDto {
     private int maxPerson;
     private int currentPerson;
     private LocalDateTime meetTime;
+
 
     public MatchingResponseDto(Matching matching) {
         this.id = matching.getId();

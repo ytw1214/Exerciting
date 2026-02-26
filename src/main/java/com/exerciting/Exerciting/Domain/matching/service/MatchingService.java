@@ -9,6 +9,8 @@ import com.exerciting.Exerciting.Domain.matching.repository.MatchingRepository;
 import com.exerciting.Exerciting.Domain.team.entity.Team;
 import com.exerciting.Exerciting.Exception.InvalidInputException;
 import com.exerciting.Exerciting.Exception.InvalidTimeException;
+import com.exerciting.Exerciting.Exception.UnauthorizedUserException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 
@@ -43,7 +45,7 @@ public class MatchingService {
 
         Matching matching = dto.toEntity(host);
         Matching savedMatching = matchingRepository.save(matching);
-        return matching.getId();
+        return savedMatching.getId();
     }
 
     public List<MatchingRequestDto> getMatchingByTeam(String teamName) {
@@ -59,5 +61,21 @@ public class MatchingService {
         return matchingRepository.findAll();
     }
 
+    public void deleteMatching() {
+        Matching matching = matchingRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("해당 모임이 존재하지 않습니다."));
+
+
+    }
+    private Matching searchMatching(Long matchingId, Long currentUserId) {
+        Matching matching = matchingRepository.findById(matchingId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 모임이 존재하지 않습니다."));
+
+        if(!matching.getUser().getId().equals(currentUserId)) {
+            throw new UnauthorizedUserException("잘못된 접근입니다.");
+        }
+        return matching;
+
+    }
 
 }
