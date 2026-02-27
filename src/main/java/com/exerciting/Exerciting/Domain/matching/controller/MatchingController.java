@@ -36,7 +36,7 @@ public class MatchingController {
         List<MatchingResponseDto> getMatchingList = new ArrayList<MatchingResponseDto>();
 
         for(Matching element : list) {
-            getMatchingList.add(new MatchingResponseDto(element));
+            getMatchingList.add(MatchingResponseDto.fromEntity(element));
         }
 
         if(getMatchingList.isEmpty()) {

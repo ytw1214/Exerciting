@@ -11,13 +11,16 @@ import com.exerciting.Exerciting.Exception.InvalidInputException;
 import com.exerciting.Exerciting.Exception.InvalidTimeException;
 import com.exerciting.Exerciting.Exception.UnauthorizedUserException;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class MatchingService {
     private final MatchingRepository matchingRepository;
@@ -61,11 +64,18 @@ public class MatchingService {
         return matchingRepository.findAll();
     }
 
-    public void deleteMatching() {
-        Matching matching = matchingRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("해당 모임이 존재하지 않습니다."));
-
-
+    public void deleteMatching(Long matchingId, Long currentUserId) {
+        Matching matching = searchMatching(matchingId, currentUserId);
+        matchingRepository.delete(matching);
+    }
+    @Transactional
+    public void updateMatching(Long matchingId, Long currentUserId, MatchingRequestDto changedDto) {
+        Matching matching = searchMatching(matchingId, currentUserId);
+        matching.update(
+                changedDto.getTitle(),
+                changedDto.getDescription(),
+                changedDto.getMaxPerson(),
+                changedDto.getMeetTime());
     }
     private Matching searchMatching(Long matchingId, Long currentUserId) {
         Matching matching = matchingRepository.findById(matchingId)
@@ -74,6 +84,7 @@ public class MatchingService {
         if(!matching.getUser().getId().equals(currentUserId)) {
             throw new UnauthorizedUserException("잘못된 접근입니다.");
         }
+        log.info("매칭 id {} 탐색 완료",matching.getId());
         return matching;
 
     }

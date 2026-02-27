@@ -17,12 +17,23 @@ public class MatchingResponseDto {
     private LocalDateTime meetTime;
 
 
-    public MatchingResponseDto(Matching matching) {
-        this.id = matching.getId();
-        this.title = matching.getTitle();
-        this.description = matching.getDescription();
-        this.maxPerson = matching.getMaxPerson();
-        this.currentPerson = matching.getCurrentPerson();
-        this.meetTime = matching.getMeetTime();
+    public MatchingResponseDto(Long id, String title, String description, int maxPerson, int currentPerson, LocalDateTime meetTime) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.maxPerson = maxPerson;
+        this.currentPerson = currentPerson;
+        this.meetTime = meetTime;
+    }
+
+    public static MatchingResponseDto fromEntity(Matching matching) {
+        return MatchingResponseDto.builder()
+                .id(matching.getId())
+                .title(matching.getTitle())
+                .description(matching.getDescription())
+                .maxPerson(matching.getMaxPerson())
+                .currentPerson(matching.getCurrentPerson())
+                .meetTime(matching.getMeetTime())
+                .build();
     }
 }
