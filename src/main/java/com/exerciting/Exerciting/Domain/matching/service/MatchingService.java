@@ -1,12 +1,11 @@
 package com.exerciting.Exerciting.Domain.matching.service;
 
-import com.exerciting.Exerciting.Domain.User.entity.User;
-import com.exerciting.Exerciting.Domain.User.repository.UserRepository;
+import com.exerciting.Exerciting.Domain.user.entity.User;
+import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.matching.dto.MatchingRequestDto;
 import com.exerciting.Exerciting.Domain.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
 import com.exerciting.Exerciting.Domain.matching.repository.MatchingRepository;
-import com.exerciting.Exerciting.Domain.team.entity.Team;
 import com.exerciting.Exerciting.Exception.InvalidInputException;
 import com.exerciting.Exerciting.Exception.InvalidTimeException;
 import com.exerciting.Exerciting.Exception.UnauthorizedUserException;

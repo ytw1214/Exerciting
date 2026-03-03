@@ -7,7 +7,7 @@ plugins {
 group = 'com.exerciting'
 version = '0.0.1-SNAPSHOT'
 description = 'Practice_project'
-
+sourceCompatibility = '17'
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
@@ -19,7 +19,7 @@ configurations {
 		extendsFrom annotationProcessor
 	}
 }
-/*
+/*a
 jar {
 	enabled=false
 }
@@ -45,6 +45,25 @@ dependencies {
     implementation 'org.seleniumhq.selenium:selenium-java:4.16.1'
     // WebDriver Manager (드라이버 자동 관리)
     //implementation 'io.github.bonigarcia:webdrivermanager:5.6.3'
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+}
+def querydslDir = "$buildDir/generated/querydsl"
+
+querydsl {
+    jpa = true
+    querydslSourcesDir = querydslDir
+}
+sourceSets {
+    main.java.srcDir querydslDir
+}
+configurations {
+    querydsl.extendsFrom compileClasspath
+}
+compileQuerydsl {
+    options.annotationProcessorPath = configurations.querydsl
 }
 
 tasks.named('test') {

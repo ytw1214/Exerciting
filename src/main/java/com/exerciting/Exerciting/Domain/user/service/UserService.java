@@ -1,8 +1,8 @@
-package com.exerciting.Exerciting.Domain.User.service;
+package com.exerciting.Exerciting.Domain.user.service;
 
-import com.exerciting.Exerciting.Domain.User.entity.User;
+import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Exception.UserNotFoundException;
-import com.exerciting.Exerciting.Domain.User.repository.UserRepository;
+import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

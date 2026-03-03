@@ -1,7 +1,7 @@
 package com.exerciting.Exerciting.Domain.matching.entity;
 
 import com.exerciting.Exerciting.Domain.game.entity.Game;
-import com.exerciting.Exerciting.Domain.User.entity.User;
+import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Exception.InvalidInputException;
 import jakarta.persistence.*;
 import lombok.*;

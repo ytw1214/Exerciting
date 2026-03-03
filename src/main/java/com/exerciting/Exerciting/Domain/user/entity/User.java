@@ -1,4 +1,4 @@
-package com.exerciting.Exerciting.Domain.User.entity;
+package com.exerciting.Exerciting.Domain.user.entity;
 
 import com.exerciting.Exerciting.Domain.matching.entity.Matching;
 import jakarta.persistence.*;

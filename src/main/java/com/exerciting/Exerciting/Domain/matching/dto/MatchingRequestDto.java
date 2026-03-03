@@ -1,6 +1,6 @@
 package com.exerciting.Exerciting.Domain.matching.dto;
 
-import com.exerciting.Exerciting.Domain.User.entity.User;
+import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.matching.entity.Matching;
 import lombok.Builder;
 import lombok.Getter;

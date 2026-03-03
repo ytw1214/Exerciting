@@ -23,4 +23,5 @@ public interface MatchingRepository extends JpaRepository<Matching, Long> {
     List<Matching> findAvailableMatchingbyPerson();
     List<Matching> findByTeamName(String teamName);
     Optional<Matching> findById(Long id);
+
 }
