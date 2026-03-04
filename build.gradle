@@ -2,29 +2,27 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.6'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.ewerk.gradle.plugins.querydsl' version '1.0.10'
 }
 
 group = 'com.exerciting'
 version = '0.0.1-SNAPSHOT'
 description = 'Practice_project'
 sourceCompatibility = '17'
+/*
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
 	}
 }
 
+
+ */
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
 }
-/*a
-jar {
-	enabled=false
-}
-
- */
 repositories {
 	mavenCentral()
 }
@@ -45,27 +43,36 @@ dependencies {
     implementation 'org.seleniumhq.selenium:selenium-java:4.16.1'
     // WebDriver Manager (드라이버 자동 관리)
     //implementation 'io.github.bonigarcia:webdrivermanager:5.6.3'
-    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
-    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 }
-def querydslDir = "$buildDir/generated/querydsl"
+def querydslDir = "src/main/generated/querydsl"
 
-querydsl {
-    jpa = true
-    querydslSourcesDir = querydslDir
+querydsl{
+	jpa = true
+	querydslSourcesDir = querydslDir
 }
-sourceSets {
-    main.java.srcDir querydslDir
+sourceSets{
+	main {
+		java {
+			srcDirs = ['src/main/java', querydslDir]
+		}
+	}
 }
-configurations {
-    querydsl.extendsFrom compileClasspath
+compileQuerydsl{
+	options.annotationProcessorPath = configurations.querydsl
 }
-compileQuerydsl {
-    options.annotationProcessorPath = configurations.querydsl
+configurations{
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+	querydsl.extendsFrom compileClasspath
 }
-
+clean {
+	delete file('src/main/generated')
+}
 tasks.named('test') {
 	useJUnitPlatform()
 }

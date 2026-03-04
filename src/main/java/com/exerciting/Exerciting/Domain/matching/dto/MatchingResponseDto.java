@@ -15,15 +15,18 @@ public class MatchingResponseDto {
     private int maxPerson;
     private int currentPerson;
     private LocalDateTime meetTime;
+    private String homeTeam;
+    private String awayTeam;
 
-
-    public MatchingResponseDto(Long id, String title, String description, int maxPerson, int currentPerson, LocalDateTime meetTime) {
+    public MatchingResponseDto(Long id, String title, String description, int maxPerson, int currentPerson, LocalDateTime meetTime, String homeTeam, String awayTeam) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.maxPerson = maxPerson;
         this.currentPerson = currentPerson;
         this.meetTime = meetTime;
+        this.homeTeam = homeTeam;
+        this.awayTeam = awayTeam;
     }
 
     public static MatchingResponseDto fromEntity(Matching matching) {
@@ -34,6 +37,8 @@ public class MatchingResponseDto {
                 .maxPerson(matching.getMaxPerson())
                 .currentPerson(matching.getCurrentPerson())
                 .meetTime(matching.getMeetTime())
+                .homeTeam(matching.getGame().getHomeTeam().getName_english())
+                .awayTeam(matching.getGame().getAwayTeam().getName_english())
                 .build();
     }
 }
