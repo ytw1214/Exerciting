@@ -1,7 +1,9 @@
 package com.exerciting.Exerciting.Domain.matching.repository;
 import org.springframework.util.StringUtils;
 
-public record MatchingCustomCond(String title, String description, String TeamName) {
+import java.time.LocalDateTime;
+
+public record MatchingCustomCond(String title, String description, String teamName, LocalDateTime meetTime) {
 
     public MatchingCustomCond {
         title = StringUtils.hasText(title) ? title : null;
