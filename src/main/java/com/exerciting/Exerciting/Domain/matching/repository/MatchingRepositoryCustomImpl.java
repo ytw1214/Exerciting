@@ -1,5 +1,9 @@
 package com.exerciting.Exerciting.Domain.matching.repository;
+import com.exerciting.Exerciting.Domain.matching.dto.MatchingQueryResponseDto;
 import com.exerciting.Exerciting.Domain.matching.entity.QMatching;
+import com.exerciting.Exerciting.Domain.stadium.entity.QStadium;
+import com.exerciting.Exerciting.Domain.team.entity.QTeam;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -9,12 +13,16 @@ import java.util.List;
 
 import static com.exerciting.Exerciting.Domain.game.entity.QGame.game;
 import static com.exerciting.Exerciting.Domain.matching.entity.QMatching.matching;
+import static com.exerciting.Exerciting.Domain.stadium.entity.QStadium.stadium;
+
 @RequiredArgsConstructor
 public class MatchingRepositoryCustomImpl implements MatchingRepositoryCustom {
     private final JPAQueryFactory queryFactory;
-    public List<QMatching> search(MatchingCustomCond cond) {
-        return null;
-    }
+
+    private final QTeam homeTeam = new QTeam("homeTeam");
+    private final QTeam awayTeam = new QTeam("awayTeam");
+    private final QStadium stadium = QStadium.stadium;
+
     public BooleanExpression titleContains(String title) {
         return title == null ? null : matching.title.containsIgnoreCase(title);
     }
@@ -32,7 +40,31 @@ public class MatchingRepositoryCustomImpl implements MatchingRepositoryCustom {
         if(teamName == null) {
             return null;
         }
-        return game.homeTeam.name_english.containsIgnoreCase(teamName)
-                .or(game.awayTeam.name_english.containsIgnoreCase(teamName));
+        return homeTeam.name_english.containsIgnoreCase(teamName)
+                .or(awayTeam.name_english.containsIgnoreCase(teamName));
+    }
+    public List<MatchingQueryResponseDto> search(MatchingCustomCond cond) {
+        return queryFactory
+                .select(Projections.constructor(MatchingQueryResponseDto.class,
+                        matching.id,
+                        matching.title,
+                        matching.currentPerson,
+                        matching.maxPerson,
+                        matching.meetTime,
+                        game.homeTeam.name_english,
+                        game.awayTeam.name_english,
+                        stadium.name,
+                        game.sportType.stringValue()))
+                .from(matching)
+                .leftJoin(matching.game,game)
+                .leftJoin(game.homeTeam, homeTeam)
+                .leftJoin(game.awayTeam, awayTeam)
+                .leftJoin(game.stadium, stadium)
+                .where(titleContains(cond.title()),
+                        descriptionContains(cond.description()),
+                        meetTimeContains(cond.meetTime()),
+                        teamNameContains(cond.teamName())
+                )
+                .fetch();
     }
 }
