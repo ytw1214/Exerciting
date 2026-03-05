@@ -49,7 +49,7 @@ public class MatchingService {
         Matching savedMatching = matchingRepository.save(matching);
         return savedMatching.getId();
     }
-
+    /*
     public List<MatchingRequestDto> getMatchingByTeam(String teamName) {
         List<Matching> list = matchingRepository.findByTeamName(teamName);
         List<MatchingRequestDto> requestList = new ArrayList<>();
@@ -59,6 +59,8 @@ public class MatchingService {
         }
         return requestList;
     }
+
+     */
     public List<Matching> getAllMatching() {
         return matchingRepository.findAll();
     }

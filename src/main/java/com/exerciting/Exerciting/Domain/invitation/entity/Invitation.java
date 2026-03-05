@@ -1,5 +1,8 @@
 package com.exerciting.Exerciting.Domain.invitation.entity;
 
+import jakarta.persistence.Entity;
+
+@Entity
 public class Invitation {
     private Long Id;
     private InvitationStatus status;
