@@ -1,5 +1,8 @@
 package com.exerciting.Exerciting.Domain.matching.service;
 
+import com.exerciting.Exerciting.Domain.matching.dto.MatchingQueryResponseDto;
+import com.exerciting.Exerciting.Domain.matching.repository.MatchingCustomCond;
+import com.exerciting.Exerciting.Domain.matching.repository.MatchingRepositoryCustomImpl;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.matching.dto.MatchingRequestDto;
@@ -81,13 +84,22 @@ public class MatchingService {
     private Matching searchMatching(Long matchingId, Long currentUserId) {
         Matching matching = matchingRepository.findById(matchingId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 모임이 존재하지 않습니다."));
-
-        if(!matching.getUser().getId().equals(currentUserId)) {
-            throw new UnauthorizedUserException("잘못된 접근입니다.");
-        }
+        verify(matching, currentUserId);
         log.info("매칭 id {} 탐색 완료",matching.getId());
         return matching;
 
     }
+    private void verify(Matching matching, Long currentUserId) {
+        if(!matching.getUser().getId().equals(currentUserId)) {
+            log.info("매칭 접근 오류");
+            throw new UnauthorizedUserException("잘못된 접근입니다.");
+        }
+    }
+    @Transactional(readOnly = true)
+    public List<MatchingQueryResponseDto> searchDetailMatching(MatchingCustomCond cond, Long currentUserId) {
+        if (!userRepository.existsById(currentUserId)) {
+            throw new UnauthorizedUserException("인증된 사용자만 조회가 가능합니다.");
+        return matchingRepository.search(cond);
 
+    }
 }

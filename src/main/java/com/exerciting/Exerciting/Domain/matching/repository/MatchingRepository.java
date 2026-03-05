@@ -1,5 +1,6 @@
 package com.exerciting.Exerciting.Domain.matching.repository;
 
+import com.exerciting.Exerciting.Domain.matching.dto.MatchingQueryResponseDto;
 import com.exerciting.Exerciting.Domain.matching.dto.MatchingRequestDto;
 import com.exerciting.Exerciting.Domain.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.team.entity.Team;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MatchingRepository extends JpaRepository<Matching, Long> {
+public interface MatchingRepository extends JpaRepository<Matching, Long>, MatchingRepositoryCustom {
     //Optional<Matching> findById(Long Id);
     //Optional<Matching> findByMatchName(String matchName);
     //Optional<Matching> findByMatchTime(LocalDateTime matchTime);
@@ -22,5 +23,6 @@ public interface MatchingRepository extends JpaRepository<Matching, Long> {
     @Query("Select m from Matching m where m.maxPerson > m.currentPerson")
     List<Matching> findAvailableMatchingbyPerson();
     Optional<Matching> findById(Long id);
+    List<MatchingQueryResponseDto> search(MatchingCustomCond cond);
 
 }
