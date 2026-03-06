@@ -35,11 +35,4 @@ public class GameService {
         return gameRepository.findByStadiumNameContaining(name);
     }
 
-    /*
-    @Transactional
-    public Long savePlayer(Long teamId, String name, String position, int age) {
-
-    }
-
-     */
 }

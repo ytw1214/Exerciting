@@ -99,6 +99,7 @@ public class MatchingService {
     public List<MatchingQueryResponseDto> searchDetailMatching(MatchingCustomCond cond, Long currentUserId) {
         if (!userRepository.existsById(currentUserId)) {
             throw new UnauthorizedUserException("인증된 사용자만 조회가 가능합니다.");
+        }
         return matchingRepository.search(cond);
 
     }

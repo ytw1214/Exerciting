@@ -1,17 +1,17 @@
 package com.exerciting.Exerciting.Infrastructure.crawler;
 
 import com.exerciting.Exerciting.Exception.CrawlingException;
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.stereotype.Component;
 
 import javax.net.ssl.*;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class CrawlerHelper {
@@ -30,6 +30,26 @@ public class CrawlerHelper {
         } catch (Exception e) {
             throw new CrawlingException("연걸 실패" + url, e);
         }
+    }
+    public WebDriver createWebDriver() {
+        ChromeOptions options = new ChromeOptions();
+
+        options.addArguments("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
+        options.setExperimentalOption("useAutomationExtension", false);
+
+        options.addArguments("--disable-gpu");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--lang=ko_KR");
+
+        ChromeDriver driver = new ChromeDriver(options);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("source", "Object.defineProperty(navigator, 'webdriver', { get: () => undefined })");
+        driver.executeCdpCommand("Page.addScriptToEvaluateOnNewDocument", params);
+
+        return driver;
     }
 
 }
