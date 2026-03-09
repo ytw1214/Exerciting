@@ -18,9 +18,15 @@ public class GameService {
     public List<Game> getPastGames() {
         return gameRepository.findByGameStatus(GameStatus.FINISHED);
     }
+
     public List<Game> getCurrentGames() {
+
         return gameRepository.findByGameStatus(GameStatus.PROCEEDING);
     }
+
+
+
+
     public List<Game> getFutureGames() {
         return gameRepository.findByGameStatus(GameStatus.BEFORE);
     }
