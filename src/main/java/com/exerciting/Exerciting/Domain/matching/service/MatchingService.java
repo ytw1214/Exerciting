@@ -87,7 +87,6 @@ public class MatchingService {
         verify(matching, currentUserId);
         log.info("매칭 id {} 탐색 완료",matching.getId());
         return matching;
-
     }
     private void verify(Matching matching, Long currentUserId) {
         if(!matching.getUser().getId().equals(currentUserId)) {
