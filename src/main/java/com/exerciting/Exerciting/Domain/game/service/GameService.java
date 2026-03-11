@@ -1,7 +1,9 @@
 package com.exerciting.Exerciting.Domain.game.service;
 
+import com.exerciting.Exerciting.Domain.game.dto.GameQueryResponseDto;
 import com.exerciting.Exerciting.Domain.game.entity.Game;
 import com.exerciting.Exerciting.Domain.game.entity.GameStatus;
+import com.exerciting.Exerciting.Domain.game.repository.GameCustomCond;
 import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
 import org.springframework.stereotype.Service;
 
@@ -33,12 +35,13 @@ public class GameService {
 
     public List<Game> getGameByTeamName(String name) {
         return gameRepository.findByTeamName(name);
-    }
-    public List<Game> getGameByTeamNameContaining(String name) {
-        return gameRepository.findByTeamNameContaining(name);
-    }
+    };
+
     public List<Game> getGameByStadium(String name) {
         return gameRepository.findByStadiumNameContaining(name);
     }
 
+    public List<GameQueryResponseDto> getGameDetail(GameCustomCond cond) {
+        return gameRepository.search(cond);
+    }
 }

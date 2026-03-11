@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MatchingParticipantRepository extends JpaRepository<Long, MatchingParticipant> {
+public interface MatchingParticipantRepository extends JpaRepository<MatchingParticipant,Long> {
     List<MatchingParticipant> findByMatchingId(Long matchingId);
 }

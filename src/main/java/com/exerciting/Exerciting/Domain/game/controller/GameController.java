@@ -1,8 +1,18 @@
 package com.exerciting.Exerciting.Domain.game.controller;
 
+import com.exerciting.Exerciting.Domain.game.dto.GameQueryResponseDto;
+import com.exerciting.Exerciting.Domain.game.entity.GameStatus;
+import com.exerciting.Exerciting.Domain.game.repository.GameCustomCond;
 import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
 import com.exerciting.Exerciting.Domain.game.service.GameService;
+import com.exerciting.Exerciting.Domain.global.SportType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 public class GameController {
@@ -31,6 +41,19 @@ public class GameController {
 
      */
 
+    @GetMapping("api/v1/games")
+    public ResponseEntity<List<GameQueryResponseDto>> getGames(
+            @RequestParam(required = false) GameStatus gameStatus,
+            @RequestParam(required = false) SportType sportType) {
+
+        GameCustomCond cond = GameCustomCond.of(gameStatus, sportType);
+        List<GameQueryResponseDto> result = gameService.getGameDetail(cond);
+
+        if (result.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(result);
+    }
     /*
     public ResponseEntity<GameRequestDto> getGamesByTeam(String teamName) {
         if(teamName == null) {

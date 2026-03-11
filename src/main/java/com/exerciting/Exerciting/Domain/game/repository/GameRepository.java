@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface GameRepository extends JpaRepository<Game, Long> {
+public interface GameRepository extends JpaRepository<Game, Long>, GameRepositoryCustom {
 
     List<Game> findByGameStatus(GameStatus gameStatus);
     @Query("Select g from Game g where g.homeTeam.name = :name OR g.awayTeam.name = :name")

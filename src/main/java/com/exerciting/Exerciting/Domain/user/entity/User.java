@@ -19,21 +19,23 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String username;
+    private String userId;
     private String pw;
     private String nickname;
     private String name;
     private String email;
+    /*
     @OneToMany(mappedBy="user")
-    private List<Matching> matchingList = new ArrayList<>();
+    private Matching matching;
 
+
+     */
     @Builder
-    public User(String username, String pw, String nickname, String name, String email, List<Matching> matchingList) {
-        this.username = username;
+    public User(String userId, String pw, String nickname, String name, String email) {
+        this.userId = userId;
         this.pw = pw;
         this.nickname = nickname;
         this.name = name;
         this.email = email;
-        this.matchingList = matchingList;
     }
 }

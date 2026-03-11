@@ -29,7 +29,7 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
                         game.homeTeam.name,
                         game.awayTeam.name,
                         game.sportType.stringValue(),
-                        game.gamestatus.stringValue(),
+                        game.gameStatus.stringValue(),
                         stadium.name
                         ))
                 .from(game)

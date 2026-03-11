@@ -2,6 +2,8 @@ package com.exerciting.Exerciting.Domain.matching.matchingParticipant.dto;
 
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 
 public class MatchingParticipantDto {

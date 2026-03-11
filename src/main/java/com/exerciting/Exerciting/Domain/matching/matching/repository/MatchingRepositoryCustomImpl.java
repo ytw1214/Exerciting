@@ -1,5 +1,8 @@
 package com.exerciting.Exerciting.Domain.matching.matching.repository;
+import com.exerciting.Exerciting.Domain.game.entity.QGame;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingQueryResponseDto;
+
+import com.exerciting.Exerciting.Domain.matching.matching.entity.QMatching;
 import com.exerciting.Exerciting.Domain.stadium.entity.QStadium;
 import com.exerciting.Exerciting.Domain.team.entity.QTeam;
 import com.querydsl.core.types.Projections;
@@ -10,17 +13,15 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.exerciting.Exerciting.Domain.game.entity.QGame.game;
-import static com.exerciting.Exerciting.Domain.matching.entity.QMatching.matching;
-
 @RequiredArgsConstructor
 public class MatchingRepositoryCustomImpl implements MatchingRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
+    private final QMatching matching = QMatching.matching;
     private final QTeam homeTeam = new QTeam("homeTeam");
     private final QTeam awayTeam = new QTeam("awayTeam");
     private final QStadium stadium = QStadium.stadium;
-
+    private final QGame game = QGame.game;
     public BooleanExpression titleContains(String title) {
         return title == null ? null : matching.title.containsIgnoreCase(title);
     }

@@ -27,6 +27,7 @@ public class KboDateFetcher {
         this.crawlerHelper = crawlerHelper;
     }
 
+    /*
     public List<Game> parseDateFetcher() {
         WebDriver driver = null;
         String url = "https://www.koreabaseball.com/Schedule/Schedule.aspx";
@@ -39,5 +40,6 @@ public class KboDateFetcher {
                     ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("td.day"))
             );
         }
+
+     */
     }
-}
