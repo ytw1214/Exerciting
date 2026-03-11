@@ -1,14 +1,13 @@
-package com.exerciting.Exerciting.Domain.matching.service;
+package com.exerciting.Exerciting.Domain.matching.matching.service;
 
-import com.exerciting.Exerciting.Domain.matching.dto.MatchingQueryResponseDto;
-import com.exerciting.Exerciting.Domain.matching.repository.MatchingCustomCond;
-import com.exerciting.Exerciting.Domain.matching.repository.MatchingRepositoryCustomImpl;
+import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingQueryResponseDto;
+import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingCustomCond;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
-import com.exerciting.Exerciting.Domain.matching.dto.MatchingRequestDto;
-import com.exerciting.Exerciting.Domain.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingRequestDto;
+import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
-import com.exerciting.Exerciting.Domain.matching.repository.MatchingRepository;
+import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRepository;
 import com.exerciting.Exerciting.Exception.InvalidInputException;
 import com.exerciting.Exerciting.Exception.InvalidTimeException;
 import com.exerciting.Exerciting.Exception.UnauthorizedUserException;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j

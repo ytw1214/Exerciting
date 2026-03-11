@@ -1,4 +1,4 @@
-package com.exerciting.Exerciting.Domain.matching.dto;
+package com.exerciting.Exerciting.Domain.matching.matching.dto;
 
 import java.time.LocalDateTime;
 

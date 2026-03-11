@@ -1,8 +1,8 @@
-package com.exerciting.Exerciting.Domain.matching.controller;
+package com.exerciting.Exerciting.Domain.matching.matching.controller;
 
-import com.exerciting.Exerciting.Domain.matching.entity.Matching;
-import com.exerciting.Exerciting.Domain.matching.service.MatchingService;
-import com.exerciting.Exerciting.Domain.matching.dto.MatchingResponseDto;
+import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.matching.matching.service.MatchingService;
+import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

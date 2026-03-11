@@ -1,4 +1,4 @@
-package com.exerciting.Exerciting.Domain.matching.repository;
+package com.exerciting.Exerciting.Domain.matching.matching.repository;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;

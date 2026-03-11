@@ -1,7 +1,7 @@
-package com.exerciting.Exerciting.Domain.matching.dto;
+package com.exerciting.Exerciting.Domain.matching.matching.dto;
 
 import com.exerciting.Exerciting.Domain.user.entity.User;
-import com.exerciting.Exerciting.Domain.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import lombok.Builder;
 import lombok.Getter;
 

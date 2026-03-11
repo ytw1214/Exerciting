@@ -1,4 +1,4 @@
-package com.exerciting.Exerciting.Domain.matching.entity;
+package com.exerciting.Exerciting.Domain.matching.matching.entity;
 
 public enum MatchingStatus {
     RECRUTING("모집중"),

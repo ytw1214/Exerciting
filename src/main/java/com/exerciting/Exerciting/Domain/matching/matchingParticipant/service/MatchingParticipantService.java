@@ -1,15 +1,14 @@
-package com.exerciting.Exerciting.Domain.matching.service;
+package com.exerciting.Exerciting.Domain.matching.matchingParticipant.service;
 
-import com.exerciting.Exerciting.Domain.matching.entity.Matching;
-import com.exerciting.Exerciting.Domain.matching.entity.MatchingParticipant;
-import com.exerciting.Exerciting.Domain.matching.repository.MatchingParticipantRepository;
-import com.exerciting.Exerciting.Domain.matching.repository.MatchingRepository;
+import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.MatchingParticipant;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
+import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRepository;
 import com.exerciting.Exerciting.Exception.InvalidInputException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

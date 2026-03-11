@@ -1,9 +1,7 @@
-package com.exerciting.Exerciting.Domain.matching.repository;
+package com.exerciting.Exerciting.Domain.matching.matching.repository;
 
-import com.exerciting.Exerciting.Domain.matching.dto.MatchingQueryResponseDto;
-import com.exerciting.Exerciting.Domain.matching.dto.MatchingRequestDto;
-import com.exerciting.Exerciting.Domain.matching.entity.Matching;
-import com.exerciting.Exerciting.Domain.team.entity.Team;
+import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingQueryResponseDto;
+import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

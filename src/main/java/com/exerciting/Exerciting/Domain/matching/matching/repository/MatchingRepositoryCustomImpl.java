@@ -1,6 +1,5 @@
-package com.exerciting.Exerciting.Domain.matching.repository;
-import com.exerciting.Exerciting.Domain.matching.dto.MatchingQueryResponseDto;
-import com.exerciting.Exerciting.Domain.matching.entity.QMatching;
+package com.exerciting.Exerciting.Domain.matching.matching.repository;
+import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingQueryResponseDto;
 import com.exerciting.Exerciting.Domain.stadium.entity.QStadium;
 import com.exerciting.Exerciting.Domain.team.entity.QTeam;
 import com.querydsl.core.types.Projections;
@@ -13,7 +12,6 @@ import java.util.List;
 
 import static com.exerciting.Exerciting.Domain.game.entity.QGame.game;
 import static com.exerciting.Exerciting.Domain.matching.entity.QMatching.matching;
-import static com.exerciting.Exerciting.Domain.stadium.entity.QStadium.stadium;
 
 @RequiredArgsConstructor
 public class MatchingRepositoryCustomImpl implements MatchingRepositoryCustom {

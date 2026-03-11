@@ -1,6 +1,6 @@
 package com.exerciting.Exerciting.Domain.user.entity;
 
-import com.exerciting.Exerciting.Domain.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

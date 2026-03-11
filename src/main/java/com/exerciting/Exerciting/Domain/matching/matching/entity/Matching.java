@@ -1,4 +1,4 @@
-package com.exerciting.Exerciting.Domain.matching.entity;
+package com.exerciting.Exerciting.Domain.matching.matching.entity;
 
 import com.exerciting.Exerciting.Domain.game.entity.Game;
 import com.exerciting.Exerciting.Domain.user.entity.User;

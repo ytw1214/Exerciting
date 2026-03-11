@@ -1,4 +1,4 @@
-package com.exerciting.Exerciting.Domain.matching.dto;
+package com.exerciting.Exerciting.Domain.matching.matchingParticipant.dto;
 
 import lombok.Getter;
 
