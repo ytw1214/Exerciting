@@ -22,3 +22,5 @@ https://jojoldu.tistory.com/493
 2/23 - teamrank 엔티티에서 종목별로 나눠서 구현해보기 & 비교해서 어떤게 더 좋은 결과인지 생각해보기
 <br>
 <&nbsp><&nbsp><&nbsp>크롤링하는 과정에서 asp.net과 selenium 사용으로 크롤링 시간이 오래걸림(해결방안 제시해야함)
+<br>
+추가 계획 : 데이터 추가 및 webSocketHandler 활용한 채팅 구현, 크롤링 구현
