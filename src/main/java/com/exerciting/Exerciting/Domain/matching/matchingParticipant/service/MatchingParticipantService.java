@@ -4,7 +4,11 @@ import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.MatchingParticipant;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRepository;
+import com.exerciting.Exerciting.Domain.user.entity.User;
+import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Exception.InvalidInputException;
+import com.exerciting.Exerciting.Exception.MatchingNotFoundException;
+import com.exerciting.Exerciting.Exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +19,27 @@ import java.util.List;
 public class MatchingParticipantService {
     private final MatchingParticipantRepository matchingParticipantRepository;
     private final MatchingRepository matchingRepository;
+    private final UserRepository userRepository;
     public List<MatchingParticipant> getUserByMatching(Long matchingId) {
         Matching matching = matchingRepository.findById(matchingId)
                 .orElseThrow(() -> new InvalidInputException("잘못된 매칭입니다."));
         return matchingParticipantRepository.findByMatchingId(matching.getId());
+    }
+
+    public void joinMatching(Long matchingId, Long userId) {
+        Matching matching = matchingRepository.findById(matchingId)
+                .orElseThrow(() -> new MatchingNotFoundException("해당 매칭이 존재하지 않습니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("해당 유저가 존재하지 않습니다."));
+
+        if(matchingParticipantRepository.existByMatchingAndUser(matching,user)) {
+            throw new InvalidInputException("이미 참가한 매칭입니다.");
+        }
+        long currentParticipant = matchingParticipantRepository.countByMatching(matching);
+        if(currentParticipant >= matching.getMaxPerson()) {
+            throw new InvalidInputException("정원이 초과되었습니다.");
+        }
+        MatchingParticipant participant = new MatchingParticipant(user, matching);
+        matchingParticipantRepository.save(participant);
     }
 }

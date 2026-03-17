@@ -8,9 +8,7 @@ import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingRequestDto
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRepository;
-import com.exerciting.Exerciting.Exception.InvalidInputException;
-import com.exerciting.Exerciting.Exception.InvalidTimeException;
-import com.exerciting.Exerciting.Exception.UnauthorizedUserException;
+import com.exerciting.Exerciting.Exception.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,7 +30,7 @@ public class MatchingService {
         this.gameRepository = gameRepository;
         this.userRepository = userRepository;
     }
-
+    @Transactional
     public Long createMatching(MatchingRequestDto dto, Long hostId) {
         if (dto.getMeetTime().isBefore(LocalDateTime.now())) {
             throw new InvalidTimeException("시간 오류 ~");
@@ -100,4 +98,5 @@ public class MatchingService {
         return matchingRepository.search(cond);
 
     }
+
 }
