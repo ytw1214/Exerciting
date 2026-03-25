@@ -27,8 +27,10 @@ public class MatchingParticipant {
         this.matching = matching;
         this.createdAt = LocalDateTime.now();
     }
-
+    /*
     public static MatchingParticipant to(Matching matching, User user) {
-        return matchingParticipant;
+        return ;
     }
+
+     */
 }

@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface MatchingParticipantRepository extends JpaRepository<MatchingParticipant,Long> {
     List<MatchingParticipant> findByMatchingId(Long matchingId);
-    boolean existByMatchingAndUser(Matching matching, User user);
+    boolean existsByMatchingAndUser(Matching matching, User user);
     long countByMatching(Matching matching);
 }

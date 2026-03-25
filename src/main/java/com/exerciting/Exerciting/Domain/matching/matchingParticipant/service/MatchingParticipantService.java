@@ -32,7 +32,7 @@ public class MatchingParticipantService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("해당 유저가 존재하지 않습니다."));
 
-        if(matchingParticipantRepository.existByMatchingAndUser(matching,user)) {
+        if(matchingParticipantRepository.existsByMatchingAndUser(matching,user)) {
             throw new InvalidInputException("이미 참가한 매칭입니다.");
         }
         long currentParticipant = matchingParticipantRepository.countByMatching(matching);
