@@ -1,5 +1,6 @@
 package com.exerciting.Exerciting.Domain.user.dto;
 
+import com.exerciting.Exerciting.Domain.user.entity.User;
 import jakarta.validation.constraints.Pattern;
 
 public record UserRequestDto(
@@ -12,4 +13,14 @@ public record UserRequestDto(
         String nickname,
         String name,
         String email
-) {}
+) {
+    public User toEntity() {
+        return User.builder()
+                .userId(this.userId())
+                .pw(this.pw())
+                .nickname(this.nickname())
+                .name(this.name())
+                .email(this.email())
+                .build();
+    }
+}

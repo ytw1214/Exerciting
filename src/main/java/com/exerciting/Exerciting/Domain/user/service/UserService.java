@@ -40,8 +40,10 @@ public class UserService {
         if(userRepository.existsByEmail(dto.email())) {
             throw new IllegalArgumentException("이미 사용중인 이메일 입니다.");
         }
-
-
+        if(userRepository.existsByNickname(dto.nickname())) {
+            throw new IllegalArgumentException("이미 사용중인 닉네임 입니다.");
+        }
+        return userRepository.save(dto.toEntity()).getId();
     }
 
 }
