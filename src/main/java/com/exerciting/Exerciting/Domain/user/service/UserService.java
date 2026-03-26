@@ -33,13 +33,15 @@ public class UserService {
 
         return userRepository.save(user).getId();
     }
-    //C
-    /*
-    public Long createUserById(User user) {
-        if(userRepository.getUserById(getUserById(id).equals(user)) {
-
+    public Long signUp(UserRequestDto dto) {
+        if(userRepository.existsByUserId(dto.userId())) {
+            throw new IllegalArgumentException("이미 사용중인 아이디 입니다.");
         }
+        if(userRepository.existsByEmail(dto.email())) {
+            throw new IllegalArgumentException("이미 사용중인 이메일 입니다.");
+        }
+
+
     }
 
-     */
 }
