@@ -17,7 +17,7 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<Long> signup(@RequestBody UserRequestDto dto) {
-        Long userId = userService.join(dto);
+        Long userId = userService.signUp(dto);
         return ResponseEntity.ok(userId);
     }
 }
