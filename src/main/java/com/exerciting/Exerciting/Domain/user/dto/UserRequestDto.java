@@ -22,5 +22,5 @@ public record UserRequestDto(
                 .name(this.name())
                 .email(this.email())
                 .build();
-    }
+    }   
 }

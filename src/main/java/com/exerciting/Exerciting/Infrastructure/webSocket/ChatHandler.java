@@ -24,7 +24,7 @@ public class ChatHandler extends TextWebSocketHandler {
             throw new RuntimeException(e);
         }
     }
-t
+
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
 
