@@ -22,15 +22,9 @@ public class MatchingParticipant {
     private LocalDateTime createdAt;
 
     @Builder
-    public MatchingParticipant(User user, Matching matching) {
+    public MatchingParticipant(User user, Matching matching, LocalDateTime createdAt) {
         this.user = user;
         this.matching = matching;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = createdAt;
     }
-    /*
-    public static MatchingParticipant to(Matching matching, User user) {
-        return ;
-    }
-
-     */
 }

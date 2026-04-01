@@ -9,5 +9,5 @@ public interface StadiumRepository extends JpaRepository<Stadium, Long> {
     List<Stadium> findByAddressContaining(String address);
     List<Stadium> findByNameContaining(String name);
     Optional<Stadium> findByLatitudeAndLongitude(double latitude, double longitude);
-
+    Optional<Stadium> findByShortName(String shortName);
 }

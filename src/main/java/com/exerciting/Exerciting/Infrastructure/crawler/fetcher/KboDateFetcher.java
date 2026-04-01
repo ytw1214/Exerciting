@@ -51,43 +51,59 @@ public class KboDateFetcher {
     try {
         driver = crawlerHelper.createWebDriver();
         driver.get(URL);
-
+        Thread.sleep(2000);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         WebElement seriesSelect = driver.findElement(By.id("ddlSeries"));
         Select select = new Select(seriesSelect);
         select.selectByValue("0,9,6");
         wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.cssSelector("table.tbl-type06 tbody tr")
+                By.id("tblScheduleList")
         ));
-
         List<WebElement> rows = driver.findElements(
-                By.cssSelector("table.tbl-type06 tbody tr")
+                By.cssSelector("#tblScheduleList tbody tr")
         );
-
+        String currentDate = "";
         for (WebElement row : rows) {
             try {
+
                 List<WebElement> cells = row.findElements(By.tagName("td"));
-                if (cells.size() < 5) continue;
+                List<WebElement> dayCell = row.findElements(By.cssSelector("td.day"));
 
-                String date     = cells.get(0).getText().trim(); // 날짜
-                String time     = cells.get(1).getText().trim(); // 시간
-                String home     = cells.get(2).getText().trim(); // 홈팀
-                String away     = cells.get(3).getText().trim(); // 원정팀
-                String stadium  = cells.get(4).getText().trim(); // 경기장
-
-                if (date.isBlank() || home.isBlank() || away.isBlank()) continue;
+                String time = "";
+                String home = "";
+                String away = "";
+                String stadium = "";
+                if (!dayCell.isEmpty()) {
+                    currentDate = cells.get(0).getText().trim();
+                    time = cells.get(1).getText().trim();
+                    WebElement playCell = cells.get(2);
+                    List<WebElement> spans = playCell.findElements(By.tagName("span"));
+                    away = spans.get(0).getText().trim();
+                    home = spans.get(2).getText().trim();
+                    stadium     = cells.get(7).getText().trim();
+                    log.info("크롤링 완료(날짜 가져옴) : {}, {}, {}, {}", time,home,away,stadium);
+                } else {
+                    time        = cells.get(0).getText().trim();
+                    WebElement playCell = cells.get(1);
+                    List<WebElement> spans = playCell.findElements(By.tagName("span"));
+                    away = spans.get(0).getText().trim();
+                    home = spans.get(2).getText().trim();
+                    stadium     = cells.get(6).getText().trim();
+                    log.info("크롤링 완료(날짜 가져옴X) : {}, {}, {}, {}", time,home,away,stadium);
+                }
+                if (currentDate.isBlank() || home.isBlank() || away.isBlank()) continue;
 
                 GameCrawlRequestDto dto = GameCrawlRequestDto.builder()
                         .homeTeam(home)
                         .awayTeam(away)
                         .stadiumName(stadium)
                         .sportType(SportType.BASEBALL.name())
-                        .gameStartTime(date + " " + time)
+                        .gameStartTime(currentDate + " " + time)
                         .build();
 
                 result.add(dto);
                 saveGame(dto);
-
+                Thread.sleep(200);
             } catch (Exception e) {
                 log.warn("행 파싱 실패, 스킵: {}", e.getMessage());
             }
@@ -105,19 +121,17 @@ public class KboDateFetcher {
 
         return result;
     }
-
     private void saveGame(GameCrawlRequestDto dto) {
         Team homeTeam = teamRepository.findByName(dto.getHomeTeam()).orElse(null);
         Team awayTeam = teamRepository.findByName(dto.getAwayTeam()).orElse(null);
-        List<Stadium> stadiums = stadiumRepository.findByNameContaining(dto.getStadiumName());
+        Stadium stadium = stadiumRepository.findByShortName(dto.getStadiumName()).orElse(null);
 
-        if (homeTeam == null || awayTeam == null || stadiums.isEmpty()) {
+        if (homeTeam == null || awayTeam == null || stadium == null) {
             log.warn("팀 또는 경기장 미존재 - 홈:{} 원정:{} 경기장:{}",
                     dto.getHomeTeam(), dto.getAwayTeam(), dto.getStadiumName());
             return;
         }
 
-        Stadium stadium = stadiums.get(0);
 
         // 같은 경기 중복 저장 방지
         boolean exists = gameRepository.findByTeamName(homeTeam.getName())

@@ -20,12 +20,14 @@ public class Stadium {
     private double latitude;
     private double longitude;
     private String address;
+    private String shortName;
 
     @Builder
-    public Stadium(String name, double latitude, double longitude, String address) {
+    public Stadium(String name, double latitude, double longitude, String address, String shortName) {
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
         this.address = address;
+        this.shortName = shortName;
     }
 }

@@ -12,6 +12,7 @@ import com.exerciting.Exerciting.Exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -39,7 +40,8 @@ public class MatchingParticipantService {
         if(currentParticipant >= matching.getMaxPerson()) {
             throw new InvalidInputException("정원이 초과되었습니다.");
         }
-        MatchingParticipant participant = new MatchingParticipant(user, matching);
+        LocalDateTime createdAt = LocalDateTime.now();
+        MatchingParticipant participant = new MatchingParticipant(user, matching, createdAt);
         matchingParticipantRepository.save(participant);
     }
 }
