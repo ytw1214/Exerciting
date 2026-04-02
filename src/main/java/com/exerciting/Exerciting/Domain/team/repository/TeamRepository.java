@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface TeamRepository extends JpaRepository<Team, Long> {
     Optional<Team> findByName(@Param("name") String name);
-
+    Optional<Team> findByShortName(String shortName);
 }

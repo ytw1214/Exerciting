@@ -18,10 +18,10 @@ public class Team {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
-
+    //구단명 풀네임
     private String name;
-    @Column(name="name_en")
-    private String name_english;
+    //크롤링 기준 매치 구단명
+    private String shortName;
     @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name = "stadium_id")
     private Stadium stadium;

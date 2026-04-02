@@ -37,8 +37,8 @@ public class MatchingResponseDto {
                 .maxPerson(matching.getMaxPerson())
                 .currentPerson(matching.getCurrentPerson())
                 .meetTime(matching.getMeetTime())
-                .homeTeam(matching.getGame().getHomeTeam().getName_english())
-                .awayTeam(matching.getGame().getAwayTeam().getName_english())
+                .homeTeam(matching.getGame().getHomeTeam().getShortName())
+                .awayTeam(matching.getGame().getAwayTeam().getShortName())
                 .build();
     }
 }

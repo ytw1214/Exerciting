@@ -77,17 +77,17 @@ public class KboDateFetcher {
                     currentDate = cells.get(0).getText().trim();
                     time = cells.get(1).getText().trim();
                     WebElement playCell = cells.get(2);
-                    List<WebElement> spans = playCell.findElements(By.tagName("span"));
-                    away = spans.get(0).getText().trim();
-                    home = spans.get(2).getText().trim();
+                    List<WebElement> teams = playCell.findElements(By.xpath("./span"));
+                    away = teams.get(0).getText().trim();
+                    home = teams.get(1).getText().trim();
                     stadium     = cells.get(7).getText().trim();
                     log.info("크롤링 완료(날짜 가져옴) : {}, {}, {}, {}", time,home,away,stadium);
                 } else {
                     time        = cells.get(0).getText().trim();
                     WebElement playCell = cells.get(1);
-                    List<WebElement> spans = playCell.findElements(By.tagName("span"));
+                    List<WebElement> spans = playCell.findElements(By.xpath("./span"));
                     away = spans.get(0).getText().trim();
-                    home = spans.get(2).getText().trim();
+                    home = spans.get(1).getText().trim();
                     stadium     = cells.get(6).getText().trim();
                     log.info("크롤링 완료(날짜 가져옴X) : {}, {}, {}, {}", time,home,away,stadium);
                 }
@@ -98,7 +98,7 @@ public class KboDateFetcher {
                         .awayTeam(away)
                         .stadiumName(stadium)
                         .sportType(SportType.BASEBALL.name())
-                        .gameStartTime(currentDate + " " + time)
+                        .gameStartTime(getCleanDate(currentDate, time))
                         .build();
 
                 result.add(dto);
@@ -122,8 +122,8 @@ public class KboDateFetcher {
         return result;
     }
     private void saveGame(GameCrawlRequestDto dto) {
-        Team homeTeam = teamRepository.findByName(dto.getHomeTeam()).orElse(null);
-        Team awayTeam = teamRepository.findByName(dto.getAwayTeam()).orElse(null);
+        Team homeTeam = teamRepository.findByShortName(dto.getHomeTeam()).orElse(null);
+        Team awayTeam = teamRepository.findByShortName(dto.getAwayTeam()).orElse(null);
         Stadium stadium = stadiumRepository.findByShortName(dto.getStadiumName()).orElse(null);
 
         if (homeTeam == null || awayTeam == null || stadium == null) {
@@ -132,14 +132,7 @@ public class KboDateFetcher {
             return;
         }
 
-
-        // 같은 경기 중복 저장 방지
-        boolean exists = gameRepository.findByTeamName(homeTeam.getName())
-                .stream()
-                .anyMatch(g -> g.getHomeTeam().getName().equals(homeTeam.getName())
-                        && g.getAwayTeam().getName().equals(awayTeam.getName())
-                        && g.getStadium().getId().equals(stadium.getId()));
-
+        boolean exists = gameRepository.existsByHomeTeamAndAwayTeamAndGameStartTime(homeTeam, awayTeam, dto.getGameStartTime());
         if (exists) {
             log.debug("이미 저장된 경기 스킵: {} vs {}", dto.getHomeTeam(), dto.getAwayTeam());
             return;
@@ -150,23 +143,20 @@ public class KboDateFetcher {
                 .homeTeam(homeTeam)
                 .awayTeam(awayTeam)
                 .stadium(stadium)
-                .gameStartTime(parseDateTime(dto.getGameStartTime()))
+                .gameStartTime(dto.getGameStartTime())
                 .gameStatus(GameStatus.BEFORE)
                 .build();
 
         gameRepository.save(game);
         log.info("경기 저장 완료: {} vs {}", dto.getHomeTeam(), dto.getAwayTeam());
     }
-
-    private LocalDateTime parseDateTime(String dateTimeStr) {
-        try {
-            // "03.28 18:30" 형식 대응
-            int year = LocalDateTime.now().getYear();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM.dd HH:mm");
-            return LocalDateTime.parse(dateTimeStr, formatter).withYear(year);
-        } catch (Exception e) {
-            log.warn("날짜 파싱 실패: {}", dateTimeStr);
-            return LocalDateTime.now();
-        }
+    private LocalDateTime getCleanDate(String date, String time) {
+        String cleanDate = date.replaceAll("\\(.*?\\)", "").trim();
+        log.info("cleanDate: '{}', time: '{}'", cleanDate, time);
+        int year = LocalDateTime.now().getYear();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+        String startDate = year + "." + cleanDate + " " + time;
+        log.info("final starttime : {}", startDate);
+        return LocalDateTime.parse(startDate, formatter);
     }
 }

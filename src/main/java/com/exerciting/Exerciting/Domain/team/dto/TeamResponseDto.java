@@ -15,15 +15,17 @@ import java.util.List;
 public class TeamResponseDto {
     private Long id;
     private String name;
+    private String shortName;
     private String imgUrl;
     private Stadium stadium;
     private List<Player> player = new ArrayList<>();
     private SportType sportType;
 
     @Builder
-    public TeamResponseDto(Long id, String name, String imgurl, Stadium stadium, List<Player> player, SportType sportType) {
+    public TeamResponseDto(Long id, String name, String shortName, String imgurl, Stadium stadium, List<Player> player, SportType sportType) {
         this.id = id;
         this.name = name;
+        this.shortName = shortName;
         this.imgUrl = imgurl;
         this.stadium = stadium;
         this.player = player;
@@ -34,6 +36,7 @@ public class TeamResponseDto {
         return new TeamResponseDto(
                 team.getId(),
                 team.getName(),
+                team.getShortName(),
                 team.getImgUrl(),
                 team.getStadium(),
                 team.getPlayer(),

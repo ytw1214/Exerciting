@@ -4,10 +4,12 @@ import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
 public class MatchingParticipant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -39,8 +39,8 @@ public class MatchingRepositoryCustomImpl implements MatchingRepositoryCustom {
         if(teamName == null) {
             return null;
         }
-        return homeTeam.name_english.containsIgnoreCase(teamName)
-                .or(awayTeam.name_english.containsIgnoreCase(teamName));
+        return homeTeam.shortName.containsIgnoreCase(teamName)
+                .or(awayTeam.shortName.containsIgnoreCase(teamName));
     }
     public List<MatchingQueryResponseDto> search(MatchingCustomCond cond) {
         return queryFactory
@@ -50,8 +50,8 @@ public class MatchingRepositoryCustomImpl implements MatchingRepositoryCustom {
                         matching.currentPerson,
                         matching.maxPerson,
                         matching.meetTime,
-                        game.homeTeam.name_english,
-                        game.awayTeam.name_english,
+                        game.homeTeam.shortName,
+                        game.awayTeam.shortName,
                         stadium.name,
                         game.sportType.stringValue()))
                 .from(matching)

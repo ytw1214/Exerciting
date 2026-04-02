@@ -3,6 +3,8 @@ package com.exerciting.Exerciting.Domain.game.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 public class GameCrawlRequestDto {
@@ -10,9 +12,9 @@ public class GameCrawlRequestDto {
     private String sportType;
     private String homeTeam;
     private String awayTeam;
-    private String gameStartTime;
+    private LocalDateTime gameStartTime;
 
-    public GameCrawlRequestDto(String stadiumName, String sportType, String homeTeam, String awayTeam, String gameStartTime) {
+    public GameCrawlRequestDto(String stadiumName, String sportType, String homeTeam, String awayTeam, LocalDateTime gameStartTime) {
         this.stadiumName = stadiumName;
         this.sportType = sportType;
         this.homeTeam = homeTeam;
