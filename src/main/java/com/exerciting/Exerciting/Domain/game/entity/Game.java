@@ -33,7 +33,9 @@ public class Game {
     private LocalDateTime gameStartTime;
     @Enumerated(EnumType.STRING)
     private GameStatus gameStatus;
-
+    private int homeTeamScore;
+    private int awayTeamScore;
+    private GameRecord gameRecord;
 
     @Builder
     public Game(SportType sportType, Team homeTeam, Team awayTeam, Stadium stadium, LocalDateTime gameStartTime, GameStatus gameStatus) {

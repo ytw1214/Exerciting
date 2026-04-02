@@ -19,6 +19,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.time.Duration;
@@ -121,6 +122,7 @@ public class KboDateFetcher {
 
         return result;
     }
+    @Transactional
     private void saveGame(GameCrawlRequestDto dto) {
         Team homeTeam = teamRepository.findByShortName(dto.getHomeTeam()).orElse(null);
         Team awayTeam = teamRepository.findByShortName(dto.getAwayTeam()).orElse(null);
@@ -131,12 +133,22 @@ public class KboDateFetcher {
                     dto.getHomeTeam(), dto.getAwayTeam(), dto.getStadiumName());
             return;
         }
-
+            /*
         boolean exists = gameRepository.existsByHomeTeamAndAwayTeamAndGameStartTime(homeTeam, awayTeam, dto.getGameStartTime());
         if (exists) {
             log.debug("이미 저장된 경기 스킵: {} vs {}", dto.getHomeTeam(), dto.getAwayTeam());
             return;
         }
+
+
+             */
+
+        boolean exists = gameRepository.findByTeamName(homeTeam.getName())
+                .stream()
+                .anyMatch(g -> g.getHomeTeam().getName().equals(homeTeam.getName())
+                        && g.getAwayTeam().getName().equals(awayTeam.getName())
+                        && g.getStadium().getId().equals(stadium.getId()));
+
 
         Game game = Game.builder()
                 .sportType(SportType.BASEBALL)
