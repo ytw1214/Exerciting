@@ -53,65 +53,71 @@ public class KboDateFetcher {
         driver = crawlerHelper.createWebDriver();
         driver.get(URL);
         Thread.sleep(2000);
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        WebElement seriesSelect = driver.findElement(By.id("ddlSeries"));
-        Select select = new Select(seriesSelect);
-        select.selectByValue("0,9,6");
-        wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.id("tblScheduleList")
-        ));
-        List<WebElement> rows = driver.findElements(
-                By.cssSelector("#tblScheduleList tbody tr")
-        );
-        String currentDate = "";
-        for (WebElement row : rows) {
-            try {
+        String[] monthlist = {"05", "06", "07"};
+        for (String month : monthlist) {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            WebElement monthSelect = driver.findElement(By.id("ddlMonth"));
+            Select selectMonth = new Select(monthSelect);
+            selectMonth.selectByValue(month);
+            WebElement seriesSelect = driver.findElement(By.id("ddlSeries"));
+            Select select = new Select(seriesSelect);
+            select.selectByValue("0,9,6");
+            wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.id("tblScheduleList")
+            ));
+            List<WebElement> rows = driver.findElements(
+                    By.cssSelector("#tblScheduleList tbody tr")
+            );
+            String currentDate = "";
+            for (WebElement row : rows) {
+                try {
 
-                List<WebElement> cells = row.findElements(By.tagName("td"));
-                List<WebElement> dayCell = row.findElements(By.cssSelector("td.day"));
+                    List<WebElement> cells = row.findElements(By.tagName("td"));
+                    List<WebElement> dayCell = row.findElements(By.cssSelector("td.day"));
 
-                String time = "";
-                String home = "";
-                String away = "";
-                String stadium = "";
-                if (!dayCell.isEmpty()) {
-                    currentDate = cells.get(0).getText().trim();
-                    time = cells.get(1).getText().trim();
-                    WebElement playCell = cells.get(2);
-                    List<WebElement> teams = playCell.findElements(By.xpath("./span"));
-                    away = teams.get(0).getText().trim();
-                    home = teams.get(1).getText().trim();
-                    stadium     = cells.get(7).getText().trim();
-                    log.info("크롤링 완료(날짜 가져옴) : {}, {}, {}, {}", time,home,away,stadium);
-                } else {
-                    time        = cells.get(0).getText().trim();
-                    WebElement playCell = cells.get(1);
-                    List<WebElement> spans = playCell.findElements(By.xpath("./span"));
-                    away = spans.get(0).getText().trim();
-                    home = spans.get(1).getText().trim();
-                    stadium     = cells.get(6).getText().trim();
-                    log.info("크롤링 완료(날짜 가져옴X) : {}, {}, {}, {}", time,home,away,stadium);
+                    String time = "";
+                    String home = "";
+                    String away = "";
+                    String stadium = "";
+                    if (!dayCell.isEmpty()) {
+                        currentDate = cells.get(0).getText().trim();
+                        time = cells.get(1).getText().trim();
+                        WebElement playCell = cells.get(2);
+                        List<WebElement> teams = playCell.findElements(By.xpath("./span"));
+                        away = teams.get(0).getText().trim();
+                        home = teams.get(1).getText().trim();
+                        stadium = cells.get(7).getText().trim();
+                        log.info("크롤링 완료(날짜 가져옴) : {}, {}, {}, {}", time, home, away, stadium);
+                    } else {
+                        time = cells.get(0).getText().trim();
+                        WebElement playCell = cells.get(1);
+                        List<WebElement> spans = playCell.findElements(By.xpath("./span"));
+                        away = spans.get(0).getText().trim();
+                        home = spans.get(1).getText().trim();
+                        stadium = cells.get(6).getText().trim();
+                        log.info("크롤링 완료(날짜 가져옴X) : {}, {}, {}, {}", time, home, away, stadium);
+                    }
+                    if (currentDate.isBlank() || home.isBlank() || away.isBlank()) continue;
+
+                    GameCrawlRequestDto dto = GameCrawlRequestDto.builder()
+                            .homeTeam(home)
+                            .awayTeam(away)
+                            .stadiumName(stadium)
+                            .sportType(SportType.BASEBALL.name())
+                            .gameStartTime(getCleanDate(currentDate, time))
+                            .build();
+
+                    result.add(dto);
+                    saveGame(dto);
+                    Thread.sleep(200);
+                } catch (Exception e) {
+                    log.warn("행 파싱 실패, 스킵: {}", e.getMessage());
                 }
-                if (currentDate.isBlank() || home.isBlank() || away.isBlank()) continue;
-
-                GameCrawlRequestDto dto = GameCrawlRequestDto.builder()
-                        .homeTeam(home)
-                        .awayTeam(away)
-                        .stadiumName(stadium)
-                        .sportType(SportType.BASEBALL.name())
-                        .gameStartTime(getCleanDate(currentDate, time))
-                        .build();
-
-                result.add(dto);
-                saveGame(dto);
-                Thread.sleep(200);
-            } catch (Exception e) {
-                log.warn("행 파싱 실패, 스킵: {}", e.getMessage());
             }
-        }
-
+            log.info("{}월 크롤링 완료",month);
+            Thread.sleep(180000);
+    }
         log.info("KBO 경기 일정 크롤링 완료 - {}건", result.size());
-
     } catch (Exception e) {
         throw new CrawlingException("KBO 일정 크롤링 실패", e);
     } finally {
@@ -122,7 +128,6 @@ public class KboDateFetcher {
 
         return result;
     }
-    @Transactional
     private void saveGame(GameCrawlRequestDto dto) {
         Team homeTeam = teamRepository.findByShortName(dto.getHomeTeam()).orElse(null);
         Team awayTeam = teamRepository.findByShortName(dto.getAwayTeam()).orElse(null);
@@ -133,23 +138,11 @@ public class KboDateFetcher {
                     dto.getHomeTeam(), dto.getAwayTeam(), dto.getStadiumName());
             return;
         }
-            /*
         boolean exists = gameRepository.existsByHomeTeamAndAwayTeamAndGameStartTime(homeTeam, awayTeam, dto.getGameStartTime());
         if (exists) {
             log.debug("이미 저장된 경기 스킵: {} vs {}", dto.getHomeTeam(), dto.getAwayTeam());
             return;
         }
-
-
-             */
-
-        boolean exists = gameRepository.findByTeamName(homeTeam.getName())
-                .stream()
-                .anyMatch(g -> g.getHomeTeam().getName().equals(homeTeam.getName())
-                        && g.getAwayTeam().getName().equals(awayTeam.getName())
-                        && g.getStadium().getId().equals(stadium.getId()));
-
-
         Game game = Game.builder()
                 .sportType(SportType.BASEBALL)
                 .homeTeam(homeTeam)

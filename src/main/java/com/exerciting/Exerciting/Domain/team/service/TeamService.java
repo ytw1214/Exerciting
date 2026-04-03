@@ -1,7 +1,6 @@
 package com.exerciting.Exerciting.Domain.team.service;
 
 import com.exerciting.Exerciting.Domain.team.entity.Team;
-import com.exerciting.Exerciting.Domain.player.repository.PlayerRepository;
 import com.exerciting.Exerciting.Domain.team.repository.TeamRepository;
 import com.exerciting.Exerciting.Domain.team.dto.TeamResponseDto;
 import org.springframework.stereotype.Service;
@@ -9,11 +8,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class TeamService {
     private final TeamRepository teamRepository;
-    private final PlayerRepository playerRepository;
 
-    public TeamService(TeamRepository teamRepository, PlayerRepository playerRepository) {
+    public TeamService(TeamRepository teamRepository) {
         this.teamRepository = teamRepository;
-        this.playerRepository = playerRepository;
     }
     public TeamResponseDto getTeam(String teamName) {
         Team team = teamRepository.findByName(teamName)

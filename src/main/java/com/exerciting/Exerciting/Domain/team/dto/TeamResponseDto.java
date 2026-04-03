@@ -1,6 +1,5 @@
 package com.exerciting.Exerciting.Domain.team.dto;
 
-import com.exerciting.Exerciting.Domain.player.entity.Player;
 import com.exerciting.Exerciting.Domain.global.SportType;
 import com.exerciting.Exerciting.Domain.stadium.entity.Stadium;
 import com.exerciting.Exerciting.Domain.team.entity.Team;
@@ -17,18 +16,16 @@ public class TeamResponseDto {
     private String name;
     private String shortName;
     private String imgUrl;
-    private Stadium stadium;
-    private List<Player> player = new ArrayList<>();
+    private List<Stadium> stadium;
     private SportType sportType;
 
     @Builder
-    public TeamResponseDto(Long id, String name, String shortName, String imgurl, Stadium stadium, List<Player> player, SportType sportType) {
+    public TeamResponseDto(Long id, String name, String shortName, String imgurl, List<Stadium> stadium, SportType sportType) {
         this.id = id;
         this.name = name;
         this.shortName = shortName;
         this.imgUrl = imgurl;
         this.stadium = stadium;
-        this.player = player;
         this.sportType = sportType;
     }
 
@@ -39,7 +36,6 @@ public class TeamResponseDto {
                 team.getShortName(),
                 team.getImgUrl(),
                 team.getStadium(),
-                team.getPlayer(),
                 team.getSportType()
         );
     }

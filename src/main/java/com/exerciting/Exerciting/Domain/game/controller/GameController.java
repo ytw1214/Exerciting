@@ -23,13 +23,6 @@ public class GameController {
         this.gameService = gameService;
         this.gameRepository = gameRepository;
     }
-/*
-    @PostMapping("/insert")
-    public String insert(Player player, Team team) {
-        String sql = "INSERT INTO "
-    }
-
- */
     /*
     public ResponseEntity<GameSearchRequestDto> getGames(
             @RequestParam(required = false) LocalDateTime start,
