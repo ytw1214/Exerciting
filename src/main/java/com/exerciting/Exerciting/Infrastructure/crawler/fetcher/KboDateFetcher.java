@@ -45,7 +45,7 @@ public class KboDateFetcher {
         this.stadiumRepository = stadiumRepository;
         this.gameRepository = gameRepository;
     }
-    @PostConstruct
+    //@PostConstruct
     public List<GameCrawlRequestDto> fetch() {
         WebDriver driver = null;
         List<GameCrawlRequestDto> result = new ArrayList<>();

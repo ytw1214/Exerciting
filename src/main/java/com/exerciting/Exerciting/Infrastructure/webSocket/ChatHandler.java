@@ -7,15 +7,19 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class ChatHandler extends TextWebSocketHandler {
 
+    private MatchingChatService matchingChatService;
+    private final Map<String, Set<WebSocketSession>> matchingSessions = new ConcurrentHashMap<>();
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        // 연결됐을 때
-    }
 
+    }
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         try {
@@ -24,9 +28,13 @@ public class ChatHandler extends TextWebSocketHandler {
             throw new RuntimeException(e);
         }
     }
-
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-
+        String matchingId = getMatchingId(session);
+        matchingSessions.getOrDefault(matchingId, Set)
+    }
+    private String getMatchingId(WebSocketSession session) {
+        String path = session.getUri().getPath();
+        return path.substring(path.lastIndexOf("/") + 1);
     }
 }
