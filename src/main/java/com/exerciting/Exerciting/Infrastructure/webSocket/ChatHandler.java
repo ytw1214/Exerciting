@@ -1,5 +1,6 @@
 package com.exerciting.Exerciting.Infrastructure.webSocket;
 
+import com.exerciting.Exerciting.Domain.matching.matchingChat.service.MatchingChatService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
