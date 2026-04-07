@@ -14,10 +14,10 @@ public record UserRequestDto(
         String name,
         String email
 ) {
-    public User toEntity() {
+    public User toEntity(String encodedPw) {
         return User.builder()
                 .userId(this.userId())
-                .pw(this.pw())
+                .pw(encodedPw)
                 .nickname(this.nickname())
                 .name(this.name())
                 .email(this.email())
