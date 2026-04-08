@@ -39,12 +39,13 @@ public class UserService {
         return userRepository.save(dto.toEntity(encodedPw)).getId();
     }
     @Transactional
-    public void deleteUser(String userId) {
+    public Long deleteUser(String userId) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
 
+        log.info("{} 회원 탈퇴 완료",user.getUserId());
         userRepository.delete(user);
-        log.info("해당 유저 탈퇴 완료");
+        return user.getId();
     }
     @Transactional
     public void updateUserDetail(String userId, UserUpdateDto dto) {
