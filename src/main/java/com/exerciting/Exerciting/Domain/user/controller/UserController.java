@@ -16,12 +16,14 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<Long> signup(@RequestBody UserRequestDto dto) {
-        Long userId = userService.signUp(dto);
-        return ResponseEntity.ok(userId);
+        Long Id = userService.signUp(dto);
+        return ResponseEntity.ok(Id);
     }
-    @DeleteMapping("/delete")
+    @DeleteMapping
     public ResponseEntity<Long> delete(@RequestBody UserRequestDto dto) {
         Long userId = userService.deleteUser(dto.userId());
         return ResponseEntity.ok(userId);
     }
+    @PostMapping("/login")
+    public ResponseEntity<Long>
 }

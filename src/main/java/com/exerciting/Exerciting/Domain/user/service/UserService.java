@@ -5,6 +5,7 @@ import com.exerciting.Exerciting.Domain.user.dto.UserUpdateDto;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Exception.UserNotFoundException;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
+import com.exerciting.Exerciting.Infrastructure.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-
+    private final JwtTokenProvider jwtTokenProvider;
     //데이터 조회
     public User getUserById(Long id) {
         return userRepository.findById(id)
@@ -51,7 +52,20 @@ public class UserService {
     public void updateUserDetail(String userId, UserUpdateDto dto) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
-        user.update(dto);
+        String encodedPw = null;
+        if (dto.pw() != null && !dto.pw().isEmpty()) {
+            encodedPw = passwordEncoder.encode(dto.pw());
+        }
+        user.update(dto, encodedPw);
     }
 
+    public String login(String userId, String pw) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
+
+        if(!passwordEncoder.matches(pw,user.getPw())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+        return jwtTokenProvider.createToken(user.getUserId());
+    }
 }

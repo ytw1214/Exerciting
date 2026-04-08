@@ -40,9 +40,15 @@ public class User {
         this.email = email;
     }
 
-    public void update(UserUpdateDto dto) {
-        this.pw = dto.pw();
-        this.nickname = dto.nickname();
-        this.email = dto.email();
+    public void update(UserUpdateDto dto, String encodedPw) {
+        if(encodedPw != null) {
+            this.pw =encodedPw;
+        }
+        if (dto.nickname() != null && !dto.nickname().isEmpty()) {
+            this.nickname = dto.nickname();
+        }
+        if (dto.email() != null && !dto.email().isEmpty()) {
+            this.email = dto.email();
+        }
     }
 }
