@@ -41,13 +41,6 @@ public class UserController {
     }
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> getMe(@AuthenticationPrincipal UserDetails userDetails) {
-        if(userDetails == null) {
-            System.out.println("null");
-        }
-        else {
-            System.out.println("유저디테일 존재");
-            System.out.println(userDetails);
-        }
         UserResponseDto dto = userService.getUser(userDetails.getUsername());
         return ResponseEntity.ok(dto);
     }
