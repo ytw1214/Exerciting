@@ -4,12 +4,9 @@ import com.exerciting.Exerciting.Domain.user.dto.LoginRequestDto;
 import com.exerciting.Exerciting.Domain.user.dto.UserRequestDto;
 import com.exerciting.Exerciting.Domain.user.dto.UserResponseDto;
 import com.exerciting.Exerciting.Domain.user.dto.UserUpdateDto;
-import com.exerciting.Exerciting.Domain.user.entity.CustomUserDetails;
-import com.exerciting.Exerciting.Domain.user.entity.User;
+import com.exerciting.Exerciting.Domain.user.entity.UserDetails;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
-import com.exerciting.Exerciting.Exception.UserNotFoundException;
-import com.exerciting.Exerciting.Infrastructure.security.UserDetailServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,12 +25,12 @@ public class UserController {
         return ResponseEntity.ok(Id);
     }
     @DeleteMapping("/me")
-    public ResponseEntity<Long> deleteUser(@PathVariable String userId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<Long> deleteUser(@PathVariable String userId, @AuthenticationPrincipal UserDetails userDetails) {
         Long id = userService.deleteUser(userDetails.getUserId());
         return ResponseEntity.ok(id);
     }
     @PostMapping("/update")
-    public ResponseEntity<Long> updateUser(@AuthenticationPrincipal CustomUserDetails userDetails,@RequestBody UserUpdateDto dto) {
+    public ResponseEntity<Long> updateUser(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UserUpdateDto dto) {
         Long id = userService.updateUserDetail(userDetails.getUsername(),dto);
         return ResponseEntity.ok(id);
     }
@@ -43,7 +40,14 @@ public class UserController {
         return ResponseEntity.ok(token);
     }
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDto> getMe(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<UserResponseDto> getMe(@AuthenticationPrincipal UserDetails userDetails) {
+        if(userDetails == null) {
+            System.out.println("null");
+        }
+        else {
+            System.out.println("유저디테일 존재");
+            System.out.println(userDetails);
+        }
         UserResponseDto dto = userService.getUser(userDetails.getUsername());
         return ResponseEntity.ok(dto);
     }
