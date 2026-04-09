@@ -2,10 +2,17 @@ package com.exerciting.Exerciting.Domain.user.controller;
 
 import com.exerciting.Exerciting.Domain.user.dto.LoginRequestDto;
 import com.exerciting.Exerciting.Domain.user.dto.UserRequestDto;
+import com.exerciting.Exerciting.Domain.user.dto.UserResponseDto;
+import com.exerciting.Exerciting.Domain.user.dto.UserUpdateDto;
+import com.exerciting.Exerciting.Domain.user.entity.CustomUserDetails;
+import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
+import com.exerciting.Exerciting.Exception.UserNotFoundException;
+import com.exerciting.Exerciting.Infrastructure.security.UserDetailServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,14 +27,24 @@ public class UserController {
         Long Id = userService.signUp(dto);
         return ResponseEntity.ok(Id);
     }
-    @DeleteMapping
-    public ResponseEntity<Long> delete(@RequestBody UserRequestDto dto) {
-        Long userId = userService.deleteUser(dto.userId());
-        return ResponseEntity.ok(userId);
+    @DeleteMapping("/me")
+    public ResponseEntity<Long> deleteUser(@PathVariable String userId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long id = userService.deleteUser(userDetails.getUserId());
+        return ResponseEntity.ok(id);
+    }
+    @PostMapping("/update")
+    public ResponseEntity<Long> updateUser(@AuthenticationPrincipal CustomUserDetails userDetails,@RequestBody UserUpdateDto dto) {
+        Long id = userService.updateUserDetail(userDetails.getUsername(),dto);
+        return ResponseEntity.ok(id);
     }
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequestDto dto) {
         String token = userService.login(dto.userId(), dto.password());
         return ResponseEntity.ok(token);
+    }
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> getMe(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserResponseDto dto = userService.getUser(userDetails.getUsername());
+        return ResponseEntity.ok(dto);
     }
 }

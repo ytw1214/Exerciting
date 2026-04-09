@@ -1,6 +1,7 @@
 package com.exerciting.Exerciting.Domain.user.service;
 
 import com.exerciting.Exerciting.Domain.user.dto.UserRequestDto;
+import com.exerciting.Exerciting.Domain.user.dto.UserResponseDto;
 import com.exerciting.Exerciting.Domain.user.dto.UserUpdateDto;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Exception.UserNotFoundException;
@@ -49,7 +50,7 @@ public class UserService {
         return user.getId();
     }
     @Transactional
-    public void updateUserDetail(String userId, UserUpdateDto dto) {
+    public Long updateUserDetail(String userId, UserUpdateDto dto) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
         String encodedPw = null;
@@ -57,6 +58,8 @@ public class UserService {
             encodedPw = passwordEncoder.encode(dto.pw());
         }
         user.update(dto, encodedPw);
+        log.info("{} 유저 정보 변경 완료");
+        return user.getId();
     }
 
     public String login(String userId, String pw) {
@@ -67,5 +70,11 @@ public class UserService {
             throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
         }
         return jwtTokenProvider.createToken(user.getUserId());
+    }
+    public UserResponseDto getUser(String userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
+
+        return UserResponseDto.from(user);
     }
 }
