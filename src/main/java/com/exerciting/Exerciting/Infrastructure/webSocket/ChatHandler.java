@@ -32,7 +32,6 @@ public class ChatHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         String matchingId = getMatchingId(session);
-        matchingSessions.getOrDefault(matchingId, Set)
     }
     private String getMatchingId(WebSocketSession session) {
         String path = session.getUri().getPath();

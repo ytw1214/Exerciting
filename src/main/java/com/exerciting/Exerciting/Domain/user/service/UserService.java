@@ -64,7 +64,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
 
         if(!passwordEncoder.matches(pw,user.getPw())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
         }
         return jwtTokenProvider.createToken(user.getUserId());
     }

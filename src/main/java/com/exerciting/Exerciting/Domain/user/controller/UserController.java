@@ -1,5 +1,6 @@
 package com.exerciting.Exerciting.Domain.user.controller;
 
+import com.exerciting.Exerciting.Domain.user.dto.LoginRequestDto;
 import com.exerciting.Exerciting.Domain.user.dto.UserRequestDto;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
@@ -25,5 +26,8 @@ public class UserController {
         return ResponseEntity.ok(userId);
     }
     @PostMapping("/login")
-    public ResponseEntity<Long>
+    public ResponseEntity<String> login(@RequestBody LoginRequestDto dto) {
+        String token = userService.login(dto.userId(), dto.password());
+        return ResponseEntity.ok(token);
+    }
 }
