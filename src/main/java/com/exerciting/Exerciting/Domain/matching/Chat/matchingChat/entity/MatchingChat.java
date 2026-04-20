@@ -1,11 +1,10 @@
 package com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.entity.MatchingChatRoom;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import org.hibernate.annotations.Fetch;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +16,10 @@ public class MatchingChat {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="chatroom_id")
+    private MatchingChatRoom matchingChatRoom;
+    
     private LocalDateTime sendAt;
 
     @Builder
