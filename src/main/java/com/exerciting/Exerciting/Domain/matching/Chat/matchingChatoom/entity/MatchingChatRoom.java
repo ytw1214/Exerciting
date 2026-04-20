@@ -1,4 +1,45 @@
 package com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.entity;
 
+import com.exerciting.Exerciting.Domain.matching.Chat.MatchingChatStatus;
+import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.user.entity.User;
+import jakarta.persistence.*;
+import lombok.Builder;
+
+import java.time.LocalDateTime;
+
+@Entity
 public class MatchingChatRoom {
+    @Id
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="matching_id")
+    private Matching matching;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requester_user_id")
+    private User requester;
+
+    private MatchingChatStatus status;
+
+    private LocalDateTime createdAt;
+
+    @Builder
+    public MatchingChatRoom(Matching matching, User requester) {
+        this.matching = matching;
+        this.requester = requester;
+        this.status = MatchingChatStatus.WAITING;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public void accept() {
+        this.status = MatchingChatStatus.ACCEPTED;
+    }
+    public void rejected() {
+        this.status = MatchingChatStatus.REJECTED;
+    }
+    public boolean isWaiting() {
+        return this.status == MatchingChatStatus.WAITING;
+    }
 }
