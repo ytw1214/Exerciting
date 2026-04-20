@@ -27,9 +27,7 @@ public class MatchingController {
 
     @PostMapping("/api/v1/Matching")
     public ResponseEntity<Long> saveMatching(@RequestBody MatchingRequestDto dto, Long hostId) {
-        hostId = 1L;
         Long data = matchingService.createMatching(dto, hostId);
-        //return ResponseEntity.created(URI.create("/api/v1/Matching/" + data)).build();
         return ResponseEntity.ok(data);
     }
 

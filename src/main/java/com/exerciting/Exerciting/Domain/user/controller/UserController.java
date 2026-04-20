@@ -25,7 +25,7 @@ public class UserController {
         return ResponseEntity.ok(Id);
     }
     @DeleteMapping("/me")
-    public ResponseEntity<Long> deleteUser(@PathVariable String userId, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Long> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
         Long id = userService.deleteUser(userDetails.getUserId());
         return ResponseEntity.ok(id);
     }
