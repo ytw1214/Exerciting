@@ -9,6 +9,9 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,15 +41,24 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
                 .leftJoin(game.awayTeam, awayTeam)
                 .where(
                         eqSportType(gameCustomCond.sportType()),
-                        eqGameStatus(gameCustomCond.gameStatus())
+                        eqGameStatus(gameCustomCond.gameStatus()),
+                        eqDateTime(gameCustomCond.dateTime())
                 )
                 .orderBy(game.gameStatus.asc(), game.gameStartTime.asc())
                 .fetch();
 
     }
 
+    private BooleanExpression eqDateTime(LocalDate localDate) {
+        if(localDate == null) {
+            return null;
+        }
+        LocalDateTime startDate = localDate.atStartOfDay();
+        LocalDateTime endDate = localDate.atTime(LocalTime.MAX);
+
+        return game.gameStartTime.between(startDate, endDate);
+    }
     private BooleanExpression eqSportType(SportType sportType) {
-        // 값이 없으면 null을 반환 -> Querydsl where절은 null을 만나면 자동으로 무시함! (핵심)
         if (sportType == null) {
             return null;
         }
@@ -54,7 +66,6 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
     }
 
     private BooleanExpression eqGameStatus(GameStatus gameStatus) {
-        // 값이 없으면 null을 반환 -> Querydsl where절은 null을 만나면 자동으로 무시함! (핵심)
         if (gameStatus == null) {
             return null;
         }

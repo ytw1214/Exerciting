@@ -5,17 +5,15 @@ import com.exerciting.Exerciting.Domain.game.entity.Game;
 import com.exerciting.Exerciting.Domain.game.entity.GameStatus;
 import com.exerciting.Exerciting.Domain.game.repository.GameCustomCond;
 import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class GameService {
     private final GameRepository gameRepository;
-
-    public GameService(GameRepository gameRepository) {
-        this.gameRepository = gameRepository;
-    }
 
     public List<Game> getPastGames() {
         return gameRepository.findByGameStatus(GameStatus.FINISHED);
@@ -25,9 +23,6 @@ public class GameService {
 
         return gameRepository.findByGameStatus(GameStatus.PROCEEDING);
     }
-
-
-
 
     public List<Game> getFutureGames() {
         return gameRepository.findByGameStatus(GameStatus.BEFORE);

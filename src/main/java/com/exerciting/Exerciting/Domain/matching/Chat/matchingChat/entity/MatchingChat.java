@@ -19,7 +19,7 @@ public class MatchingChat {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="chatroom_id")
     private MatchingChatRoom matchingChatRoom;
-    
+
     private LocalDateTime sendAt;
 
     @Builder

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -34,12 +35,13 @@ public class GameController {
 
      */
 
-    @GetMapping("api/v1/games")
+    @GetMapping("/api/v1/games")
     public ResponseEntity<List<GameQueryResponseDto>> getGames(
             @RequestParam(required = false) GameStatus gameStatus,
-            @RequestParam(required = false) SportType sportType) {
+            @RequestParam(required = false) SportType sportType,
+            @RequestParam(required = false) LocalDate dateTime) {
 
-        GameCustomCond cond = GameCustomCond.of(gameStatus, sportType);
+        GameCustomCond cond = GameCustomCond.of(gameStatus, sportType,dateTime);
         List<GameQueryResponseDto> result = gameService.getGameDetail(cond);
 
         if (result.isEmpty()) {
