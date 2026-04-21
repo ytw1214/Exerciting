@@ -6,7 +6,10 @@ import com.exerciting.Exerciting.Domain.game.entity.GameStatus;
 import com.exerciting.Exerciting.Domain.game.repository.GameCustomCond;
 import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
 import lombok.RequiredArgsConstructor;
+<<<<<<< HEAD
 import net.bytebuddy.asm.Advice;
+=======
+>>>>>>> 873bd9aa5415303c4880acba78e3c772f19c65bd
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

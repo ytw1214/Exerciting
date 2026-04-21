@@ -40,16 +40,37 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
                 .leftJoin(game.homeTeam, homeTeam)
                 .leftJoin(game.awayTeam, awayTeam)
                 .where(
+<<<<<<< HEAD
                         eqSportType(gameCustomCond),
                         eqGameStatus(gameCustomCond),
                         eqDateTime(start,end)
+=======
+                        eqSportType(gameCustomCond.sportType()),
+                        eqGameStatus(gameCustomCond.gameStatus()),
+                        eqDateTime(gameCustomCond.dateTime())
+>>>>>>> 873bd9aa5415303c4880acba78e3c772f19c65bd
                 )
                 .orderBy(game.gameStatus.asc(), game.gameStartTime.asc())
                 .fetch();
 
     }
+<<<<<<< HEAD
     private BooleanExpression eqDateTime(LocalDateTime start, LocalDateTime end) {
         if(start == null) {
+=======
+
+    private BooleanExpression eqDateTime(LocalDate localDate) {
+        if(localDate == null) {
+            return null;
+        }
+        LocalDateTime startDate = localDate.atStartOfDay();
+        LocalDateTime endDate = localDate.atTime(LocalTime.MAX);
+
+        return game.gameStartTime.between(startDate, endDate);
+    }
+    private BooleanExpression eqSportType(SportType sportType) {
+        if (sportType == null) {
+>>>>>>> 873bd9aa5415303c4880acba78e3c772f19c65bd
             return null;
         }
         return game.gameStartTime.between(start,end);
@@ -61,8 +82,13 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
         return game.sportType.eq(cond.sportType());
     }
 
+<<<<<<< HEAD
     private BooleanExpression eqGameStatus(GameCustomCond cond) {
         if (cond.gameStatus() == null) {
+=======
+    private BooleanExpression eqGameStatus(GameStatus gameStatus) {
+        if (gameStatus == null) {
+>>>>>>> 873bd9aa5415303c4880acba78e3c772f19c65bd
             return null;
         }
         return game.gameStatus.eq(cond.gameStatus());

@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+<<<<<<< HEAD
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+=======
+>>>>>>> 873bd9aa5415303c4880acba78e3c772f19c65bd
 import java.util.List;
 
 @RestController
@@ -41,6 +44,7 @@ public class GameController {
         @RequestParam(required = false) LocalDate startTime,
         @RequestParam(required = false) SportType sportType) {
 
+<<<<<<< HEAD
         GameCustomCond cond = new GameCustomCond(null,sportType,startTime);
         List<GameQueryResponseDto> result = gameService.getMonthGames(cond);
         if(result.isEmpty()) {
@@ -56,6 +60,16 @@ public class GameController {
 
         GameCustomCond cond = GameCustomCond.of(gameStatus, sportType, startTime);
         List<GameQueryResponseDto> result = gameService.getDailyGames(cond);
+=======
+    @GetMapping("/api/v1/games")
+    public ResponseEntity<List<GameQueryResponseDto>> getGames(
+            @RequestParam(required = false) GameStatus gameStatus,
+            @RequestParam(required = false) SportType sportType,
+            @RequestParam(required = false) LocalDate dateTime) {
+
+        GameCustomCond cond = GameCustomCond.of(gameStatus, sportType,dateTime);
+        List<GameQueryResponseDto> result = gameService.getGameDetail(cond);
+>>>>>>> 873bd9aa5415303c4880acba78e3c772f19c65bd
 
         if (result.isEmpty()) {
             return ResponseEntity.noContent().build();
