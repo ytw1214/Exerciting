@@ -6,10 +6,7 @@ import com.exerciting.Exerciting.Domain.game.entity.GameStatus;
 import com.exerciting.Exerciting.Domain.game.repository.GameCustomCond;
 import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
 import lombok.RequiredArgsConstructor;
-<<<<<<< HEAD
 import net.bytebuddy.asm.Advice;
-=======
->>>>>>> 873bd9aa5415303c4880acba78e3c772f19c65bd
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -47,14 +44,18 @@ public class GameService {
         LocalDate target = cond.startTime() != null ? cond.startTime() : LocalDate.now();
         LocalDateTime start = target.withDayOfMonth(1).atStartOfDay();
         LocalDateTime end = target.withDayOfMonth(target.lengthOfMonth()).atTime(LocalTime.MAX);
-
+        System.out.println("-----------월-----------");
+        System.out.println(start);
+        System.out.println(end);
         return gameRepository.search(cond, start, end);
     }
     //일별 경기 조회
     public List<GameQueryResponseDto> getDailyGames(GameCustomCond cond) {
         LocalDateTime start = cond.startTime().atStartOfDay();
         LocalDateTime end = cond.startTime().atTime(LocalTime.MAX);
-
+        System.out.println("-----------일-----------");
+        System.out.println(start);
+        System.out.println(end);
         return gameRepository.search(cond,start,end);
     }
 }
