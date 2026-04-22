@@ -18,10 +18,6 @@ public class ChatHandler extends TextWebSocketHandler {
     private MatchingChatService matchingChatService;
     private final Map<String, Set<WebSocketSession>> matchingSessions = new ConcurrentHashMap<>();
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) {
-
-    }
-    @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         try {
             session.sendMessage(message);
@@ -32,9 +28,19 @@ public class ChatHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         String matchingId = getMatchingId(session);
+        matchingSessions.getOrDefault(matchingId, ConcurrentHashMap.newKeySet())
+                .remove(session);
     }
     private String getMatchingId(WebSocketSession session) {
         String path = session.getUri().getPath();
         return path.substring(path.lastIndexOf("/") + 1);
+    }
+    @Override
+    public void afterConnectionEstablished(WebSocketSession session) {
+        String matchingId = getMatchingId(session);
+
+        matchingSessions
+                .computeIfAbsent(matchingId, k -> ConcurrentHashMap.newKeySet())
+                .add(session);
     }
 }
