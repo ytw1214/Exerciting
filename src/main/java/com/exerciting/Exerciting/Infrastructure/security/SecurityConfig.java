@@ -30,7 +30,13 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/login","/user/signup").permitAll()
+<<<<<<< HEAD
+
+                        .requestMatchers("/**").permitAll()
+                        //.requestMatchers("/user/login","/user/signup","/api/v1/games").permitAll()
+=======
+                        .requestMatchers("/user/login","/user/signup","/api/v1/games").permitAll()
+>>>>>>> 873bd9aa5415303c4880acba78e3c772f19c65bd
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
