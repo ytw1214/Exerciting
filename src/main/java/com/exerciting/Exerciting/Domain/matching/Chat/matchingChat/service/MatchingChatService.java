@@ -17,17 +17,19 @@ public class MatchingChatService {
     private final MatchingChatRepository matchingChatRepository;
     private final MatchingChatRoomRepository matchingChatRoomRepository;
 
-    public MatchingChat saveMessage(MatchingChatRoom chatRoom, User sender, String message) {
+    public MatchingChat saveMessage(MatchingChatRoom chatRoom, User senderId, String message) {
         MatchingChat chat = MatchingChat.builder()
                 .matchingChatRoom(chatRoom)
-                .sender(sender)
+                .sender(senderId)
                 .message(message)
                 .build();
         return matchingChatRepository.save(chat);
     }
+
     public List<MatchingChat> getMessages(MatchingChatRoom chatRoom) {
         return matchingChatRepository.findByMatchingChatRoomOrderBySendAtAsc(chatRoom);
     }
+
     public MatchingChatRoom createChatRoom(Matching matching, User requester) {
         return matchingChatRoomRepository.save(
                 MatchingChatRoom.builder()
