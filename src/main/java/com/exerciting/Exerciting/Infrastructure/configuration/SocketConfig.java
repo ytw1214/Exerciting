@@ -9,12 +9,8 @@ import org.springframework.web.socket.config.annotation.*;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
 @Configuration
-@EnableWebSocket
+@EnableWebSocketMessageBroker
 public class SocketConfig implements WebSocketMessageBrokerConfigurer {
-    private final ChatHandler chatHandler;
-    public SocketConfig(ChatHandler chatHandler) {
-        this.chatHandler = chatHandler;
-    }
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/websocket")
