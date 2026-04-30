@@ -1,5 +1,6 @@
 package com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.service;
 
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.dto.ChatMessageResponseDto;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.entity.MatchingChat;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.repository.MatchingChatRepository;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.entity.MatchingChatRoom;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +28,17 @@ public class MatchingChatService {
         return matchingChatRepository.save(chat);
     }
 
-    public List<MatchingChat> getMessages(MatchingChatRoom chatRoom) {
-        return matchingChatRepository.findByMatchingChatRoomOrderBySendAtAsc(chatRoom);
+    public List<ChatMessageResponseDto> getMessages(MatchingChatRoom chatRoom) {
+        return matchingChatRepository.findByMatchingChatRoomOrderBySendAtAsc(chatRoom)
+                .stream()
+                .map(chat -> new ChatMessageResponseDto(
+                        chat.getSender().getId(),
+                        chat.getMessage(),
+                        chat.getSendAt(),
+                        chat.getSender().getName(),
+                        chat.isRead()
+                ))
+                .collect(Collectors.toList());
     }
 
     public MatchingChatRoom createChatRoom(Matching matching, User requester) {
@@ -37,5 +48,10 @@ public class MatchingChatService {
                         .requester(requester)
                         .build()
         );
+    }
+    public void readMessages(MatchingChatRoom chatRoom, User user) {
+        matchingChatRepository
+                .findByMatchingChatRoomAndIsReadFalseAndSenderNot(chatRoom, user)
+                .forEach(chat -> chat.updateIsRead(true));
     }
 }
