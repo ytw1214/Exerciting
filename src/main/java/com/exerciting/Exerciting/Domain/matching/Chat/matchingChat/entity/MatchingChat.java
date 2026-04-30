@@ -37,5 +37,7 @@ public class MatchingChat {
         this.sendAt = LocalDateTime.now();
         this.isRead = false;
     }
-
+    public void updateIsRead(boolean isRead) {
+        this.isRead = isRead;
+    }
 }
