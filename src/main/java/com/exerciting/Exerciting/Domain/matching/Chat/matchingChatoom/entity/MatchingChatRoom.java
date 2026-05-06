@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Entity
 public class MatchingChatRoom {
     @Id
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -21,6 +22,7 @@ public class MatchingChatRoom {
     @JoinColumn(name = "requester_user_id")
     private User requester;
 
+    @Enumerated(EnumType.STRING)
     private MatchingChatStatus status;
 
     private LocalDateTime createdAt;
