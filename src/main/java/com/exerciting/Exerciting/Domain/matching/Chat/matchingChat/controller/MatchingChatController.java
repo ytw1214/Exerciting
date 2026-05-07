@@ -59,4 +59,7 @@ public class MatchingChatController {
         }
         return ResponseEntity.ok(messages);
     }
+    public ChatMessageResponseDto sendMessage(ChatMessageRequestDto request, @DestinationVariable Long chatRoomId) {
+        return new ChatMessageResponseDto(request.senderId(),request.message(),LocalDateTime.now())
+    }
 }
