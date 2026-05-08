@@ -77,4 +77,8 @@ public class UserService {
 
         return UserResponseDto.from(user);
     }
+    public User getUserByUserId(String userId) {
+        return userRepository.findByUserId(userId)
+                .orElseThrow(()->new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
+    }
 }
