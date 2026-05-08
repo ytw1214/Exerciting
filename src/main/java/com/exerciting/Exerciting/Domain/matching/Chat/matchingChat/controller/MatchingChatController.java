@@ -3,12 +3,13 @@ package com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.controller;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.dto.ChatMessageRequestDto;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.dto.ChatMessageResponseDto;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.entity.MatchingChat;
-import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.repository.MatchingChatRepository;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.service.MatchingChatService;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.entity.MatchingChatRoom;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.repository.MatchingChatRoomRepository;
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.service.MatchingChatRoomService;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
+import com.exerciting.Exerciting.Domain.user.service.UserService;
 import com.exerciting.Exerciting.Exception.MatchingChatRoomNotFoundException;
 import com.exerciting.Exerciting.Exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -28,22 +29,25 @@ import java.util.stream.Collectors;
 public class MatchingChatController {
     private final MatchingChatService matchingChatService;
     private final MatchingChatRoomRepository matchingChatRoomRepository;
-    private final UserRepository userRepository;
-    private final MatchingChatRepository matchingChatRepository;
-
+    private final UserService userService;
+    private final MatchingChatRoomService matchingChatRoomService;
     @MessageMapping("/chat/{chatRoomId}")
-    @SendTo("/matching/chat/{chatRoomId}")
-    public ChatMessageRequestDto handleMessage(
+    @SendTo("/sub/matching/chat/{chatRoomId}")
+    public ChatMessageResponseDto sendMessage(
             @DestinationVariable Long chatRoomId,
             ChatMessageRequestDto dto,
             Principal principal) {
-        MatchingChatRoom chatroom = matchingChatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new MatchingChatRoomNotFoundException("해당 채팅방을 찾을 수 없습니다."));
-        User user = userRepository.findByUserId(principal.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+        MatchingChatRoom chatRoom = matchingChatRoomService.findByRoomId(chatRoomId);
+        User user = userService.getUserByUserId(principal.getName());
 
-        MatchingChat chat = matchingChatService.saveMessage(chatroom, user, dto.message());
-        return new ChatMessageRequestDto(chat.getMessage());
+        MatchingChat chat = matchingChatService.saveMessage(chatRoom, user, dto.message());
+        return new ChatMessageResponseDto(
+                chat.getSender().getId(),
+                chat.getMessage(),
+                chat.getSendAt(),
+                chat.getSender().getName(),
+                chat.isRead()
+        );
     }
 
     public ResponseEntity<List<ChatMessageResponseDto>> getMessages(
@@ -51,15 +55,11 @@ public class MatchingChatController {
             Principal principal) {
         MatchingChatRoom chatRoom = matchingChatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new MatchingChatRoomNotFoundException("해당 채팅방을 찾을 수 없습니다."));
-        User user = userRepository.findByUserId(principal.getName())
-                .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
+        User user = userService.getUserByUserId(principal.getName());
         List<ChatMessageResponseDto> messages = matchingChatService.getMessages(chatRoom);
         if (messages.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(messages);
-    }
-    public ChatMessageResponseDto sendMessage(ChatMessageRequestDto request, @DestinationVariable Long chatRoomId) {
-        return new ChatMessageResponseDto(request.senderId(),request.message(),LocalDateTime.now())
     }
 }
