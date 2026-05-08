@@ -1,4 +1,4 @@
-package com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.entity;
+package com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity;
 
 import com.exerciting.Exerciting.Domain.matching.Chat.MatchingChatStatus;
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;

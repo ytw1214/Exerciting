@@ -1,7 +1,7 @@
-package com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.service;
+package com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.service;
 
-import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.entity.MatchingChatRoom;
-import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.repository.MatchingChatRoomRepository;
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.MatchingChatRoom;
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.repository.MatchingChatRoomRepository;
 import com.exerciting.Exerciting.Exception.MatchingChatRoomNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

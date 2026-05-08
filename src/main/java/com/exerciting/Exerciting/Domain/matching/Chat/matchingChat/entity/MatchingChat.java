@@ -1,11 +1,10 @@
 package com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.entity;
 
-import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.entity.MatchingChatRoom;
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.MatchingChatRoom;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
-import org.hibernate.annotations.Fetch;
 
 import java.time.LocalDateTime;
 

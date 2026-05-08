@@ -4,25 +4,21 @@ import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.dto.ChatMessa
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.dto.ChatMessageResponseDto;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.entity.MatchingChat;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.service.MatchingChatService;
-import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.entity.MatchingChatRoom;
-import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.repository.MatchingChatRoomRepository;
-import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatoom.service.MatchingChatRoomService;
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.MatchingChatRoom;
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.repository.MatchingChatRoomRepository;
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.service.MatchingChatRoomService;
 import com.exerciting.Exerciting.Domain.user.entity.User;
-import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
 import com.exerciting.Exerciting.Exception.MatchingChatRoomNotFoundException;
-import com.exerciting.Exerciting.Exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
