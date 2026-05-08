@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface MatchingChatRoomRepository extends JpaRepository<MatchingChatRoom, Long> {
     Optional<MatchingChatRoom> findByMatching(Matching matching);
+    Optional<MatchingChatRoom> findByMatchingChatRoom(Long chatRoomId);
 }
