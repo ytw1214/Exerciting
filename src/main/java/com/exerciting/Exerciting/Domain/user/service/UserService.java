@@ -24,7 +24,7 @@ public class UserService {
     //데이터 조회
     public User getUserById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(()->new UserNotFoundException("해당하는 아이디를 찾을 수 없습니다."));
+                .orElseThrow(()->new UserNotFoundException());
     }
     @Transactional
     public Long signUp(UserRequestDto dto) {
@@ -43,7 +43,7 @@ public class UserService {
     @Transactional
     public Long deleteUser(String userId) {
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserNotFoundException());
 
         log.info("{} 회원 탈퇴 완료",user.getUserId());
         userRepository.delete(user);
@@ -52,7 +52,7 @@ public class UserService {
     @Transactional
     public Long updateUserDetail(String userId, UserUpdateDto dto) {
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserNotFoundException());
         String encodedPw = null;
         if (dto.pw() != null && !dto.pw().isEmpty()) {
             encodedPw = passwordEncoder.encode(dto.pw());
@@ -64,7 +64,7 @@ public class UserService {
 
     public String login(String userId, String pw) {
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserNotFoundException());
 
         if(!passwordEncoder.matches(pw,user.getPw())) {
             throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
@@ -73,12 +73,12 @@ public class UserService {
     }
     public UserResponseDto getUser(String userId) {
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UserNotFoundException());
 
         return UserResponseDto.from(user);
     }
     public User getUserByUserId(String userId) {
         return userRepository.findByUserId(userId)
-                .orElseThrow(()->new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
+                .orElseThrow(()->new UserNotFoundException());
     }
 }

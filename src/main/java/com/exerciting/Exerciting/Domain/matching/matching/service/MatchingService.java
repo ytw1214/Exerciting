@@ -1,5 +1,7 @@
 package com.exerciting.Exerciting.Domain.matching.matching.service;
 
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.service.MatchingChatService;
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.service.MatchingChatRoomService;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingQueryResponseDto;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingCustomCond;
 import com.exerciting.Exerciting.Domain.user.entity.User;
@@ -10,6 +12,7 @@ import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRepository;
 import com.exerciting.Exerciting.Exception.*;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,33 +23,34 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class MatchingService {
     private final MatchingRepository matchingRepository;
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
-
-    public MatchingService(MatchingRepository matchingRepository, GameRepository gameRepository, UserRepository userRepository) {
-        this.matchingRepository = matchingRepository;
-        this.gameRepository = gameRepository;
-        this.userRepository = userRepository;
-    }
+    private final MatchingChatService matchingChatService;
     @Transactional
     public Long createMatching(MatchingRequestDto dto, Long hostId) {
         if (dto.getMeetTime().isBefore(LocalDateTime.now())) {
-            throw new InvalidTimeException("시간 오류 ~");
+            throw new InvalidTimeException();
         }
         if (dto.getMaxPerson() < 2) {
-            throw new InvalidInputException("인원 부족~");
+            throw new InvalidInputException();
         }
         if (dto.getTitle() == null || dto.getTitle().isBlank()) {
-            throw new InvalidInputException("매칭 이름은 필수 입력이며, 공백으로만 이루어질 수 없습니다.");
+            throw new InvalidInputException();
         }
         User host = userRepository.findById(hostId)
-                .orElseThrow(() -> new InvalidInputException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new InvalidInputException());
 
         Matching matching = dto.toEntity(host);
         Matching savedMatching = matchingRepository.save(matching);
+        matchingChatService.createChatRoom(savedMatching, host);
         return savedMatching.getId();
+    }
+    public Matching findById(Long matchingId) {
+        return matchingRepository.findById(matchingId)
+                .orElseThrow(() -> new MatchingNotFoundException());
     }
     /*
     public List<MatchingRequestDto> getMatchingByTeam(String teamName) {
@@ -87,13 +91,13 @@ public class MatchingService {
     private void verify(Matching matching, Long currentUserId) {
         if(!matching.getUser().getId().equals(currentUserId)) {
             log.info("매칭 접근 오류");
-            throw new UnauthorizedUserException("잘못된 접근입니다.");
+            throw new UnauthorizedUserException();
         }
     }
     @Transactional(readOnly = true)
     public List<MatchingQueryResponseDto> searchDetailMatching(MatchingCustomCond cond, Long currentUserId) {
         if (!userRepository.existsById(currentUserId)) {
-            throw new UnauthorizedUserException("인증된 사용자만 조회가 가능합니다.");
+            throw new UnauthorizedUserException();
         }
         return matchingRepository.search(cond);
 
