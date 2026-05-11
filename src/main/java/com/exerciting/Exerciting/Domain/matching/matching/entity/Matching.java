@@ -1,6 +1,7 @@
 package com.exerciting.Exerciting.Domain.matching.matching.entity;
 
 import com.exerciting.Exerciting.Domain.game.entity.Game;
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.MatchingChatRoom;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Exception.InvalidInputException;
 import jakarta.persistence.*;
@@ -19,7 +20,6 @@ public class Matching {
     private String title;
     private String description;
     private int maxPerson;
-    private int currentPerson; // 현재 인원 필드 추가
     @ManyToOne(
             fetch = FetchType.LAZY
             //CascadeType = CascadeType.
@@ -32,26 +32,26 @@ public class Matching {
     private LocalDateTime meetTime;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    /*
+
+
     @Enumerated(EnumType.STRING)
     private MatchingStatus status;
-     */
     @Builder
-    public Matching(String title, String description, int maxPerson, int currentPerson, Game game, User user, LocalDateTime meetTime, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Matching(String title, String description, int maxPerson, Game game, User user, LocalDateTime meetTime, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.title = title;
         this.description = description;
         this.maxPerson = maxPerson;
-        this.currentPerson = currentPerson;
         this.game = game;
         this.user = user;
         this.meetTime = meetTime;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.status = MatchingStatus.RECRUTING;
     }
 
     public void update(String title, String description, int maxPerson, LocalDateTime meetTime) {
         if (maxPerson < 2) {
-            throw new InvalidInputException("인원은 최소 2명 이상이어야 합니다.");
+            throw new InvalidInputException();
         }
 
         this.title = title;
