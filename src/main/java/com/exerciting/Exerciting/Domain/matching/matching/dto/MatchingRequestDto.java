@@ -35,7 +35,6 @@ public class MatchingRequestDto {
                 .description(this.getDescription())
                 .maxPerson(this.getMaxPerson())
                 .user(user)
-                .currentPerson(1)
                 .build();
     }
     /*

@@ -13,17 +13,15 @@ public class MatchingResponseDto {
     private String title;
     private String description;
     private int maxPerson;
-    private int currentPerson;
     private LocalDateTime meetTime;
     private String homeTeam;
     private String awayTeam;
 
-    public MatchingResponseDto(Long id, String title, String description, int maxPerson, int currentPerson, LocalDateTime meetTime, String homeTeam, String awayTeam) {
+    public MatchingResponseDto(Long id, String title, String description, int maxPerson, LocalDateTime meetTime, String homeTeam, String awayTeam) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.maxPerson = maxPerson;
-        this.currentPerson = currentPerson;
         this.meetTime = meetTime;
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
@@ -35,7 +33,6 @@ public class MatchingResponseDto {
                 .title(matching.getTitle())
                 .description(matching.getDescription())
                 .maxPerson(matching.getMaxPerson())
-                .currentPerson(matching.getCurrentPerson())
                 .meetTime(matching.getMeetTime())
                 .homeTeam(matching.getGame().getHomeTeam().getShortName())
                 .awayTeam(matching.getGame().getAwayTeam().getShortName())
