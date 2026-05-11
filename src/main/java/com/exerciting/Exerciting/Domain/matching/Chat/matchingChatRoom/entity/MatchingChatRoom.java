@@ -14,14 +14,12 @@ public class MatchingChatRoom {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="matching_id")
     private Matching matching;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requester_user_id")
     private User requester;
-
     @Enumerated(EnumType.STRING)
     private MatchingChatStatus status;
 
