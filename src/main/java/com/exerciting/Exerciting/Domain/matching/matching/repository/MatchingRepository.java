@@ -13,8 +13,6 @@ import java.util.Optional;
 @Repository
 public interface MatchingRepository extends JpaRepository<Matching, Long>, MatchingRepositoryCustom {
     List<Matching> findByMeetTimeBefore(LocalDateTime meetTime);
-    @Query("Select m from Matching m where m.maxPerson > m.currentPerson")
-    List<Matching> findAvailableMatchingbyPerson();
     Optional<Matching> findById(Long id);
     //List<MatchingQueryResponseDto> search(MatchingCustomCond cond);
 
