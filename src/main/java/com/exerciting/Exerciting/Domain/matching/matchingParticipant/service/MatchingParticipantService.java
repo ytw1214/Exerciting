@@ -27,23 +27,23 @@ public class MatchingParticipantService {
     private final MatchingChatRoomRepository matchingChatRoomRepository;
     public List<MatchingParticipant> getUserByMatching(Long matchingId) {
         Matching matching = matchingRepository.findById(matchingId)
-                .orElseThrow(() -> new InvalidInputException("잘못된 매칭입니다."));
+                .orElseThrow(() -> new InvalidInputException());
         return matchingParticipantRepository.findByMatchingId(matching.getId());
     }
 
     @Transactional
     public void joinMatching(Long matchingId, Long userId) {
         Matching matching = matchingRepository.findById(matchingId)
-                .orElseThrow(() -> new MatchingNotFoundException("해당 매칭이 존재하지 않습니다."));
+                .orElseThrow(() -> new MatchingNotFoundException());
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("해당 유저가 존재하지 않습니다."));
+                .orElseThrow(() -> new UserNotFoundException());
 
         if(matchingParticipantRepository.existsByMatchingAndUser(matching,user)) {
-            throw new InvalidInputException("이미 참가한 매칭입니다.");
+            throw new InvalidInputException();
         }
         long currentParticipant = matchingParticipantRepository.countByMatching(matching);
         if(currentParticipant >= matching.getMaxPerson()) {
-            throw new InvalidInputException("정원이 초과되었습니다.");
+            throw new InvalidInputException();
         }
         matchingParticipantRepository.save(new MatchingParticipant(user,matching,LocalDateTime.now()));
 
