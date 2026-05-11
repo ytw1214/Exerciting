@@ -12,7 +12,8 @@ public class MatchingChatRoomService {
     private final MatchingChatRoomRepository matchingChatRoomRepository;
 
     public MatchingChatRoom findByRoomId(Long chatRoomId) {
-        return matchingChatRoomRepository.findByMatchingChatRoom(chatRoomId)
-                .orElseThrow(()-> new MatchingChatRoomNotFoundException("해당 채팅방을 찾을 수 없습니다."));
+        return matchingChatRoomRepository.findById(chatRoomId)
+                .orElseThrow(()-> new MatchingChatRoomNotFoundException());
     }
+
 }
