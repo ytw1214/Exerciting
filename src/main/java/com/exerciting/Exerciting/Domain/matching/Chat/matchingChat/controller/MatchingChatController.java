@@ -24,7 +24,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MatchingChatController {
     private final MatchingChatService matchingChatService;
-    private final MatchingChatRoomRepository matchingChatRoomRepository;
     private final UserService userService;
     private final MatchingChatRoomService matchingChatRoomService;
     @MessageMapping("/chat/{chatRoomId}")
@@ -49,8 +48,7 @@ public class MatchingChatController {
     public ResponseEntity<List<ChatMessageResponseDto>> getMessages(
             Long chatRoomId,
             Principal principal) {
-        MatchingChatRoom chatRoom = matchingChatRoomRepository.findById(chatRoomId)
-                .orElseThrow(() -> new MatchingChatRoomNotFoundException("해당 채팅방을 찾을 수 없습니다."));
+        MatchingChatRoom chatRoom = matchingChatRoomService.findByRoomId(chatRoomId);
         User user = userService.getUserByUserId(principal.getName());
         List<ChatMessageResponseDto> messages = matchingChatService.getMessages(chatRoom);
         if (messages.isEmpty()) {
