@@ -25,7 +25,7 @@ public class TeamRankController {
     public ResponseEntity<List<TeamRank>> getTeamRank() {
         List<TeamRank> rankList = teamRankService.getAllTeamByRank();
         if(rankList.isEmpty()) {
-            throw new DisMatchedSizeException("데이터 내용이 잘못되었습니다.");
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(rankList);
     }
