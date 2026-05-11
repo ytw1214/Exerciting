@@ -47,7 +47,6 @@ public class MatchingRepositoryCustomImpl implements MatchingRepositoryCustom {
                 .select(Projections.constructor(MatchingQueryResponseDto.class,
                         matching.id,
                         matching.title,
-                        matching.currentPerson,
                         matching.maxPerson,
                         matching.meetTime,
                         game.homeTeam.shortName,
