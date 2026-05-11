@@ -38,23 +38,6 @@ public class MatchingController {
 
     @GetMapping("/api/v1/Matching")
     public ResponseEntity<List<MatchingResponseDto>> getMatching() {
-        /*
-        List<Matching> list = matchingService.getAllMatching();
-
-        List<MatchingResponseDto> getMatchingList = new ArrayList<MatchingResponseDto>();
-
-        for(Matching element : list) {
-            getMatchingList.add(MatchingResponseDto.fromEntity(element));
-        }
-
-        if(getMatchingList.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(getMatchingList);
-
-
-         */
-
         List<Matching> list = matchingService.getAllMatching();
         List<MatchingResponseDto> result = list.stream()
                 .map(MatchingResponseDto::fromEntity)
