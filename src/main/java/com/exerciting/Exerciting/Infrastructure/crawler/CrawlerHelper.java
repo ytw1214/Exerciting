@@ -1,6 +1,7 @@
 package com.exerciting.Exerciting.Infrastructure.crawler;
 
 import com.exerciting.Exerciting.Exception.CrawlingException;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.openqa.selenium.WebDriver;
@@ -13,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class CrawlerHelper {
 
@@ -28,7 +30,8 @@ public class CrawlerHelper {
                     .timeout(10000)
                     .get();
         } catch (Exception e) {
-            throw new CrawlingException("연걸 실패" + url, e);
+            log.error("크롤링 오류" + e.getMessage());
+            throw new CrawlingException();
         }
     }
     public WebDriver createWebDriver() {

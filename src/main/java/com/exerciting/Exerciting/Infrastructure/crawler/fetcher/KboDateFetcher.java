@@ -119,7 +119,8 @@ public class KboDateFetcher {
     }
         log.info("KBO 경기 일정 크롤링 완료 - {}건", result.size());
     } catch (Exception e) {
-        throw new CrawlingException("KBO 일정 크롤링 실패", e);
+        log.error("크롤링 오류" + e.getMessage());
+        throw new CrawlingException();
     } finally {
         if (driver != null) {
             driver.quit(); // 브라우저 반드시 닫기

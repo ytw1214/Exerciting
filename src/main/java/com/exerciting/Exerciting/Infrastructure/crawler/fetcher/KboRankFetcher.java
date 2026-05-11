@@ -66,7 +66,8 @@ public class KboRankFetcher implements Fetcher {
                 }
             }
         }catch(Exception e) {
-            throw new CrawlingException("크롤링 오류",e);
+            log.error("크롤링 오류" + e.getMessage());
+            throw new CrawlingException();
         }
         log.info("크롤링 완료");
         for(TeamRankCrawlDto s : rankings) {
