@@ -27,6 +27,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOriginPatterns("**")
                 .addInterceptors(new HttpSessionHandshakeInterceptor())
                 .withSockJS();
+        //Postman용 소켓 연결 확인
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("**");
     }
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -45,6 +48,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     if(token == null || !jwtTokenProvider.validateToken(token.replace("Bearer ", ""))) {
                         throw new MessagingException("인증에 실패했습니다.");
                     }
+                    String userId = jwtTokenProvider.getUserId(token.replace("Bearer ", ""));
+                    accessor.setUser(() -> userId);
                 }
                 return message;
             }
