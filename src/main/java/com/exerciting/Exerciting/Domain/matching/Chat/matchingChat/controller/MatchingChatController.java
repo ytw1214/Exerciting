@@ -50,7 +50,7 @@ public class MatchingChatController {
             Principal principal) {
         MatchingChatRoom chatRoom = matchingChatRoomService.findByRoomId(chatRoomId);
         User user = userService.getUserByUserId(principal.getName());
-        List<ChatMessageResponseDto> messages = matchingChatService.getMessages(chatRoom);
+        List<ChatMessageResponseDto> messages = matchingChatService.getMessages(chatRoom,user);
         if (messages.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
