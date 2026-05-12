@@ -9,6 +9,7 @@ import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +29,8 @@ public class MatchingChatService {
         return matchingChatRepository.save(chat);
     }
 
-    public List<ChatMessageResponseDto> getMessages(MatchingChatRoom chatRoom) {
+    public List<ChatMessageResponseDto> getMessages(MatchingChatRoom chatRoom,User user) {
+        readMessages(chatRoom, user);
         return matchingChatRepository.findByMatchingChatRoomOrderBySendAtAsc(chatRoom)
                 .stream()
                 .map(chat -> new ChatMessageResponseDto(
@@ -49,6 +51,7 @@ public class MatchingChatService {
                         .build()
         );
     }
+    @Transactional
     public void readMessages(MatchingChatRoom chatRoom, User user) {
         matchingChatRepository
                 .findByMatchingChatRoomAndIsReadFalseAndSenderNot(chatRoom, user)
