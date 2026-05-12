@@ -7,6 +7,7 @@ import com.exerciting.Exerciting.Domain.user.dto.UserUpdateDto;
 import com.exerciting.Exerciting.Domain.user.entity.UserDetails;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,7 +21,7 @@ public class UserController {
     private final UserRepository userRepository;
 
     @PostMapping("/signup")
-    public ResponseEntity<Long> signup(@RequestBody UserRequestDto dto) {
+    public ResponseEntity<Long> signup(@RequestBody @Valid UserRequestDto dto) {
         Long Id = userService.signUp(dto);
         return ResponseEntity.ok(Id);
     }
