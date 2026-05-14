@@ -12,5 +12,5 @@ import java.util.List;
 public interface MatchingChatRepository extends JpaRepository<MatchingChat, Long> {
     @Query("select c from MatchingChat c join fetch c.sender where c.matchingChatRoom=:chatroom order by c.sendAt asc")
     List<MatchingChat> findByMatchingChatRoomOrderBySendAtAsc(MatchingChatRoom matchingChatRoom);
-    long countByMatchingChatRoomAndSendAfter(MatchingChatRoom matchingChatRoom, LocalDateTime time);
+    long countByMatchingChatRoomAndSendAtAfter(MatchingChatRoom matchingChatRoom, LocalDateTime time);
 }
