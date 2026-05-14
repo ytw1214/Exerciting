@@ -26,7 +26,6 @@ public class MatchingChat {
     private String message;
 
     private LocalDateTime sendAt;
-    private boolean isRead;
 
     @Builder
     public MatchingChat(MatchingChatRoom matchingChatRoom, User sender, String message) {
@@ -34,9 +33,5 @@ public class MatchingChat {
         this.sender = sender;
         this.message = message;
         this.sendAt = LocalDateTime.now();
-        this.isRead = false;
-    }
-    public void updateIsRead(boolean isRead) {
-        this.isRead = isRead;
     }
 }
