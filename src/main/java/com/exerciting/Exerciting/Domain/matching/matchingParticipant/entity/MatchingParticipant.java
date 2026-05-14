@@ -5,11 +5,13 @@ import com.exerciting.Exerciting.Domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class MatchingParticipant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
