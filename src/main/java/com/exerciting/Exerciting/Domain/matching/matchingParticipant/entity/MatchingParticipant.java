@@ -22,11 +22,16 @@ public class MatchingParticipant {
     private Matching matching;
 
     private LocalDateTime createdAt;
+    private LocalDateTime lastReadAt;
 
     @Builder
     public MatchingParticipant(User user, Matching matching, LocalDateTime createdAt) {
         this.user = user;
         this.matching = matching;
         this.createdAt = createdAt;
+    }
+
+    public void updateLastReadAt(LocalDateTime time) {
+        this.lastReadAt = time;
     }
 }
