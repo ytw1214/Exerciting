@@ -56,10 +56,7 @@ public class MatchingChatService {
     }
     @Transactional
     public void readMessages(MatchingChatRoom chatRoom, User user) {
-        MatchingParticipant participant = matchingParticipantS
-        matchingChatRepository
-                .findByMatchingChatRoomAndIsReadFalseAndSenderNot(chatRoom, user)
-                .forEach(chat -> chat.updateIsRead(true));
+        matchingParticipantService.updateLastReadAt(chatRoom.getMatching(), user);
     }
 
 }
