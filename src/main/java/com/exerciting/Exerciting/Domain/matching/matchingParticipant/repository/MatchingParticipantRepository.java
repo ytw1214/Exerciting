@@ -7,10 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MatchingParticipantRepository extends JpaRepository<MatchingParticipant,Long> {
     List<MatchingParticipant> findByMatchingId(Long matchingId);
     boolean existsByMatchingAndUser(Matching matching, User user);
     long countByMatching(Matching matching);
+    Optional<MatchingParticipant> findByMatchingAndUser(Matching matching, User user);
 }
