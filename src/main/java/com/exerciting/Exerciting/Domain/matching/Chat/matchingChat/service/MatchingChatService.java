@@ -6,11 +6,14 @@ import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.repository.Ma
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.MatchingChatRoom;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.repository.MatchingChatRoomRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.MatchingParticipant;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.service.MatchingParticipantService;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +22,7 @@ import java.util.stream.Collectors;
 public class MatchingChatService {
     private final MatchingChatRepository matchingChatRepository;
     private final MatchingChatRoomRepository matchingChatRoomRepository;
+    private final MatchingParticipantService matchingParticipantService;
 
     public MatchingChat saveMessage(MatchingChatRoom chatRoom, User senderId, String message) {
         MatchingChat chat = MatchingChat.builder()
@@ -37,8 +41,7 @@ public class MatchingChatService {
                         chat.getSender().getId(),
                         chat.getMessage(),
                         chat.getSendAt(),
-                        chat.getSender().getName(),
-                        chat.isRead()
+                        chat.getSender().getName()
                 ))
                 .collect(Collectors.toList());
     }
@@ -53,8 +56,10 @@ public class MatchingChatService {
     }
     @Transactional
     public void readMessages(MatchingChatRoom chatRoom, User user) {
+        MatchingParticipant participant = matchingParticipantS
         matchingChatRepository
                 .findByMatchingChatRoomAndIsReadFalseAndSenderNot(chatRoom, user)
                 .forEach(chat -> chat.updateIsRead(true));
     }
+
 }
