@@ -372,27 +372,29 @@
     }
 
     function subscribe() {
-      const chatRoomId = document.getElementById('chatRoomId').value;
-      if (!chatRoomId) { log('채팅방 ID를 입력하세요', 'error'); return; }
+    const chatRoomId = document.getElementById('chatRoomId').value;
+    if (!chatRoomId) { log('채팅방 ID를 입력하세요', 'error'); return; }
 
-      if (subscription) subscription.unsubscribe();
+    if (subscription) subscription.unsubscribe();
 
-      subscription = stompClient.subscribe(`/sub/matching/chat/${chatRoomId}`, function(message) {
+    subscription = stompClient.subscribe(`/sub/matching/chat/${chatRoomId}`, function(message) {
         const body = JSON.parse(message.body);
-        log(`메시지 수신: ${JSON.stringify(body)}`, 'success');
         addMessage(
-          body.message,
-          'other',
-          `${body.senderName || body.senderId} · ${body.sendAt || ''}`
+            body.message,
+            'other',
+            `${body.senderName || body.senderId} · ${body.sendAt || ''}`
         );
-      });
+    });
 
-      log(`/sub/matching/chat/${chatRoomId} 구독 완료`, 'success');
-      addMessage(`채팅방 #${chatRoomId} 구독 완료`, 'system');
-      document.getElementById('sendBtn').disabled = false;
-      document.getElementById('messageInput').disabled = false;
-      document.getElementById('messageInput').focus();
-    }
+    log(`/sub/matching/chat/${chatRoomId} 구독 완료`, 'success');
+    addMessage(`채팅방 #${chatRoomId} 구독 완료`, 'system');
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('messageInput').disabled = false;
+    document.getElementById('loadBtn').disabled = false;
+    document.getElementById('messageInput').focus();
+
+    loadMessages();
+}
 
     function sendMessage() {
       const input = document.getElementById('messageInput');
@@ -410,6 +412,43 @@
       input.value = '';
       log(`메시지 전송: ${msg}`, 'info');
     }
+    async function loadMessages() {
+    const chatRoomId = document.getElementById('chatRoomId').value;
+    const token = document.getElementById('jwtToken').value.trim();
+
+    try {
+        const res = await fetch(`http://localhost:8080/api/v1/chat/${chatRoomId}/messages`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.status === 204) {
+            addMessage('메시지가 없습니다.', 'system');
+            return;
+        }
+        if (res.status === 403) {
+            addMessage('접근 권한이 없는 채팅방입니다.', 'system');
+            return;
+        }
+        if (res.status === 404) {
+            addMessage('존재하지 않는 채팅방입니다.', 'system');
+            return;
+        }
+
+        const messages = await res.json();
+        addMessage(`── 이전 메시지 (${messages.length}개) ──`, 'system');
+        messages.forEach(m => {
+            addMessage(
+                `${m.message} ${m.read ? '✓✓' : '✓'}`,
+                'other',
+                `${m.senderName || m.senderId} · ${m.sendAt || ''}`
+            );
+        });
+
+        log(`메시지 ${messages.length}개 로드 완료`, 'success');
+    } catch(e) {
+        log(`메시지 로드 실패: ${e.message}`, 'error');
+    }
+}
 </script>
 </body>
 </html>
