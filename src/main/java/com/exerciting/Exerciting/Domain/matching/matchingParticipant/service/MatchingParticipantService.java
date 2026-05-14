@@ -47,5 +47,9 @@ public class MatchingParticipantService {
         }
         matchingParticipantRepository.save(new MatchingParticipant(user,matching,LocalDateTime.now()));
     }
-
+    public void updateLastReadAt(Matching matching, User user){
+        MatchingParticipant participant = matchingParticipantRepository.findByMatchingAndUser(matching,user)
+                .orElseThrow(()-> new InvalidInputException());
+        participant.updateLastReadAt(LocalDateTime.now());
+    }
 }
