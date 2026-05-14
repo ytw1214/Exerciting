@@ -6,7 +6,6 @@ public record ChatMessageResponseDto(
         Long senderId,
         String message,
         LocalDateTime sendAt,
-        String senderName,
-        boolean isRead
+        String senderName
 ) {
 }
