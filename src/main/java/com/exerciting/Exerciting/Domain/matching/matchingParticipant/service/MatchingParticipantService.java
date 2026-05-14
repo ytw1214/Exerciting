@@ -27,7 +27,6 @@ public class MatchingParticipantService {
     private final MatchingParticipantRepository matchingParticipantRepository;
     private final MatchingService matchingService;
     private final UserService userService;
-    private final MatchingChatRoomService matchingChatRoomService;
     public List<MatchingParticipant> getUserByMatching(Long matchingId) {
         Matching matching = matchingService.findById(matchingId);
         return matchingParticipantRepository.findByMatchingId(matching.getId());
