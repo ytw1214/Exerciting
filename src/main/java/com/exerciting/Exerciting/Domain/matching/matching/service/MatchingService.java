@@ -28,7 +28,6 @@ public class MatchingService {
     private final MatchingRepository matchingRepository;
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
-    private final MatchingChatService matchingChatService;
     @Transactional
     public Long createMatching(MatchingRequestDto dto, Long hostId) {
         if (dto.getMeetTime().isBefore(LocalDateTime.now())) {
@@ -45,7 +44,7 @@ public class MatchingService {
 
         Matching matching = dto.toEntity(host);
         Matching savedMatching = matchingRepository.save(matching);
-        matchingChatService.createChatRoom(savedMatching, host);
+        //matchingChatService.createChatRoom(savedMatching, host);
         return savedMatching.getId();
     }
     public Matching findById(Long matchingId) {
