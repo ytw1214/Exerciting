@@ -40,8 +40,7 @@ public class MatchingChatController {
                 chat.getSender().getId(),
                 chat.getMessage(),
                 chat.getSendAt(),
-                chat.getSender().getName(),
-                chat.isRead()
+                chat.getSender().getName()
         );
     }
 
