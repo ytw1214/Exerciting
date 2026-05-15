@@ -390,7 +390,6 @@
     addMessage(`채팅방 #${chatRoomId} 구독 완료`, 'system');
     document.getElementById('sendBtn').disabled = false;
     document.getElementById('messageInput').disabled = false;
-    document.getElementById('loadBtn').disabled = false;
     document.getElementById('messageInput').focus();
 
     loadMessages();
@@ -438,7 +437,7 @@
         addMessage(`── 이전 메시지 (${messages.length}개) ──`, 'system');
         messages.forEach(m => {
             addMessage(
-                `${m.message} ${m.read ? '✓✓' : '✓'}`,
+                m.message,
                 'other',
                 `${m.senderName || m.senderId} · ${m.sendAt || ''}`
             );
