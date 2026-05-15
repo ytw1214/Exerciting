@@ -1,14 +1,15 @@
 package com.exerciting.Exerciting.Domain.matching.matching.service;
 
-import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.service.MatchingChatService;
-import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.service.MatchingChatRoomService;
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.MatchingChatRoom;
+import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.repository.MatchingChatRoomRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingQueryResponseDto;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingCustomCond;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.MatchingParticipant;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingRequestDto;
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
-import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRepository;
 import com.exerciting.Exerciting.Exception.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,8 +27,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MatchingService {
     private final MatchingRepository matchingRepository;
-    private final GameRepository gameRepository;
     private final UserRepository userRepository;
+    private final MatchingChatRoomRepository matchingChatRoomRepository;
+    private final MatchingParticipantRepository matchingParticipantRepository;
     @Transactional
     public Long createMatching(MatchingRequestDto dto, Long hostId) {
         if (dto.getMeetTime().isBefore(LocalDateTime.now())) {
@@ -43,26 +45,23 @@ public class MatchingService {
                 .orElseThrow(() -> new InvalidInputException());
 
         Matching matching = dto.toEntity(host);
-        Matching savedMatching = matchingRepository.save(matching);
-        //matchingChatService.createChatRoom(savedMatching, host);
+        Matching savedMatching = matchingRepository.save(dto.toEntity(host));
+        matchingChatRoomRepository.save(
+                MatchingChatRoom.builder()
+                        .matching(matching)
+                        .requester(host)
+                        .build()
+        );
+        matchingParticipantRepository.save(
+                new MatchingParticipant(host, matching, LocalDateTime.now())
+        );
+        log.info("매칭 생성 완료 - matchingId: {}, host: {}", matching.getId(), host.getUserId());
         return savedMatching.getId();
     }
     public Matching findById(Long matchingId) {
         return matchingRepository.findById(matchingId)
                 .orElseThrow(() -> new MatchingNotFoundException());
     }
-    /*
-    public List<MatchingRequestDto> getMatchingByTeam(String teamName) {
-        List<Matching> list = matchingRepository.findByTeamName(teamName);
-        List<MatchingRequestDto> requestList = new ArrayList<>();
-        for(Matching matching : list) {
-            MatchingRequestDto dto = MatchingRequestDto.fromEntity(matching);
-            requestList.add(dto);
-        }
-        return requestList;
-    }
-
-     */
     public List<Matching> getAllMatching() {
         return matchingRepository.findAll();
     }
