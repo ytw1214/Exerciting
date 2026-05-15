@@ -12,23 +12,19 @@ import com.exerciting.Exerciting.Domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/matching")
 public class MatchingController {
     private final MatchingService matchingService;
     private final UserService userService;
     private final MatchingChatRoomService matchingChatRoomService;
     private final MatchingParticipantService matchingParticipantService;
-    @PostMapping("/api/v1/Matching")
+    @PostMapping
     public ResponseEntity<Long> saveMatching(
             @RequestBody MatchingRequestDto dto,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -39,9 +35,7 @@ public class MatchingController {
         matchingParticipantService.joinMatching(matchingId, user.getId());
         return ResponseEntity.ok(matchingId);
     }
-
-
-    @GetMapping("/api/v1/Matching")
+    @GetMapping
     public ResponseEntity<List<MatchingResponseDto>> getMatching() {
         List<Matching> list = matchingService.getAllMatching();
         List<MatchingResponseDto> result = list.stream()
@@ -53,8 +47,4 @@ public class MatchingController {
         }
         return ResponseEntity.ok(result);
     }
-    @GetMapping("/")
-    public String HelloController() {
-        return "Yammy!~";
-    }
-    }
+}
