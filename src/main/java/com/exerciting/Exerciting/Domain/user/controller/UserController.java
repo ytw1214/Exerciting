@@ -5,7 +5,6 @@ import com.exerciting.Exerciting.Domain.user.dto.UserRequestDto;
 import com.exerciting.Exerciting.Domain.user.dto.UserResponseDto;
 import com.exerciting.Exerciting.Domain.user.dto.UserUpdateDto;
 import com.exerciting.Exerciting.Domain.user.entity.UserDetails;
-import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;
-    private final UserRepository userRepository;
 
     @PostMapping("/signup")
     public ResponseEntity<Long> signup(@RequestBody @Valid UserRequestDto dto) {
@@ -30,7 +28,7 @@ public class UserController {
         Long id = userService.deleteUser(userDetails.getUserId());
         return ResponseEntity.ok(id);
     }
-    @PostMapping("/update")
+    @PatchMapping("/me")
     public ResponseEntity<Long> updateUser(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UserUpdateDto dto) {
         Long id = userService.updateUserDetail(userDetails.getUsername(),dto);
         return ResponseEntity.ok(id);
