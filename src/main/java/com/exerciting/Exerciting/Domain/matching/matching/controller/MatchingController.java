@@ -22,17 +22,12 @@ import java.util.List;
 public class MatchingController {
     private final MatchingService matchingService;
     private final UserService userService;
-    private final MatchingChatRoomService matchingChatRoomService;
-    private final MatchingParticipantService matchingParticipantService;
     @PostMapping
     public ResponseEntity<Long> saveMatching(
             @RequestBody MatchingRequestDto dto,
             @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.getUserByUserId(userDetails.getUserId());
-        Long matchingId = matchingService.createMatching(dto, user.getId());
-        Matching matching = matchingService.findById(matchingId);
-        matchingChatRoomService.createChatRoom(matching,user);
-        matchingParticipantService.joinMatching(matchingId, user.getId());
+        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
+        Long matchingId = matchingService.createMatching(dto, userId);
         return ResponseEntity.ok(matchingId);
     }
     @GetMapping
