@@ -24,6 +24,7 @@ public class MatchingParticipant {
     private Matching matching;
 
     private LocalDateTime createdAt;
+
     private LocalDateTime lastReadAt;
 
     @Builder
