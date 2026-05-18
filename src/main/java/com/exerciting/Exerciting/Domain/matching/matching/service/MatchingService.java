@@ -88,7 +88,7 @@ public class MatchingService {
     }
     private void verify(Matching matching, Long currentUserId) {
         if(!matching.getUser().getId().equals(currentUserId)) {
-            log.info("매칭 접근 오류");
+            log.info("매칭 접근 권한 없음 - matchingId : {} / userId : {}",matching.getId(), currentUserId);
             throw new UnauthorizedUserException();
         }
     }
