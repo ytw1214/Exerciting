@@ -58,6 +58,14 @@ public class MatchingController {
         matchingService.reopenMatching(matchingId, userId);
         return ResponseEntity.ok().build();
     }
+    @PatchMapping("{matchingId}/close")
+    public ResponseEntity<Void> closeMatching(
+            @PathVariable Long matchingId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
+        matchingService.closeMatching(matchingId, userId);
+        return ResponseEntity.ok().build();
+    }
 
     @PatchMapping("/{matchingId}")
     public ResponseEntity<Void> updateMatching(
