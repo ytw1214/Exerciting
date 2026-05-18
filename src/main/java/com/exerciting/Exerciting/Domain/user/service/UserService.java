@@ -4,6 +4,7 @@ import com.exerciting.Exerciting.Domain.user.dto.UserRequestDto;
 import com.exerciting.Exerciting.Domain.user.dto.UserResponseDto;
 import com.exerciting.Exerciting.Domain.user.dto.UserUpdateDto;
 import com.exerciting.Exerciting.Domain.user.entity.User;
+import com.exerciting.Exerciting.Exception.InvalidInputException;
 import com.exerciting.Exerciting.Exception.UserNotFoundException;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Infrastructure.security.JwtTokenProvider;
@@ -58,7 +59,7 @@ public class UserService {
             encodedPw = passwordEncoder.encode(dto.pw());
         }
         user.update(dto, encodedPw);
-        log.info("{} 유저 정보 변경 완료");
+        log.info("{} 유저 정보 변경 완료", userId);
         return user.getId();
     }
 
@@ -67,7 +68,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException());
 
         if(!passwordEncoder.matches(pw,user.getPw())) {
-            throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
+            throw new InvalidInputException();
         }
         return jwtTokenProvider.createToken(user.getUserId());
     }
