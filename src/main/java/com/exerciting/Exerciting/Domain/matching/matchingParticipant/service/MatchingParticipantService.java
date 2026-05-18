@@ -5,6 +5,7 @@ import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.repositor
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.service.MatchingChatRoomService;
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.matching.matching.service.MatchingService;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.dto.MatchingParticipantDto;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.MatchingParticipant;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRepository;
@@ -31,20 +32,12 @@ public class MatchingParticipantService {
         Matching matching = matchingService.findById(matchingId);
         return matchingParticipantRepository.findByMatchingId(matching.getId());
     }
-
-    @Transactional
-    public void joinMatching(Long matchingId, Long userId) {
+    public List<MatchingParticipantDto> getParticipants(Long matchingId) {
         Matching matching = matchingService.findById(matchingId);
-        User user = userService.getUserById(userId);
-
-        if(matchingParticipantRepository.existsByMatchingAndUser(matching,user)) {
-            throw new InvalidInputException();
-        }
-        long currentParticipant = matchingParticipantRepository.countByMatching(matching);
-        if(currentParticipant >= matching.getMaxPerson()) {
-            throw new InvalidInputException();
-        }
-        matchingParticipantRepository.save(new MatchingParticipant(user,matching,LocalDateTime.now()));
+        return MatchingParticipantRepository.findByMatchingId(matching.getId())
+                .stream()
+                .map(MatchingParticipantDto::from)
+                .toList();
     }
     @Transactional
     public void updateLastReadAt(Matching matching, User user){
