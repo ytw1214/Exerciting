@@ -46,7 +46,7 @@ public class Matching {
         this.meetTime = meetTime;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.status = MatchingStatus.RECRUTING;
+        this.status = MatchingStatus.RECRUITING;
     }
 
     public void update(String title, String description, int maxPerson, LocalDateTime meetTime) {
@@ -59,5 +59,31 @@ public class Matching {
         this.maxPerson = maxPerson;
         this.meetTime = meetTime;
         this.updatedAt = LocalDateTime.now();
+    }
+    public void checkAndFull(long currentCount) {
+        if(currentCount >= this.getMaxPerson()) {
+            this.status = MatchingStatus.FULL;
+        }
+    }
+    public void checkAndReopen(long currentCount) {
+        if(this.status == MatchingStatus.FULL && currentCount < this.maxPerson) {
+            this.status = MatchingStatus.RECRUITING;
+        }
+    }
+    public void close() {
+        if(this.status == MatchingStatus.CLOSED) {
+            throw new InvalidInputException();
+        }
+        this.status = MatchingStatus.CLOSED;
+    }
+
+    public void reopen() {
+        if(this.status==MatchingStatus.RECRUITING) {
+            throw new InvalidInputException();
+        }
+        this.status = MatchingStatus.RECRUITING;
+    }
+    public boolean isRecruiting() {
+        return this.status == MatchingStatus.RECRUITING;
     }
 }
