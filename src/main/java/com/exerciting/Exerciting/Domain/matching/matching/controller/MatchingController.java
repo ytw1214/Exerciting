@@ -42,4 +42,40 @@ public class MatchingController {
         }
         return ResponseEntity.ok(result);
     }
+    @PostMapping("/{matchingId}/join")
+    public ResponseEntity<Void> joinMatching(
+            @PathVariable Long matchingId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
+        matchingService.joinMatching(matchingId, userId);
+        return ResponseEntity.ok().build();
+    }
+    @PatchMapping("/{matchingId}/reopen")
+    public ResponseEntity<Void> reopenMatching(
+            @PathVariable Long matchingId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
+        matchingService.reopenMatching(matchingId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{matchingId}")
+    public ResponseEntity<Void> updateMatching(
+            @PathVariable Long matchingId,
+            @RequestBody MatchingRequestDto dto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
+        matchingService.updateMatching(matchingId, userId, dto);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{matchingId}")
+    public ResponseEntity<Void> deleteMatching(
+            @PathVariable Long matchingId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
+        matchingService.deleteMatching(matchingId, userId);
+        return ResponseEntity.ok().build();
+    }
+
 }
