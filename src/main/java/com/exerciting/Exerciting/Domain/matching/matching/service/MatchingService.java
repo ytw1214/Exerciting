@@ -86,6 +86,12 @@ public class MatchingService {
         log.info("매칭 id {} 탐색 완료",matching.getId());
         return matching;
     }
+    @Transactional
+    public void reopenMatching(Long matchingId, Long currentUserId) {
+        Matching matching = searchMatching(matchingId,currentUserId);
+        matching.reopen();
+
+    }
     private void verify(Matching matching, Long currentUserId) {
         if(!matching.getUser().getId().equals(currentUserId)) {
             log.info("매칭 접근 권한 없음 - matchingId : {} / userId : {}",matching.getId(), currentUserId);
@@ -100,5 +106,22 @@ public class MatchingService {
         return matchingRepository.search(cond);
 
     }
-
+    @Transactional
+    public void joinMatching(Long matchingId, Long userId) {
+        Matching matching = matchingRepository.findById(matchingId)
+                .orElseThrow(()->new MatchingNotFoundException());
+        if(!matching.isRecruiting()) {
+            throw new InvalidInputException();
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(()->new UserNotFoundException());
+        if(matchingParticipantRepository.existsByMatchingAndUser(matching,user)) {
+            throw new InvalidInputException();
+        }
+        matchingParticipantRepository.save(
+                new MatchingParticipant(user,matching,LocalDateTime.now()));
+        long count = matchingParticipantRepository.countByMatching(matching);
+        matching.checkAndFull(count);
+        log.info("매칭 참가 - matchingId: {}, userId: {}, 현재인원: {}/{}", matchingId, userId, count, matching.getMaxPerson());
+    }
 }
