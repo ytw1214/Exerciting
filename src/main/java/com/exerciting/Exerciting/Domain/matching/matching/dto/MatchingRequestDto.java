@@ -34,6 +34,8 @@ public class MatchingRequestDto {
                 .title(this.getTitle())
                 .description(this.getDescription())
                 .maxPerson(this.getMaxPerson())
+                .meetTime(this.meetTime)
+                .createdAt(LocalDateTime.now())
                 .user(user)
                 .build();
     }
