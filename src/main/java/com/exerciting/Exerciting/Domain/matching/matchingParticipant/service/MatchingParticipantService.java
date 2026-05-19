@@ -34,7 +34,7 @@ public class MatchingParticipantService {
     }
     public List<MatchingParticipantDto> getParticipants(Long matchingId) {
         Matching matching = matchingService.findById(matchingId);
-        return MatchingParticipantRepository.findByMatchingId(matching.getId())
+        return matchingParticipantRepository.findByMatchingId(matching.getId())
                 .stream()
                 .map(MatchingParticipantDto::from)
                 .toList();
