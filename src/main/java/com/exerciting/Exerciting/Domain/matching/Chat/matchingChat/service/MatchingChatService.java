@@ -7,8 +7,10 @@ import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.Ma
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.repository.MatchingChatRoomRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.MatchingParticipant;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.service.MatchingParticipantService;
 import com.exerciting.Exerciting.Domain.user.entity.User;
+import com.exerciting.Exerciting.Exception.UnauthorizedUserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,14 +25,18 @@ public class MatchingChatService {
     private final MatchingChatRepository matchingChatRepository;
     private final MatchingChatRoomRepository matchingChatRoomRepository;
     private final MatchingParticipantService matchingParticipantService;
-
-    public MatchingChat saveMessage(MatchingChatRoom chatRoom, User senderId, String message) {
-        MatchingChat chat = MatchingChat.builder()
+    private final MatchingParticipantRepository matchingParticipantRepository;
+    @Transactional
+    public ChatMessageResponseDto saveMessage(MatchingChatRoom chatRoom, User sender, String message) {
+        if(!matchingParticipantRepository.existsByMatchingAndUser(chatRoom.getMatching(), sender)) {
+            throw new UnauthorizedUserException();
+        }
+        MatchingChat chat = matchingChatRepository.save(MatchingChat.builder()
                 .matchingChatRoom(chatRoom)
-                .sender(senderId)
+                .sender(sender)
                 .message(message)
-                .build();
-        return matchingChatRepository.save(chat);
+                .build());
+        return ChatMessageResponseDto.from(chat);
     }
 
     public List<ChatMessageResponseDto> getMessages(MatchingChatRoom chatRoom,User user) {
@@ -46,14 +52,6 @@ public class MatchingChatService {
                 .collect(Collectors.toList());
     }
 
-    public MatchingChatRoom createChatRoom(Matching matching, User requester) {
-        return matchingChatRoomRepository.save(
-                MatchingChatRoom.builder()
-                        .matching(matching)
-                        .requester(requester)
-                        .build()
-        );
-    }
     @Transactional
     public void readMessages(MatchingChatRoom chatRoom, User user) {
         matchingParticipantService.updateLastReadAt(chatRoom.getMatching(), user);
