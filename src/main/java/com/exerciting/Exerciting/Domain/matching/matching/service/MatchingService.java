@@ -68,7 +68,7 @@ public class MatchingService {
 
     @Transactional
     public void joinMatching(Long matchingId, Long userId) {
-        Matching matching = matchingRepository.findById(matchingId)
+        Matching matching = matchingRepository.findByIdWithLock(matchingId)
                 .orElseThrow(()->new MatchingNotFoundException());
         if(!matching.isRecruiting()) {
             throw new InvalidInputException();
