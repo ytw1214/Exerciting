@@ -85,5 +85,14 @@ public class MatchingController {
         matchingService.deleteMatching(matchingId, userId);
         return ResponseEntity.ok().build();
     }
+    @DeleteMapping("/{matchingId}/leave")
+    public ResponseEntity<Void> leaveMatching(
+            @PathVariable Long matchingId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
+        matchingService.leaveMatching(matchingId, userId);
+        return ResponseEntity.ok().build();
+    }
+    )
 
 }
