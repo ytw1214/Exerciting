@@ -138,4 +138,21 @@ public class MatchingService {
         log.info("매칭 id {} 탐색 완료",matching.getId());
         return matching;
     }
+    @Transactional
+    public void leaveMatching(Long matchingId, Long userId) {
+        Matching matching = matchingRepository.findById(matchingId)
+                .orElseThrow(() -> new MatchingNotFoundException());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException());
+        if(matching.getUser().getId().equals(userId)) {
+            throw new UnauthorizedUserException();
+        }
+        MatchingParticipant participant = matchingParticipantRepository
+                .findByMatchingAndUser(matching, user)
+                .orElseThrow(InvalidInputException::new);
+        matchingParticipantRepository.delete(participant);
+        long count = matchingParticipantRepository.countByMatching(matching);
+        matching.checkAndReopen(count);
+        log.info("유저 {} - 매칭 {} 나감", userId, matchingId);
+    }
 }
