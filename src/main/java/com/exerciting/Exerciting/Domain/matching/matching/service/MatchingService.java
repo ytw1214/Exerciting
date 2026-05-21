@@ -2,8 +2,10 @@ package com.exerciting.Exerciting.Domain.matching.matching.service;
 
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.MatchingChatRoom;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.repository.MatchingChatRoomRepository;
+import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingDetailResponseDto;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingQueryResponseDto;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingCustomCond;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.dto.MatchingParticipantDto;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.MatchingParticipant;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
 import com.exerciting.Exerciting.Domain.user.entity.User;
@@ -154,5 +156,21 @@ public class MatchingService {
         long count = matchingParticipantRepository.countByMatching(matching);
         matching.checkAndReopen(count);
         log.info("유저 {} - 매칭 {} 나감", userId, matchingId);
+    }
+    @Transactional(readOnly = true)
+    public MatchingDetailResponseDto getMatchingDetail(Long matchingId, Long userId) {
+        Matching matching = findById(matchingId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
+
+        List<MatchingParticipantDto> participants = matchingParticipantRepository
+                .findByMatchingId(matchingId)
+                .stream()
+                .map(MatchingParticipantDto::from)
+                .toList();
+
+        boolean isJoined = matchingParticipantRepository.existsByMatchingAndUser(matching, user);
+
+        return MatchingDetailResponseDto.of(matching, isJoined, participants);
     }
 }
