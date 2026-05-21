@@ -10,7 +10,7 @@ import com.exerciting.Exerciting.Domain.team.entity.Team;
 import com.exerciting.Exerciting.Domain.team.repository.TeamRepository;
 import com.exerciting.Exerciting.Exception.CrawlingException;
 import com.exerciting.Exerciting.Infrastructure.crawler.CrawlerHelper;
-import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -18,9 +18,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
@@ -29,24 +28,16 @@ import java.util.List;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class KboDateFetcher {
-    private final RestTemplate restTemplate;
     private final CrawlerHelper crawlerHelper;
     private final TeamRepository teamRepository;
     private final StadiumRepository stadiumRepository;
     private final GameRepository gameRepository;
     private static final String URL = "https://www.koreabaseball.com/Schedule/Schedule.aspx";
 
-    public KboDateFetcher(RestTemplate restTemplate, CrawlerHelper crawlerHelper, TeamRepository teamRepository,StadiumRepository stadiumRepository,
-                          GameRepository gameRepository) {
-        this.restTemplate = restTemplate;
-        this.crawlerHelper = crawlerHelper;
-        this.teamRepository = teamRepository;
-        this.stadiumRepository = stadiumRepository;
-        this.gameRepository = gameRepository;
-    }
-    //@PostConstruct
-    public List<GameCrawlRequestDto> fetch() {
+    @Async
+    public void fetch() {
         WebDriver driver = null;
         List<GameCrawlRequestDto> result = new ArrayList<>();
     try {
@@ -115,7 +106,6 @@ public class KboDateFetcher {
                 }
             }
             log.info("{}월 크롤링 완료",month);
-            Thread.sleep(180000);
     }
         log.info("KBO 경기 일정 크롤링 완료 - {}건", result.size());
     } catch (Exception e) {
@@ -123,11 +113,9 @@ public class KboDateFetcher {
         throw new CrawlingException();
     } finally {
         if (driver != null) {
-            driver.quit(); // 브라우저 반드시 닫기
+            driver.quit();
         }
     }
-
-        return result;
     }
     private void saveGame(GameCrawlRequestDto dto) {
         Team homeTeam = teamRepository.findByShortName(dto.getHomeTeam()).orElse(null);
