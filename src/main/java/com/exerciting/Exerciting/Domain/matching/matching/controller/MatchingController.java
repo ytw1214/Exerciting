@@ -93,6 +93,6 @@ public class MatchingController {
         matchingService.leaveMatching(matchingId, userId);
         return ResponseEntity.ok().build();
     }
-    )
+
 
 }
