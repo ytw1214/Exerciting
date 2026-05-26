@@ -1,5 +1,7 @@
 package com.exerciting.Exerciting.Domain.matching.matching.service;
 
+import com.exerciting.Exerciting.Domain.game.entity.Game;
+import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.MatchingChatRoom;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.repository.MatchingChatRoomRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingDetailResponseDto;
@@ -31,6 +33,7 @@ public class MatchingService {
     private final UserRepository userRepository;
     private final MatchingChatRoomRepository matchingChatRoomRepository;
     private final MatchingParticipantRepository matchingParticipantRepository;
+    private final GameRepository gameRepository;
     @Transactional
     public Long createMatching(MatchingRequestDto dto, Long hostId) {
         if (dto.getMeetTime().isBefore(LocalDateTime.now())) {
@@ -44,8 +47,9 @@ public class MatchingService {
         }
         User host = userRepository.findById(hostId)
                 .orElseThrow(() -> new InvalidInputException());
-
-        Matching savedMatching = matchingRepository.save(dto.toEntity(host));
+        Game game = gameRepository.findById(dto.getGameId())
+                .orElseThrow(InvalidInputException::new);
+        Matching savedMatching = matchingRepository.save(dto.toEntity(host,game));
         matchingChatRoomRepository.save(
                 MatchingChatRoom.builder()
                         .matching(savedMatching)
