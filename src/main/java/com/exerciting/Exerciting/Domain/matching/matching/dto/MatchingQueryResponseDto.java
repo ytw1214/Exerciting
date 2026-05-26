@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 public record MatchingQueryResponseDto(
         Long matchingId,
         String title,
-        int currentPerson,
         int maxPerson,
         LocalDateTime meetTime,
         String homeTeamEnglish,
