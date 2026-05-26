@@ -1,5 +1,6 @@
 package com.exerciting.Exerciting.Domain.matching.matching.dto;
 
+import com.exerciting.Exerciting.Domain.game.entity.Game;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import lombok.Builder;
@@ -13,12 +14,13 @@ public class MatchingRequestDto {
     private String description;
     private int maxPerson;
     private LocalDateTime meetTime;
-
-    public MatchingRequestDto(String title, String description, int maxPerson, LocalDateTime meetTime) {
+    private Long gameId;
+    public MatchingRequestDto(String title, String description, int maxPerson, LocalDateTime meetTime, Long gameId) {
         this.title = title;
         this.description = description;
         this.maxPerson = maxPerson;
         this.meetTime = meetTime;
+        this.gameId = gameId;
     }
     public static MatchingRequestDto fromEntity(Matching matching) {
         return MatchingRequestDto.builder()
@@ -29,7 +31,7 @@ public class MatchingRequestDto {
                 .build();
 
     }
-    public Matching toEntity(User user) {
+    public Matching toEntity(User user, Game game) {
         return Matching.builder()
                 .title(this.getTitle())
                 .description(this.getDescription())
@@ -37,6 +39,7 @@ public class MatchingRequestDto {
                 .meetTime(this.meetTime)
                 .createdAt(LocalDateTime.now())
                 .user(user)
+                .game(game)
                 .build();
     }
     /*

@@ -33,7 +33,6 @@ public class MatchingParticipant {
         this.matching = matching;
         this.createdAt = createdAt;
     }
-
     public void updateLastReadAt(LocalDateTime time) {
         this.lastReadAt = time;
     }
