@@ -1,8 +1,10 @@
 package com.exerciting.Exerciting.Domain.matching.matching.controller;
 
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.service.MatchingChatRoomService;
+import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingQueryResponseDto;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingRequestDto;
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingCustomCond;
 import com.exerciting.Exerciting.Domain.matching.matching.service.MatchingService;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingResponseDto;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.service.MatchingParticipantService;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -94,5 +97,17 @@ public class MatchingController {
         return ResponseEntity.ok().build();
     }
 
+    public ResponseEntity<List<MatchingQueryResponseDto>> searchMatching(
+            @PathVariable String title,
+            @PathVariable String description,
+            @PathVariable String teamName,
+            @PathVariable LocalDateTime meetTime,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
+        MatchingCustomCond cond = new MatchingCustomCond(title,description,teamName,meetTime);
+        List<MatchingQueryResponseDto> matching = matchingService.searchDetailMatching(cond, userId);
+
+        return ResponseEntity.ok(matching);
+    }
 
 }
