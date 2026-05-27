@@ -6,11 +6,10 @@ import com.exerciting.Exerciting.Domain.game.repository.GameCustomCond;
 import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
 import com.exerciting.Exerciting.Domain.game.service.GameService;
 import com.exerciting.Exerciting.Domain.global.SportType;
+import com.exerciting.Exerciting.Infrastructure.crawler.fetcher.KboDateFetcher;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,14 +17,11 @@ import java.time.LocalTime;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 public class GameController {
     private final GameService gameService;
     private final GameRepository gameRepository;
-
-    public GameController(GameService gameService, GameRepository gameRepository) {
-        this.gameService = gameService;
-        this.gameRepository = gameRepository;
-    }
+    private final KboDateFetcher kboDateFetcher;
     /*
     public ResponseEntity<GameSearchRequestDto> getGames(
             @RequestParam(required = false) LocalDateTime start,
@@ -101,4 +97,9 @@ public class GameController {
     }
 
      */
+    @PostMapping("/crawl")
+    public ResponseEntity<String> crawl() {
+        kboDateFetcher.fetch();
+        return ResponseEntity.ok("크롤링 시작됨");
+    }
 }
