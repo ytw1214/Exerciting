@@ -25,8 +25,6 @@ public record MatchingQueryResponseDto(
                 matching.getGame().getAwayTeam().getShortName(),
                 matching.getGame().getStadium().getName(),
                 matching.getGame().getSportType().name()
-
                 );
-
     }
 }
