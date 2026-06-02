@@ -18,6 +18,10 @@ import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRep
 import com.exerciting.Exerciting.Exception.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,8 +100,10 @@ public class MatchingService {
         log.info("매칭 참가 - matchingId: {}, userId: {}, 현재인원: {}/{}", matchingId, userId, count, matching.getMaxPerson());
     }
 
-    public List<Matching> getAllMatching() {
-        return matchingRepository.findAll();
+    public Page<MatchingQueryResponseDto> getAllMatching(int page, int size) {
+        Pageable pageable = PageRequest.of(page,size, Sort.by("createdAt").descending());
+        return matchingRepository.findAll(pageable)
+                .map(MatchingQueryResponseDto::from);
     }
     @Transactional
     public void closeMatching(Long matchingId, Long currentUserId) {
