@@ -19,7 +19,7 @@ public class JwtTokenProvider {
 
     private final Key key;
     private final long expiration = 1000 * 60 * 60 * 24; // 24시간
-    private final long refreshToken = 1000L * 60 * 60 * 24 * 14;
+    private final long refreshTokenExpiration = 1000L * 60 * 60 * 24 * 14;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secret) {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
@@ -30,6 +30,14 @@ public class JwtTokenProvider {
                 .setSubject(userId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+    public String createRefreshToken(String userId) {
+        return Jwts.builder()
+                .setSubject(userId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
