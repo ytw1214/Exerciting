@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Component
@@ -18,6 +19,7 @@ public class JwtTokenProvider {
 
     private final Key key;
     private final long expiration = 1000 * 60 * 60 * 24; // 24시간
+    private final long refreshToken = 1000L * 60 * 60 * 24 * 14;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secret) {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
@@ -52,5 +54,8 @@ public class JwtTokenProvider {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+    public LocalDateTime getRefreshTokenExpiresAt() {
+        return LocalDateTime.now().plusWeeks(2);
     }
 }
