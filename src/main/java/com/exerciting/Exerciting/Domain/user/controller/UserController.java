@@ -1,9 +1,6 @@
 package com.exerciting.Exerciting.Domain.user.controller;
 
-import com.exerciting.Exerciting.Domain.user.dto.LoginRequestDto;
-import com.exerciting.Exerciting.Domain.user.dto.UserRequestDto;
-import com.exerciting.Exerciting.Domain.user.dto.UserResponseDto;
-import com.exerciting.Exerciting.Domain.user.dto.UserUpdateDto;
+import com.exerciting.Exerciting.Domain.user.dto.*;
 import com.exerciting.Exerciting.Domain.user.entity.UserDetails;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
 import jakarta.validation.Valid;
@@ -34,13 +31,22 @@ public class UserController {
         return ResponseEntity.ok(id);
     }
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequestDto dto) {
-        String token = userService.login(dto.userId(), dto.password());
+    public ResponseEntity<TokenResponseDto> login(@RequestBody LoginRequestDto dto) {
+        TokenResponseDto token = userService.login(dto.userId(),dto.password());
         return ResponseEntity.ok(token);
     }
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> getMe(@AuthenticationPrincipal UserDetails userDetails) {
         UserResponseDto dto = userService.getUser(userDetails.getUsername());
         return ResponseEntity.ok(dto);
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetails userDetails) {
+        userService.logout(userDetails.getUserId());
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/reissue")
+    public ResponseEntity<TokenResponseDto> reissue(@RequestBody String refreshToken) {
+        return ResponseEntity.ok(userService.reissue(refreshToken));
     }
 }
