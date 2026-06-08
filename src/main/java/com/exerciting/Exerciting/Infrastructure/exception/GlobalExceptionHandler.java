@@ -55,6 +55,13 @@ public class GlobalExceptionHandler {
                 .status(e.getErrorCode().getStatus())
                 .body(ErrorResponse.of(e.getErrorCode()));
     }
+    @ExceptionHandler(InvalidTimeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidTimeException(InvalidTimeException e) {
+        log.warn("InvalidTimeException: {}", e.getMessage());
+        return ResponseEntity
+                .status(e.getErrorCode().getStatus())
+                .body(ErrorResponse.of(e.getErrorCode()));
+    }
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         String detail = e.getBindingResult().getFieldErrors().stream()
