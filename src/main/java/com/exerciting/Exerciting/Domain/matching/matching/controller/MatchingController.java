@@ -90,14 +90,15 @@ public class MatchingController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/search")
     public ResponseEntity<List<MatchingQueryResponseDto>> searchMatching(
-            @PathVariable String title,
-            @PathVariable String description,
-            @PathVariable String teamName,
-            @PathVariable LocalDateTime meetTime,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String teamName,
+            @RequestParam(required = false) LocalDateTime meetTime,
             @AuthenticationPrincipal UserDetails userDetails) {
         Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
-        MatchingCustomCond cond = new MatchingCustomCond(title,description,teamName,meetTime);
+        MatchingCustomCond cond = new MatchingCustomCond(title, description, teamName, meetTime);
         List<MatchingQueryResponseDto> matching = matchingService.searchDetailMatching(cond, userId);
 
         return ResponseEntity.ok(matching);
