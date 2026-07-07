@@ -1,4 +1,5 @@
 package com.exerciting.Exerciting.User.Service;
+import com.exerciting.Exerciting.Domain.user.dto.TokenResponseDto;
 import com.exerciting.Exerciting.Domain.user.dto.UserRequestDto;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
@@ -70,10 +71,8 @@ class UserServiceTest {
         when(passwordEncoder.matches(rawPw, "encodedPw")).thenReturn(true);
         when(jwtTokenProvider.createToken(userId)).thenReturn("mock-token");
 
-        // when
-        String token = userService.login(userId, rawPw);
+        TokenResponseDto result = userService.login(userId, rawPw);
 
-        // then
-        assertThat(token).isEqualTo("mock-token");
+        assertThat(result.accessToken()).isEqualTo("mock-access-token");
     }
 }
