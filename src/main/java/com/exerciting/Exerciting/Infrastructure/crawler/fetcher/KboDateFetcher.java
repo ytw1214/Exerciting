@@ -44,7 +44,12 @@ public class KboDateFetcher {
         driver = crawlerHelper.createWebDriver();
         driver.get(URL);
         Thread.sleep(2000);
-        String[] monthlist = {"05", "06", "07"};
+        String[] monthlist = {"04", "05", "06"};
+        WebElement yearSelect = driver.findElement(By.id("ddlYear"));
+        Select selectYear = new Select(yearSelect);
+        selectYear.selectByValue("2025");
+        log.info("==== 크롤링 작업 시작 ====");
+        long startTime = System.currentTimeMillis();
         for (String month : monthlist) {
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
             WebElement monthSelect = driver.findElement(By.id("ddlMonth"));
@@ -107,6 +112,11 @@ public class KboDateFetcher {
             }
             log.info("{}월 크롤링 완료",month);
     }
+        long endTime = System.currentTimeMillis(); // 종료 시간 (ms)
+        long duration = endTime - startTime; // 소요 시간 계산
+
+        log.info("==== 크롤링 작업 종료 ====");
+        log.info("총 소요 시간: {} ms (약 {}초)", duration, (duration / 1000.0));
         log.info("KBO 경기 일정 크롤링 완료 - {}건", result.size());
     } catch (Exception e) {
         log.error("크롤링 오류" + e.getMessage());
