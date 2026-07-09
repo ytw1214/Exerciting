@@ -9,7 +9,9 @@ import com.exerciting.Exerciting.Domain.stadium.repository.StadiumRepository;
 import com.exerciting.Exerciting.Domain.team.entity.Team;
 import com.exerciting.Exerciting.Domain.team.repository.TeamRepository;
 import com.exerciting.Exerciting.Exception.CrawlingException;
+import com.exerciting.Exerciting.Exception.InvalidInputException;
 import com.exerciting.Exerciting.Infrastructure.crawler.CrawlerHelper;
+import com.exerciting.Exerciting.Infrastructure.exception.ErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.By;
@@ -37,9 +39,13 @@ public class KboDateFetcher {
     private static final String URL = "https://www.koreabaseball.com/Schedule/Schedule.aspx";
 
     @Async
-    public void fetch() {
+    public void fetch(String year) {
         WebDriver driver = null;
         List<GameCrawlRequestDto> result = new ArrayList<>();
+        if(Integer.parseInt(year) <= 2000 || Integer.parseInt(year) > LocalDateTime.now().getYear()) {
+            log.warn("해당 연도를 찾을 수 없습니다. 크롤링을 종료합니다.");
+            return;
+        }
     try {
         driver = crawlerHelper.createWebDriver();
         driver.get(URL);
@@ -47,7 +53,7 @@ public class KboDateFetcher {
         String[] monthlist = {"04", "05", "06"};
         WebElement yearSelect = driver.findElement(By.id("ddlYear"));
         Select selectYear = new Select(yearSelect);
-        selectYear.selectByValue("2025");
+        selectYear.selectByValue(year);
         log.info("==== 크롤링 작업 시작 ====");
         long startTime = System.currentTimeMillis();
         for (String month : monthlist) {
