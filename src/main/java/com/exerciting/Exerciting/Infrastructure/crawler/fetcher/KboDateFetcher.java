@@ -149,15 +149,11 @@ public class KboDateFetcher {
             parsedYear = Integer.parseInt(year);
         } catch (NumberFormatException e) {
             throw new UnsupportedYearCrawlException(
-                    "지원하지 않는 연도입니다."
             );
         }
         int currentYear = LocalDateTime.now().getYear();
         if (parsedYear < MIN_SUPPORTED_YEAR || parsedYear > currentYear) {
-            throw new UnsupportedCrawlYearException(
-                    String.format("지원하지 않는 연도입니다. %d년 ~ %d년까지 조회 가능합니다.",
-                            MIN_SUPPORTED_YEAR, currentYear)
-            );
+            throw new UnsupportedYearCrawlException();
         }
 
         WebDriver driver = null;
