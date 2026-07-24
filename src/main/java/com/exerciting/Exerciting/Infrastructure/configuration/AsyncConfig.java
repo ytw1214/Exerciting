@@ -11,7 +11,7 @@ public class AsyncConfig {
     @Bean(name="kboExecutor")
     public ThreadPoolTaskExecutor setKboExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
+        executor.setCorePoolSize(3);
 
 
         return executor;
