@@ -140,10 +140,16 @@ public class KboDateFetcher {
     }
     */
 
+    public record YearCrawlSummary(
+            String year,
+            int parsedCount,
+            int savedCount,
+            int duplicateCount,
+            int parseFailCount
+    ) {}
 
-    public List<GameCrawlRequestDto> fetch(String year) {
+    public YearCrawlSummary fetch(String year) {
 
-        // ── 연도 검증: guard clause + try-catch ──
         int parsedYear;
         try {
             parsedYear = Integer.parseInt(year);
@@ -157,7 +163,10 @@ public class KboDateFetcher {
         }
 
         WebDriver driver = null;
-        List<GameCrawlRequestDto> result = new ArrayList<>();
+        int parsedCount = 0;
+        int savedCount = 0;
+        int duplicateCount = 0;
+        int parseFailCount = 0;
 
         try {
             driver = crawlerHelper.createWebDriver();
@@ -166,7 +175,7 @@ public class KboDateFetcher {
             WebDriverWait initialWait = new WebDriverWait(driver, Duration.ofSeconds(10));
             initialWait.until(ExpectedConditions.elementToBeClickable(By.id("ddlYear")));
 
-            String[] monthlist = {"04", "05", "06"};
+            String[] monthlist = {"03", "04", "05", "06", "07", "08", "09", "10"};
             WebElement yearSelect = driver.findElement(By.id("ddlYear"));
             Select selectYear = new Select(yearSelect);
             selectYear.selectByValue(year);
@@ -175,7 +184,6 @@ public class KboDateFetcher {
             long startTime = System.currentTimeMillis();
 
             for (String month : monthlist) {
-                // ③ 갱신 전 테이블 요소 참조 저장 (staleness 체크용)
                 WebElement oldTable = driver.findElement(By.id("tblScheduleList"));
 
                 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -184,7 +192,6 @@ public class KboDateFetcher {
                 WebElement seriesSelect = driver.findElement(By.id("ddlSeries"));
                 new Select(seriesSelect).selectByValue("0,9,6");
 
-                // ③ "존재하는지"가 아니라 "갱신됐는지"를 확인
                 wait.until(ExpectedConditions.stalenessOf(oldTable));
                 wait.until(ExpectedConditions.presenceOfElementLocated(By.id("tblScheduleList")));
 
@@ -228,11 +235,16 @@ public class KboDateFetcher {
                                 .gameStartTime(getCleanDate(currentDate, time))
                                 .build();
 
-                        result.add(dto);
-                        saveGame(dto);
+                        parsedCount++;
+                        if(saveGame(dto)) {
+                            savedCount++;
+                        } else {
+                            duplicateCount++;
+                        }
                         // ② Thread.sleep(200) 삭제 — 서버 요청 없는 로컬 DOM 읽기라 불필요
 
                     } catch (Exception e) {
+                        parseFailCount++;
                         log.warn("행 파싱 실패, 스킵: {}", e.getMessage());
                     }
                 }
@@ -243,9 +255,10 @@ public class KboDateFetcher {
             long duration = endTime - startTime;
             log.info("==== 크롤링 작업 종료 ====");
             log.info("총 소요 시간: {} ms (약 {}초)", duration, (duration / 1000.0));
-            log.info("KBO 경기 일정 크롤링 완료 - {}건", result.size());
+            log.info("[{}년] 파싱 {}건 → 신규 저장 {}건 / 중복 스킵 {}건 / 파싱 실패 {}건",
+                    year, parsedCount, savedCount, duplicateCount, parseFailCount);
 
-            return result; // 0건이어도 정상 반환 (예외 아님)
+            return new YearCrawlSummary(year, parsedCount, savedCount, duplicateCount, parseFailCount);
 
         } catch (Exception e) {
             log.error("크롤링 오류" + e.getMessage());
@@ -257,7 +270,7 @@ public class KboDateFetcher {
         }
     }
 
-    private void saveGame(GameCrawlRequestDto dto) {
+    private boolean saveGame(GameCrawlRequestDto dto) {
         Team homeTeam = teamRepository.findByShortName(dto.getHomeTeam()).orElse(null);
         Team awayTeam = teamRepository.findByShortName(dto.getAwayTeam()).orElse(null);
         Stadium stadium = stadiumRepository.findByShortName(dto.getStadiumName()).orElse(null);
@@ -265,12 +278,12 @@ public class KboDateFetcher {
         if (homeTeam == null || awayTeam == null || stadium == null) {
             log.warn("팀 또는 경기장 미존재 - 홈:{} 원정:{} 경기장:{}",
                     dto.getHomeTeam(), dto.getAwayTeam(), dto.getStadiumName());
-            return;
+            return false;
         }
         boolean exists = gameRepository.existsByHomeTeamAndAwayTeamAndGameStartTime(homeTeam, awayTeam, dto.getGameStartTime());
         if (exists) {
             log.debug("이미 저장된 경기 스킵: {} vs {}", dto.getHomeTeam(), dto.getAwayTeam());
-            return;
+            return false;
         }
         Game game = Game.builder()
                 .sportType(SportType.BASEBALL)
@@ -283,6 +296,7 @@ public class KboDateFetcher {
 
         gameRepository.save(game);
         log.info("경기 저장 완료: {} vs {}", dto.getHomeTeam(), dto.getAwayTeam());
+        return true;
     }
     private LocalDateTime getCleanDate(String date, String time) {
         String cleanDate = date.replaceAll("\\(.*?\\)", "").trim();
