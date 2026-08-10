@@ -97,11 +97,11 @@ public class GameController {
     }
 
      */
-    @PostMapping("/crawl")
-    public ResponseEntity<String> crawl(
-            @RequestParam(required = true) String crawlYear
+    @PostMapping("/crawl/{year}")
+    public ResponseEntity<?> crawl(
+            @PathVariable String year
     ) {
-        kboDateFetcher.fetch(crawlYear);
-        return ResponseEntity.ok(crawlYear + "년 경기 크롤링 시작됨");
+
+        return ResponseEntity.ok(kboDateFetcher.fetch(year));
     }
 }
