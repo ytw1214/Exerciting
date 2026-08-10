@@ -28,11 +28,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
 
-/**
- * MatchingService 단위 테스트 (Mockito 기반)
- * - DB 없이 의존성 격리
- * - 실제 코드 시그니처: createMatching(MatchingRequestDto dto, Long hostId)
- */
 @ExtendWith(MockitoExtension.class)
 class MatchingServiceTest {
 
@@ -68,7 +63,7 @@ class MatchingServiceTest {
 
             Matching savedMatching = Matching.builder()
                     .title(dto.getTitle()).description(dto.getDescription())
-                    .maxPerson(dto.getMaxPerson()).currentPerson(1)
+                    .maxPerson(dto.getMaxPerson())
                     .user(mockHost).meetTime(dto.getMeetTime()).build();
 
             given(userRepository.findById(1L)).willReturn(Optional.of(mockHost));
@@ -160,7 +155,8 @@ class MatchingServiceTest {
         void deleteMatching_fail_unauthorized() {
             // mockHost.getId() == null, currentUserId == 99L → null != 99L → 권한 없음
             Matching matching = Matching.builder()
-                    .title("남의 매칭").maxPerson(5).currentPerson(1)
+                    .title("남의 매칭")
+                    .maxPerson(5)
                     .user(mockHost).meetTime(LocalDateTime.now().plusDays(1)).build();
 
             given(matchingRepository.findById(1L)).willReturn(Optional.of(matching));
@@ -179,7 +175,7 @@ class MatchingServiceTest {
         @DisplayName("수정 시 maxPerson < 2이면 엔티티 내부 검증에서 InvalidInputException 발생")
         void updateMatching_fail_lowMaxPerson() {
             Matching matching = Matching.builder()
-                    .title("수정 대상").maxPerson(5).currentPerson(1)
+                    .title("수정 대상").maxPerson(5)
                     .user(mockHost).meetTime(LocalDateTime.now().plusDays(1)).build();
 
             MatchingRequestDto changedDto = MatchingRequestDto.builder()
