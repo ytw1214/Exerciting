@@ -15,7 +15,12 @@ import java.time.LocalDateTime;
 public class MatchingChat {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "matching_chat_seq")
+    @SequenceGenerator(
+            name = "matching_chat_seq",
+            sequenceName = "matching_chat_seq",
+            allocationSize = 1000
+    )
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
