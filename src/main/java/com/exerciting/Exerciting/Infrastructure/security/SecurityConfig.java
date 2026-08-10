@@ -1,6 +1,7 @@
 package com.exerciting.Exerciting.Infrastructure.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -31,6 +32,7 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/chat_test.html", "/ws/**", "/css/**", "/js/**","/ws-raw/**").permitAll()
                         .requestMatchers("/user/login", "/user/signup", "/user/reissue").permitAll()   
                         .requestMatchers(HttpMethod.GET, "/api/v1/games/**", "/games/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
