@@ -184,17 +184,15 @@ public class KboDateFetcher {
             long startTime = System.currentTimeMillis();
 
             for (String month : monthlist) {
-                WebElement oldTable = driver.findElement(By.id("tblScheduleList"));
-
-                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
                 WebElement monthSelect = driver.findElement(By.id("ddlMonth"));
                 new Select(monthSelect).selectByValue(month);
                 WebElement seriesSelect = driver.findElement(By.id("ddlSeries"));
                 new Select(seriesSelect).selectByValue("0,9,6");
 
-                wait.until(ExpectedConditions.stalenessOf(oldTable));
-                wait.until(ExpectedConditions.presenceOfElementLocated(By.id("tblScheduleList")));
-
+                wait.until(ExpectedConditions.refreshed(
+                        ExpectedConditions.presenceOfElementLocated(By.id("tblScheduleList"))
+                ));
                 List<WebElement> rows = driver.findElements(
                         By.cssSelector("#tblScheduleList tbody tr")
                 );
@@ -232,7 +230,7 @@ public class KboDateFetcher {
                                 .awayTeam(away)
                                 .stadiumName(stadium)
                                 .sportType(SportType.BASEBALL.name())
-                                .gameStartTime(getCleanDate(currentDate, time))
+                                .gameStartTime(getCleanDate(currentDate, time, year))
                                 .build();
 
                         parsedCount++;
@@ -298,10 +296,9 @@ public class KboDateFetcher {
         log.info("경기 저장 완료: {} vs {}", dto.getHomeTeam(), dto.getAwayTeam());
         return true;
     }
-    private LocalDateTime getCleanDate(String date, String time) {
+    private LocalDateTime getCleanDate(String date, String time, String year) {
         String cleanDate = date.replaceAll("\\(.*?\\)", "").trim();
         log.info("cleanDate: '{}', time: '{}'", cleanDate, time);
-        int year = LocalDateTime.now().getYear();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
         String startDate = year + "." + cleanDate + " " + time;
         log.info("final starttime : {}", startDate);
