@@ -23,13 +23,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final JwtTokenProvider jwtTokenProvider;
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/websocket")
-                .setAllowedOriginPatterns("**")
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*")
                 .addInterceptors(new HttpSessionHandshakeInterceptor())
                 .withSockJS();
         //Postman용 소켓 연결 확인
-        registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("**");
+        registry.addEndpoint("/ws-raw")
+                .setAllowedOriginPatterns("*");
     }
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
