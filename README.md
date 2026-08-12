@@ -15,13 +15,6 @@
 | 크롤링 | Jsoup, Selenium |
 | 문서화 | Springdoc OpenAPI (Swagger) |
 | 인프라 | Docker, Docker Compose |
-
-## 아키텍처 개요
-
-<img width="905" height="697" alt="architecture" src="https://github.com/user-attachments/assets/d2953bf9-952b-4bbc-bfcc-9089dc394874" />
-
----
-
 ## 주요 구현 및 기술적 경험
 
 ### 1. 동시성 제어를 통한 매칭 정원 보장
