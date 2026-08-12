@@ -152,7 +152,7 @@ public class MatchingService {
     }
     @Transactional
     public void leaveMatching(Long matchingId, Long userId) {
-        Matching matching = matchingRepository.findById(matchingId)
+        Matching matching = matchingRepository.findByIdWithLock(matchingId)
                 .orElseThrow(() -> new MatchingNotFoundException());
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException());
