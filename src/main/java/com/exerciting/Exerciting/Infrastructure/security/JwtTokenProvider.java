@@ -12,13 +12,14 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 @Slf4j
 public class JwtTokenProvider {
 
     private final Key key;
-    private final long expiration = 1000 * 60 * 60 * 24; // 24시간
+    private final long accessTokenExpiration = 1000 * 60 * 30; // 30분
     private final long refreshTokenExpiration = 1000L * 60 * 60 * 24 * 14;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secret) {
@@ -27,9 +28,10 @@ public class JwtTokenProvider {
 
     public String createToken(String userId) {
         return Jwts.builder()
+                .setId(UUID.randomUUID().toString())
                 .setSubject(userId)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -65,5 +67,19 @@ public class JwtTokenProvider {
     }
     public LocalDateTime getRefreshTokenExpiresAt() {
         return LocalDateTime.now().plusWeeks(2);
+    }
+
+    public String hashToken(String token) {
+        try {
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(token.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException("해시 알고리즘을 찾을 수 없습니다.", e);
+        }
     }
 }
