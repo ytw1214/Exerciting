@@ -19,18 +19,19 @@ public class RefreshToken {
     @JoinColumn(name="user_id")
     private User user;
 
-    private String token;
+    @Column(unique = true)
+    private String tokenHash;
     private LocalDateTime expiresAt;
 
     @Builder
-    public RefreshToken(User user, String token, LocalDateTime expiresAt) {
+    public RefreshToken(User user, String tokenHash, LocalDateTime expiresAt) {
         this.user = user;
-        this.token = token;
+        this.tokenHash = tokenHash;
         this.expiresAt = expiresAt;
     }
 
-    public void updateToken(String token, LocalDateTime expiresAt) {
-        this.token = token;
+    public void updateToken(String tokenHash, LocalDateTime expiresAt) {
+        this.tokenHash = tokenHash;
         this.expiresAt = expiresAt;
     }
 }
