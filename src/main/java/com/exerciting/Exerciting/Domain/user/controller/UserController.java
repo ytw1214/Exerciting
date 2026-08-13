@@ -5,6 +5,8 @@ import com.exerciting.Exerciting.Domain.user.entity.UserDetails;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -43,10 +45,37 @@ public class UserController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetails userDetails) {
         userService.logout(userDetails.getUserId());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, expireRefreshTokenCookie().toString())
+                .build();
     }
     @PostMapping("/reissue")
-    public ResponseEntity<TokenResponseDto> reissue(@RequestBody String refreshToken) {
-        return ResponseEntity.ok(userService.reissue(refreshToken));
+    public ResponseEntity<TokenResponseDto> reissue(@CookieValue(name = "REFRESH_TOKEN", required = false) String refreshToken) {
+        if (refreshToken == null) {
+            return ResponseEntity.status(401).build();
+        }
+        TokenPairDto tokenPair = userService.reissue(refreshToken);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(tokenPair.refreshToken()).toString())
+                .body(new TokenResponseDto(tokenPair.accessToken()));
+    }
+    private ResponseCookie buildRefreshTokenCookie(String refreshToken) {
+        return ResponseCookie.from(REFRESH_TOKEN_COOKIE,refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path("/user")
+                .maxAge(java.time.Duration.ofDays(14))
+                .build();
+    }
+
+    private ResponseCookie expireRefreshTokenCookie() {
+        return ResponseCookie.from(REFRESH_TOKEN_COOKIE, "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path("/user")
+                .maxAge(0)
+                .build();
     }
 }
