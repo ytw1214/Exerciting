@@ -14,7 +14,6 @@
 | 인증 | JWT (jjwt) |
 | 크롤링 | Jsoup, Selenium |
 | 문서화 | Springdoc OpenAPI (Swagger) |
-| 인프라 | Docker, Docker Compose |
 ## 주요 구현 및 기술적 경험
 
 ### 1. 동시성 제어를 통한 매칭 정원 보장
