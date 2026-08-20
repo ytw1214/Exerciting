@@ -100,18 +100,6 @@ if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
 **결과**
 Jsoup으로는 불가능했던 동적 페이지 크롤링이 가능해졌고, 인증되지 않은 사용자의 WebSocket 연결이 차단되는 것을 확인했습니다.
 
----
-
-## 실행 방법
-
-```bash
-# 로컬 실행 (MySQL이 로컬에 별도로 떠 있어야 함)
-./gradlew bootRun
-
-# Docker Compose로 앱 + MySQL 한 번에 실행
-docker compose up -d
-```
-
 ## 다음 계획
 
 - [ ] N+1 개선 전/후 정확한 쿼리 횟수 측정 및 기재
