@@ -29,4 +29,9 @@ public class TeamRankController {
         }
         return ResponseEntity.ok(rankList);
     }
+    @GetMapping("/ranks/sync")
+    public ResponseEntity<String> updateTeamRank() {
+        int updatedCount = teamRankService.updateTeamRank();
+        return ResponseEntity.ok(updatedCount+"개팀 순위 수정 완료");
+    }
 }

@@ -8,6 +8,7 @@ import com.exerciting.Exerciting.Infrastructure.crawler.CrawlerHelper;
 import com.exerciting.Exerciting.Infrastructure.crawler.fetcher.KboRankFetcher;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,14 +27,15 @@ public class TeamRankService {
     public List<TeamRank> getAllTeamByRank() {
         return teamRankRepository.findAllByOrderByTeamRankAsc();
     }
-    //@PostConstruct
-    public void saveTeamRank() {
+    @Transactional
+    public int updateTeamRank() {
         List<TeamRankCrawlDto> arr = kboRankFetcher.fetch();
         List<TeamRank> arr1 = new ArrayList<>();
         for(TeamRankCrawlDto dto : arr) {
             arr1.add(dto.toEntity());
         }
         teamRankRepository.saveAll(arr1);
+        return arr1.size();
     }
     public List<TeamRank> getTeamContainingName(String name) {
         return teamRankRepository.findByTeamNameContaining(name)
