@@ -19,6 +19,13 @@ public class GlobalExceptionHandler {
                 .status(e.getErrorCode().getStatus())
                 .body(ErrorResponse.of(e.getErrorCode()));
     }
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateResourceException(DuplicateResourceException e) {
+        log.warn("DuplicateResourceException: {}", e.getMessage());
+        return ResponseEntity
+                .status(e.getErrorCode().getStatus())
+                .body(ErrorResponse.of(e.getErrorCode()));
+    }
     @ExceptionHandler(UnauthorizedUserException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorizationUserFoundException(UnauthorizedUserException e) {
         log.warn("UnauthorizedUserException: {}", e.getMessage());
