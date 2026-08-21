@@ -7,9 +7,11 @@ import com.exerciting.Exerciting.Domain.user.dto.UserUpdateDto;
 import com.exerciting.Exerciting.Domain.user.entity.RefreshToken;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.RefreshTokenRepository;
+import com.exerciting.Exerciting.Exception.DuplicateResourceException;
 import com.exerciting.Exerciting.Exception.InvalidInputException;
 import com.exerciting.Exerciting.Exception.UserNotFoundException;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
+import com.exerciting.Exerciting.Infrastructure.exception.ErrorCode;
 import com.exerciting.Exerciting.Infrastructure.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,13 +38,13 @@ public class UserService {
     @Transactional
     public Long signUp(UserRequestDto dto) {
         if(userRepository.existsByUserId(dto.userId())) {
-            throw new IllegalArgumentException("이미 사용중인 아이디 입니다.");
+            throw new DuplicateResourceException(ErrorCode.DUPLICATE_USER_ID);
         }
         if(userRepository.existsByEmail(dto.email())) {
-            throw new IllegalArgumentException("이미 사용중인 이메일 입니다.");
+            throw new DuplicateResourceException(ErrorCode.DUPLICATE_EMAIL);
         }
         if(userRepository.existsByNickname(dto.nickname())) {
-            throw new IllegalArgumentException("이미 사용중인 닉네임 입니다.");
+            throw new DuplicateResourceException(ErrorCode.DUPLICATE_NICKNAME);
         }
         String encodedPw = passwordEncoder.encode(dto.pw());
         return userRepository.save(dto.toEntity(encodedPw)).getId();

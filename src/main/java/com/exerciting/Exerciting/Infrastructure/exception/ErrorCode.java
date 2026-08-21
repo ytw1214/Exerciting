@@ -7,9 +7,11 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-    //USER
     USER_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 유저를 찾을 수 없습니다."),
     UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED,"권한이 없습니다."),
+    DUPLICATE_USER_ID(HttpStatus.CONFLICT,"이미 사용중인 아이디 입니다."),
+    DUPLICATE_EMAIL(HttpStatus.CONFLICT,"이미 사용중인 이메일 입니다."),
+    DUPLICATE_NICKNAME(HttpStatus.CONFLICT,"이미 사용중인 닉네임 입니다."),
 
     //Matching
     MATCHING_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 매칭을 찾을 수 없습니다."),
