@@ -8,6 +8,7 @@ import com.exerciting.Exerciting.Infrastructure.crawler.fetcher.KboRankFetcher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +30,7 @@ public class TeamRankController {
         }
         return ResponseEntity.ok(rankList);
     }
-    @GetMapping("/ranks/sync")
+    @PostMapping("/ranks/sync")
     public ResponseEntity<String> updateTeamRank() {
         int updatedCount = teamRankService.updateTeamRank();
         return ResponseEntity.ok(updatedCount+"개팀 순위 수정 완료");
