@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;
+    private static final String REFRESH_TOKEN_COOKIE = "REFERSH_TOKEN";
 
     @PostMapping("/signup")
     public ResponseEntity<Long> signup(@RequestBody @Valid UserRequestDto dto) {
