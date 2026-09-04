@@ -20,10 +20,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique=true)
     private String userId;
     private String pw;
+    @Column(unique=true)
     private String nickname;
     private String name;
+    @Column(unique=true)
     private String email;
     /*
     @OneToMany(mappedBy="user")
