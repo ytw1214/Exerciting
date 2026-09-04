@@ -1,6 +1,10 @@
 package com.exerciting.Exerciting.Domain.user.controller;
 
 import com.exerciting.Exerciting.Domain.user.dto.*;
+import com.exerciting.Exerciting.Domain.user.dto.request.LoginRequestDto;
+import com.exerciting.Exerciting.Domain.user.dto.request.UserSignUpRequestDto;
+import com.exerciting.Exerciting.Domain.user.dto.request.UserUpdateRequestDto;
+import com.exerciting.Exerciting.Domain.user.dto.response.*;
 import com.exerciting.Exerciting.Domain.user.entity.UserDetails;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
 import jakarta.validation.Valid;
@@ -19,19 +23,19 @@ public class UserController {
     private static final String REFRESH_TOKEN_COOKIE = "REFERSH_TOKEN";
 
     @PostMapping("/signup")
-    public ResponseEntity<Long> signup(@RequestBody @Valid UserRequestDto dto) {
-        Long Id = userService.signUp(dto);
-        return ResponseEntity.ok(Id);
+    public ResponseEntity<UserSignUpResponseDto> signup(@RequestBody @Valid UserSignUpRequestDto dto) {
+        UserSignUpResponseDto result = userService.signUp(dto);
+        return ResponseEntity.ok(result);
     }
     @DeleteMapping("/me")
-    public ResponseEntity<Long> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
-        Long id = userService.deleteUser(userDetails.getUserId());
-        return ResponseEntity.ok(id);
+    public ResponseEntity<UserDeleteResponseDto> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
+        UserDeleteResponseDto result = userService.deleteUser(userDetails.getUserId());
+        return ResponseEntity.ok(result);
     }
     @PatchMapping("/me")
-    public ResponseEntity<Long> updateUser(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UserUpdateDto dto) {
-        Long id = userService.updateUserDetail(userDetails.getUsername(),dto);
-        return ResponseEntity.ok(id);
+    public ResponseEntity<UserUpdateResponseDto> updateUser(@AuthenticationPrincipal UserDetails userDetails, @RequestBody UserUpdateRequestDto dto) {
+        UserUpdateResponseDto result = userService.updateUserDetail(userDetails.getUsername(),dto);
+        return ResponseEntity.ok(result);
     }
     @PostMapping("/login")
     public ResponseEntity<TokenResponseDto> login(@RequestBody LoginRequestDto dto) {
@@ -55,10 +59,10 @@ public class UserController {
         if (refreshToken == null) {
             return ResponseEntity.status(401).build();
         }
-        TokenPairDto tokenPair = userService.reissue(refreshToken);
+        TokenReissuePairDto tokenPair = userService.reissue(refreshToken);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(tokenPair.refreshToken()).toString())
-                .body(new TokenResponseDto(tokenPair.accessToken()));
+                .body(new TokenResponseDto(tokenPair.accessToken(), tokenPair.refreshToken()));
     }
     private ResponseCookie buildRefreshTokenCookie(String refreshToken) {
         return ResponseCookie.from(REFRESH_TOKEN_COOKIE,refreshToken)

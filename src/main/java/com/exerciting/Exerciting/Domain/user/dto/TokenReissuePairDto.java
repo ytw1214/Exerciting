@@ -1,6 +1,6 @@
 package com.exerciting.Exerciting.Domain.user.dto;
 
-public record TokenPairDto(
+public record TokenReissuePairDto(
         String accessToken,
         String refreshToken
 ) {

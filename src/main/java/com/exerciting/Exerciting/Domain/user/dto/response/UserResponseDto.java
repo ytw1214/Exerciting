@@ -1,4 +1,4 @@
-package com.exerciting.Exerciting.Domain.user.dto;
+package com.exerciting.Exerciting.Domain.user.dto.response;
 
 import com.exerciting.Exerciting.Domain.user.entity.User;
 

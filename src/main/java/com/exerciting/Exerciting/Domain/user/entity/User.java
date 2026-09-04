@@ -1,14 +1,11 @@
 package com.exerciting.Exerciting.Domain.user.entity;
 
-import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
-import com.exerciting.Exerciting.Domain.user.dto.UserUpdateDto;
+import com.exerciting.Exerciting.Domain.user.dto.request.UserUpdateRequestDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -43,7 +40,7 @@ public class User {
         this.email = email;
     }
 
-    public void update(UserUpdateDto dto, String encodedPw) {
+    public void update(UserUpdateRequestDto dto, String encodedPw) {
         if(encodedPw != null) {
             this.pw =encodedPw;
         }
