@@ -18,7 +18,7 @@ import java.util.Map;
 @Component
 public class CrawlerHelper {
 
-
+    //jsoup용 크롤링 연결 구성
     public Document createSafeConnection(String url) {
         try {
             return Jsoup.connect(url)
