@@ -1,6 +1,9 @@
 package com.exerciting.Exerciting.Domain.user.service;
 
 import com.exerciting.Exerciting.Domain.user.dto.*;
+import com.exerciting.Exerciting.Domain.user.dto.request.UserSignUpRequestDto;
+import com.exerciting.Exerciting.Domain.user.dto.request.UserUpdateRequestDto;
+import com.exerciting.Exerciting.Domain.user.dto.response.*;
 import com.exerciting.Exerciting.Domain.user.entity.RefreshToken;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.RefreshTokenRepository;
@@ -12,7 +15,6 @@ import com.exerciting.Exerciting.Infrastructure.exception.ErrorCode;
 import com.exerciting.Exerciting.Infrastructure.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,13 +29,9 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
-    //데이터 조회
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(()->new UserNotFoundException());
-    }
+
     @Transactional
-    public Long signUp(UserRequestDto dto) {
+    public UserSignUpResponseDto signUp(UserSignUpRequestDto dto) {
         if(userRepository.existsByUserId(dto.userId())) {
             throw new DuplicateResourceException(ErrorCode.DUPLICATE_USER_ID);
         }
@@ -44,19 +42,21 @@ public class UserService {
             throw new DuplicateResourceException(ErrorCode.DUPLICATE_NICKNAME);
         }
         String encodedPw = passwordEncoder.encode(dto.pw());
-        return userRepository.save(dto.toEntity(encodedPw)).getId();
+        User user = userRepository.save(dto.toEntity(encodedPw);
+        return UserSignUpResponseDto.of(user);
+
     }
     @Transactional
-    public Long deleteUser(String userId) {
+    public UserDeleteResponseDto deleteUser(String userId) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UserNotFoundException());
 
         log.info("{} 회원 탈퇴 완료",user.getUserId());
         userRepository.delete(user);
-        return user.getId();
+        return UserDeleteResponseDto.of(user.getId());
     }
     @Transactional
-    public Long updateUserDetail(String userId, UserUpdateDto dto) {
+    public UserUpdateResponseDto updateUserDetail(String userId, UserUpdateRequestDto dto) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UserNotFoundException());
         String encodedPw = null;
@@ -65,7 +65,7 @@ public class UserService {
         }
         user.update(dto, encodedPw);
         log.info("{} 유저 정보 변경 완료", userId);
-        return user.getId();
+        return UserUpdateResponseDto.of(user.getId());
     }
     @Transactional
     public TokenResponseDto login(String userId, String pw) {
@@ -91,7 +91,7 @@ public class UserService {
         return new TokenResponseDto(accessToken, refreshToken);
     }
     @Transactional
-    public TokenPairDto reissue(String refreshToken) {
+    public TokenReissuePairDto reissue(String refreshToken) {
         if (!jwtTokenProvider.validateToken(refreshToken)) {
             throw new InvalidInputException();
         }
@@ -118,7 +118,7 @@ public class UserService {
 
         savedToken.updateToken(newRefreshTokenHash, jwtTokenProvider.getRefreshTokenExpiresAt());
 
-        return new TokenPairDto(newAccessToken, newRefreshToken);
+        return new TokenReissuePairDto(newAccessToken, newRefreshToken);
     }
     public UserResponseDto getUser(String userId) {
         User user = userRepository.findByUserId(userId)

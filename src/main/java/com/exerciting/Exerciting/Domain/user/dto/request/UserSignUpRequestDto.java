@@ -1,4 +1,4 @@
-package com.exerciting.Exerciting.Domain.user.dto;
+package com.exerciting.Exerciting.Domain.user.dto.request;
 
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import jakarta.validation.constraints.Email;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public record UserRequestDto(
+public record UserSignUpRequestDto(
         @NotBlank(message="아이디를 입력해주세요")
         @Size(min=4,max=20,message="아이디는 4~20자여야 합니다")
         String userId,
