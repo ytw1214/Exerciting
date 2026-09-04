@@ -1,6 +1,6 @@
 package com.exerciting.Exerciting.User.Service;
-import com.exerciting.Exerciting.Domain.user.dto.TokenResponseDto;
-import com.exerciting.Exerciting.Domain.user.dto.UserRequestDto;
+import com.exerciting.Exerciting.Domain.user.dto.response.TokenResponseDto;
+import com.exerciting.Exerciting.Domain.user.dto.request.UserSignUpRequestDto;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
@@ -40,7 +40,7 @@ class UserServiceTest {
     @DisplayName("회원가입 성공 테스트")
     void signUpSuccess() {
         // given
-        UserRequestDto dto = new UserRequestDto("testId", "Password123!", "nick", "name", "test@test.com");
+        UserSignUpRequestDto dto = new UserSignUpRequestDto("testId", "Password123!", "nick", "name", "test@test.com");
 
         when(userRepository.existsByUserId(anyString())).thenReturn(false);
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
