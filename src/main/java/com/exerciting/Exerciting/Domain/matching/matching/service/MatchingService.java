@@ -114,7 +114,38 @@ public class MatchingService {
     @Transactional
     public void deleteMatching(Long matchingId, Long currentUserId) {
         Matching matching = findMatchingByHost(matchingId, currentUserId);
-        matchingRepository.delete(matching);
+        // 기존: matchingRepository.delete(matching) — MatchingParticipant/MatchingChatRoom이
+        // matching_id FK로 물려있어 cascade 미설정 상태에서는 참가자가 1명(호스트)만 있어도
+        // 무결성 제약 위반 예외가 발생한다. 삭제 대신 상태 전환으로 이력을 보존한다.
+        matching.cancel();
+        log.info("매칭 취소(소프트 삭제) - matchingId: {}", matching.getId());
+    }
+
+    /**
+     * meetTime이 지난 매칭을 완료 처리한다. MatchingScheduler가 주기적으로 호출.
+     * 이 시점에 참가자 전원을 ATTENDED로 확정하고 MatchingCompletedEvent를 발행한다.
+     * userReputation 도메인은 이 이벤트만 구독하면 되고, MatchingService는
+     * 평판 계산 로직을 몰라도 된다(관심사 분리).
+     */
+    @Transactional
+    public void completeMatching(Long matchingId) {
+        Matching matching = matchingRepository.findByIdWithLock(matchingId)
+                .orElseThrow(MatchingNotFoundException::new);
+        if (matching.isTerminal()) {
+            return; // 이미 완료/취소된 매칭은 중복 처리하지 않음
+        }
+        matching.complete();
+
+        List<MatchingParticipant> activeParticipants =
+                matchingParticipantRepository.findByMatchingAndStatus(matching, ParticipantStatus.JOINED);
+        activeParticipants.forEach(MatchingParticipant::markAttended);
+
+        List<Long> attendedUserIds = activeParticipants.stream()
+                .map(p -> p.getUser().getId())
+                .toList();
+
+        log.info("매칭 완료 처리 - matchingId: {}, 참석자 {}명", matchingId, attendedUserIds.size());
+        eventPublisher.publishEvent(new MatchingCompletedEvent(matching.getId(), matching.getUser().getId(), attendedUserIds));
     }
     @Transactional
     public void updateMatching(Long matchingId, Long currentUserId, MatchingRequestDto changedDto) {

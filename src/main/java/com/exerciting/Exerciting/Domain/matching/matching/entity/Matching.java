@@ -4,6 +4,7 @@ import com.exerciting.Exerciting.Domain.game.entity.Game;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.MatchingChatRoom;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Exception.InvalidInputException;
+import com.exerciting.Exerciting.Infrastructure.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="matching")
-public class Matching {
+public class Matching extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,26 +27,26 @@ public class Matching {
             )
     @JoinColumn(name="game_id")
     private Game game;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id")
     private User user;
-    private LocalDateTime meetTime;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
+    private LocalDateTime meetTime;
 
     @Enumerated(EnumType.STRING)
     private MatchingStatus status;
+
+    @Version
+    private Long version;
     @Builder
-    public Matching(String title, String description, int maxPerson, Game game, User user, LocalDateTime meetTime, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public Matching(String title, String description, int maxPerson, Game game, User user, LocalDateTime meetTime) {
         this.title = title;
         this.description = description;
         this.maxPerson = maxPerson;
         this.game = game;
         this.user = user;
         this.meetTime = meetTime;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
         this.status = MatchingStatus.RECRUITING;
     }
 
@@ -58,7 +59,6 @@ public class Matching {
         this.description = description;
         this.maxPerson = maxPerson;
         this.meetTime = meetTime;
-        this.updatedAt = LocalDateTime.now();
     }
     public void checkAndFull(long currentCount) {
         if(currentCount >= this.getMaxPerson()) {
@@ -71,12 +71,24 @@ public class Matching {
         }
     }
     public void close() {
-        if(this.status == MatchingStatus.CLOSED) {
+        if(this.status == MatchingStatus.CLOSED || isTerminal()) {
             throw new InvalidInputException();
         }
         this.status = MatchingStatus.CLOSED;
     }
 
+    public void complete() {
+        if(isTerminal()) {
+            throw new InvalidInputException();
+        }
+        this.status = MatchingStatus.COMPLETED;
+    }
+    public void cancel() {
+        if(this.status == MatchingStatus.COMPLETED) {
+            throw new InvalidInputException();
+        }
+        this.status = MatchingStatus.CANCELLED;
+    }
     public void reopen() {
         if(this.status==MatchingStatus.RECRUITING) {
             throw new InvalidInputException();
@@ -85,5 +97,9 @@ public class Matching {
     }
     public boolean isRecruiting() {
         return this.status == MatchingStatus.RECRUITING;
+    }
+
+    public boolean isTerminal() {
+        return this.status == MatchingStatus.COMPLETED || this.status == MatchingStatus.CANCELLED;
     }
 }
