@@ -42,7 +42,7 @@ public class UserService {
             throw new DuplicateResourceException(ErrorCode.DUPLICATE_NICKNAME);
         }
         String encodedPw = passwordEncoder.encode(dto.pw());
-        User user = userRepository.save(dto.toEntity(encodedPw);
+        User user = userRepository.save(dto.toEntity(encodedPw));
         return UserSignUpResponseDto.of(user);
 
     }
