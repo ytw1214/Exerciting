@@ -1,6 +1,7 @@
 package com.exerciting.Exerciting.Domain.matching.matching.repository;
 
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.matching.matching.entity.MatchingStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -18,6 +19,8 @@ public interface MatchingRepository extends JpaRepository<Matching, Long>, Match
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT m FROM Matching m WHERE m.id = :id")
     Optional<Matching> findByIdWithLock(@Param("id") Long id);
-    //List<MatchingQueryResponseDto> search(MatchingCustomCond cond);
+    // 완료 처리 스케줄러 전용: 아직 종료되지 않았는데 약속 시간이 지난 매칭만 조회.
+    @Query("SELECT m.id FROM Matching m WHERE m.meetTime < :now AND m.status IN :statuses")
+    List<Long> findIdsToComplete(@Param("now") LocalDateTime now, @Param("statuses") List<MatchingStatus> statuses);
 
 }

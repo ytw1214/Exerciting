@@ -9,7 +9,9 @@ import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingQueryRespo
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingCustomCond;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.dto.MatchingParticipantDto;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.MatchingParticipant;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.ParticipantStatus;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
+import com.exerciting.Exerciting.Domain.matching.matching.event.MatchingCompletedEvent;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingRequestDto;
@@ -18,6 +20,7 @@ import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRep
 import com.exerciting.Exerciting.Exception.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -38,6 +41,7 @@ public class MatchingService {
     private final MatchingChatRoomRepository matchingChatRoomRepository;
     private final MatchingParticipantRepository matchingParticipantRepository;
     private final GameRepository gameRepository;
+    private final ApplicationEventPublisher eventPublisher;
     @Transactional
     public Long createMatching(MatchingRequestDto dto, Long hostId) {
         if (dto.getMeetTime().isBefore(LocalDateTime.now())) {
@@ -64,7 +68,6 @@ public class MatchingService {
                 MatchingParticipant.builder()
                         .user(host)
                         .matching(savedMatching)
-                        .createdAt(LocalDateTime.now())
                         .build()
         );
         savedMatching.checkAndFull(1);
