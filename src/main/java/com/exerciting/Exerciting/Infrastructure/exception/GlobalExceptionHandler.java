@@ -12,59 +12,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException e) {
-        log.warn("UserNotFoundException: {}", e.getMessage());
-        return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(ErrorResponse.of(e.getErrorCode()));
-    }
-    @ExceptionHandler(DuplicateResourceException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicateResourceException(DuplicateResourceException e) {
-        log.warn("DuplicateResourceException: {}", e.getMessage());
-        return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(ErrorResponse.of(e.getErrorCode()));
-    }
-    @ExceptionHandler(UnauthorizedUserException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorizationUserFoundException(UnauthorizedUserException e) {
-        log.warn("UnauthorizedUserException: {}", e.getMessage());
-        return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(ErrorResponse.of(e.getErrorCode()));
-    }
 
-    @ExceptionHandler(MatchingNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleMatchingNotFoundException(MatchingNotFoundException e) {
-        log.warn("MatchingNotFoundException: {}", e.getMessage());
-        return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(ErrorResponse.of(e.getErrorCode()));
-    }
-    @ExceptionHandler(InvalidInputException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidInputException(InvalidInputException e) {
-        log.warn("InvalidInputException: {}", e.getMessage());
-        return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(ErrorResponse.of(e.getErrorCode()));
-    }
-    @ExceptionHandler(DisMatchedSizeException.class)
-    public ResponseEntity<ErrorResponse> handleDisMatchedSizeException(DisMatchedSizeException e) {
-        log.warn("DisMatchedSizeException: {}", e.getMessage());
-        return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(ErrorResponse.of(e.getErrorCode()));
-    }
-    @ExceptionHandler(MatchingChatRoomNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleMatchingChatRoomNotFoundException(MatchingChatRoomNotFoundException e) {
-        log.warn("MatchingChatRoomNotFoundException: {}", e.getMessage());
-        return ResponseEntity
-                .status(e.getErrorCode().getStatus())
-                .body(ErrorResponse.of(e.getErrorCode()));
-    }
-    @ExceptionHandler(InvalidTimeException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidTimeException(InvalidTimeException e) {
-        log.warn("InvalidTimeException: {}", e.getMessage());
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
+        log.warn("{}: {}", e.getClass().getSimpleName(), e.getMessage());
         return ResponseEntity
                 .status(e.getErrorCode().getStatus())
                 .body(ErrorResponse.of(e.getErrorCode()));
