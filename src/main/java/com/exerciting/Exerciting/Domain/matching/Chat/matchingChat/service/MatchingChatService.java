@@ -7,6 +7,7 @@ import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.Ma
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.repository.MatchingChatRoomRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.MatchingParticipant;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.ParticipantStatus;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.service.MatchingParticipantService;
 import com.exerciting.Exerciting.Domain.user.entity.User;
@@ -31,7 +32,8 @@ public class MatchingChatService {
     private final MatchingParticipantRepository matchingParticipantRepository;
     @Transactional
     public ChatMessageResponseDto saveMessage(MatchingChatRoom chatRoom, User sender, String message) {
-        if(!matchingParticipantRepository.existsByMatchingAndUser(chatRoom.getMatching(), sender)) {
+        if(!matchingParticipantRepository.existsByMatchingAndUserAndStatus(
+                chatRoom.getMatching(), sender, ParticipantStatus.JOINED)) {
             throw new UnauthorizedUserException();
         }
         MatchingChat chat = matchingChatRepository.save(MatchingChat.builder()
