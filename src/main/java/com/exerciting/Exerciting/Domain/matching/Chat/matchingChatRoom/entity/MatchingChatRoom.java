@@ -27,14 +27,12 @@ public class MatchingChatRoom {
     @Enumerated(EnumType.STRING)
     private MatchingChatStatus status;
 
-    private LocalDateTime createdAt;
 
     @Builder
     public MatchingChatRoom(Matching matching, User requester) {
         this.matching = matching;
         this.requester = requester;
         this.status = MatchingChatStatus.WAITING;
-        this.createdAt = LocalDateTime.now();
     }
 
     public void accept() {

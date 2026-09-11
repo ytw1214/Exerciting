@@ -37,32 +37,8 @@ public class MatchingRequestDto {
                 .description(this.getDescription())
                 .maxPerson(this.getMaxPerson())
                 .meetTime(this.meetTime)
-                .createdAt(LocalDateTime.now())
                 .user(user)
                 .game(game)
                 .build();
     }
-    /*
-    public Matching toEntity(Long hostId) {
-        return Matching.builder()
-                .title(this.title)
-                .description(this.description)
-                .maxPerson(this.maxPerson)
-                .meetTime(this.meetTime)
-                .build();
-    }
-     */
-
-    /*
-    public Matching toEntity(Long hostId) {
-        return Matching.builder()
-                .id(this.id)
-                .title(this.title)
-                .description(this.description)
-                .maxPerson(this.maxPerson)
-                .meetTime(this.meetTime)
-                .build();
-    }
-
-     */
 }

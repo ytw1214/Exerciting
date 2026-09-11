@@ -7,6 +7,7 @@ import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.matching.matching.service.MatchingService;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.dto.MatchingParticipantDto;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.MatchingParticipant;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.ParticipantStatus;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRepository;
 import com.exerciting.Exerciting.Domain.user.entity.User;
@@ -41,7 +42,8 @@ public class MatchingParticipantService {
     }
     @Transactional
     public void updateLastReadAt(Matching matching, User user){
-        MatchingParticipant participant = matchingParticipantRepository.findByMatchingAndUser(matching,user)
+        MatchingParticipant participant = matchingParticipantRepository
+                .findByMatchingAndUserAndStatus(matching, user, ParticipantStatus.JOINED)
                 .orElseThrow(()-> new InvalidInputException());
         participant.updateLastReadAt(LocalDateTime.now());
     }
