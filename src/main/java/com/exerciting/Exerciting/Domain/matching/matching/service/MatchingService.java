@@ -85,17 +85,16 @@ public class MatchingService {
         }
         User user = userRepository.findById(userId)
                 .orElseThrow(()->new UserNotFoundException());
-        if(matchingParticipantRepository.existsByMatchingAndUser(matching,user)) {
+        if(matchingParticipantRepository.existsByMatchingAndUserAndStatus(matching, user, ParticipantStatus.JOINED)) {
             throw new InvalidInputException();
         }
         matchingParticipantRepository.save(
                 MatchingParticipant.builder()
                         .user(user)
                         .matching(matching)
-                        .createdAt(LocalDateTime.now())
                         .build()
         );
-        long count = matchingParticipantRepository.countByMatching(matching);
+        long count = matchingParticipantRepository.countByMatchingAndStatus(matching, ParticipantStatus.JOINED);
         matching.checkAndFull(count);
         log.info("매칭 참가 - matchingId: {}, userId: {}, 현재인원: {}/{}", matchingId, userId, count, matching.getMaxPerson());
     }
@@ -191,10 +190,12 @@ public class MatchingService {
             throw new UnauthorizedUserException();
         }
         MatchingParticipant participant = matchingParticipantRepository
-                .findByMatchingAndUser(matching, user)
+                .findByMatchingAndUserAndStatus(matching, user, ParticipantStatus.JOINED)
                 .orElseThrow(InvalidInputException::new);
-        matchingParticipantRepository.delete(participant);
-        long count = matchingParticipantRepository.countByMatching(matching);
+        // 기존: matchingParticipantRepository.delete(participant) — 이탈 이력이 사라져
+        // "마감 직전 이탈" 같은 평판 신호를 만들 근거 데이터가 없어짐. 상태 전환으로 대체.
+        participant.leave();
+        long count = matchingParticipantRepository.countByMatchingAndStatus(matching, ParticipantStatus.JOINED);
         matching.checkAndReopen(count);
         log.info("유저 {} - 매칭 {} 나감", userId, matchingId);
     }
@@ -210,7 +211,7 @@ public class MatchingService {
                 .map(MatchingParticipantDto::from)
                 .toList();
 
-        boolean isJoined = matchingParticipantRepository.existsByMatchingAndUser(matching, user);
+        boolean isJoined = matchingParticipantRepository.existsByMatchingAndUserAndStatus(matching, user, ParticipantStatus.JOINED);
 
         return MatchingDetailResponseDto.of(matching, isJoined, participants);
     }
