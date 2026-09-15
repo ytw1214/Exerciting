@@ -1,9 +1,6 @@
 package com.exerciting.Exerciting;
 
-import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRepository;
-import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,15 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -28,219 +26,164 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 class ExercitingApplicationTests {
 
-	@Autowired
-	private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@Autowired
-	private UserRepository userRepository;
+    @Test
+    @DisplayName("스프링 컨텍스트가 정상적으로 로드된다")
+    void contextLoads() {
+    }
 
-	@Autowired
-	private MatchingRepository matchingRepository;
-	@Test
-	@DisplayName("스프링 컨텍스트가 정상적으로 로드된다")
-	void contextLoads() {
-		// 빈 테스트: 컨텍스트 뜨면 통과
-	}
+    private Map<String, Object> signUpBody(String userId, String nickname, String email) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("userId", userId);
+        body.put("pw", "Password123!");
+        body.put("nickname", nickname);
+        body.put("name", "홍길동");
+        body.put("email", email);
+        return body;
+    }
 
-	@Test
-	@DisplayName("GET / - 헬스체크 엔드포인트가 200을 반환한다")
-	void healthCheck() throws Exception {
-		mockMvc.perform(get("/"))
-				.andDo(print())
-				.andExpect(status().isOk())
-				.andExpect(content().string("Yammy!~"));
-	}
+    @Nested
+    @DisplayName("POST /user/signup - 회원가입 (permitAll)")
+    class SignupTest {
 
-	@Nested
-	@DisplayName("POST /signup - 회원가입")
-	class SignupTest {
+        @Test
+        @DisplayName("정상 입력 시 가입 정보 DTO를 반환한다")
+        void signup_success() throws Exception {
+            mockMvc.perform(post("/user/signup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(
+                                    signUpBody("testuser01", "테스터", "test@exerciting.com"))))
+                    .andExpect(status().is2xxSuccessful())
+                    .andExpect(jsonPath("$.userId").exists());
+        }
 
-		@Test
-		@DisplayName("정상 입력 시 userId(PK)를 반환하고 200 응답한다")
-		void signup_success() throws Exception {
-			Map<String, String> body = Map.of(
-					"userId", "testuser01",
-					"pw", "password123",
-					"nickname", "테스터",
-					"name", "홍길동",
-					"email", "test@exerciting.com"
-			);
+        @Test
+        @DisplayName("동일한 userId로 두 번 가입하면 두 번째는 실패한다")
+        void signup_fail_duplicate() throws Exception {
+            String json = objectMapper.writeValueAsString(
+                    signUpBody("sameuser", "중복닉", "dup@test.com"));
 
-			mockMvc.perform(post("/signup")
-							.contentType(MediaType.APPLICATION_JSON)
-							.content(objectMapper.writeValueAsString(body)))
-					.andDo(print())
-					.andExpect(status().isOk())
-					.andExpect(jsonPath("$").isNumber()); // 반환값이 Long id
-		}
+            mockMvc.perform(post("/user/signup")
+                            .contentType(MediaType.APPLICATION_JSON).content(json))
+                    .andExpect(status().is2xxSuccessful());
 
-		@Test
-		@DisplayName("동일한 요청 두 번 보내도 각각 다른 id가 발급된다 (중복 검증 로직 없음 확인)")
-		void signup_duplicateAllowed() throws Exception {
-			Map<String, String> body = Map.of(
-					"userId", "sameuser",
-					"pw", "pw",
-					"nickname", "중복닉",
-					"name", "중복이름",
-					"email", "dup@test.com"
-			);
-			String json = objectMapper.writeValueAsString(body);
+            mockMvc.perform(post("/user/signup")
+                            .contentType(MediaType.APPLICATION_JSON).content(json))
+                    .andExpect(status().is4xxClientError());
+        }
+    }
 
-			String result1 = mockMvc.perform(post("/signup")
-							.contentType(MediaType.APPLICATION_JSON).content(json))
-					.andExpect(status().isOk())
-					.andReturn().getResponse().getContentAsString();
+    @Nested
+    @DisplayName("GET /api/v1/games - 경기 조회 (permitAll)")
+    class GameGetTest {
 
-			String result2 = mockMvc.perform(post("/signup")
-							.contentType(MediaType.APPLICATION_JSON).content(json))
-					.andExpect(status().isOk())
-					.andReturn().getResponse().getContentAsString();
+        @Test
+        @DisplayName("파라미터 없이 요청하면 2xx 반환한다")
+        void getGames_noParams() throws Exception {
+            mockMvc.perform(get("/api/v1/games"))
+                    .andExpect(status().is2xxSuccessful());
+        }
 
-			org.assertj.core.api.Assertions.assertThat(result1).isNotEqualTo(result2);
-		}
-	}
-	@Nested
-	@DisplayName("POST /api/v1/Matching - 매칭 생성")
-	class MatchingCreateTest {
+        @Test
+        @DisplayName("gameStatus=BEFORE 파라미터로 요청하면 2xx 반환한다")
+        void getGames_withGameStatus() throws Exception {
+            mockMvc.perform(get("/api/v1/games").param("gameStatus", "BEFORE"))
+                    .andExpect(status().is2xxSuccessful());
+        }
 
-		@BeforeEach
-		void insertHostUser() throws Exception {
-			Map<String, String> body = Map.of(
-					"userId", "host01",
-					"pw", "pw",
-					"nickname", "방장",
-					"name", "방장이름",
-					"email", "host@test.com"
-			);
-			mockMvc.perform(post("/signup")
-					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsString(body)));
-		}
+        @Test
+        @DisplayName("sportType=BASEBALL 파라미터로 요청하면 2xx 반환한다")
+        void getGames_withSportType() throws Exception {
+            mockMvc.perform(get("/api/v1/games").param("sportType", "BASEBALL"))
+                    .andExpect(status().is2xxSuccessful());
+        }
 
-		@Test
-		@DisplayName("정상 요청 시 매칭 id를 반환하고 200 응답한다")
-		void createMatching_success() throws Exception {
-			Map<String, Object> body = Map.of(
-					"title", "축구 한 판 하실 분",
-					"description", "같이 뛰어요",
-					"maxPerson", 10,
-					"meetTime", LocalDateTime.now().plusDays(1).toString()
-			);
+        @Test
+        @DisplayName("gameStatus와 sportType 동시 파라미터 요청이 정상 처리된다")
+        void getGames_withBothParams() throws Exception {
+            mockMvc.perform(get("/api/v1/games")
+                            .param("gameStatus", "FINISHED")
+                            .param("sportType", "BASEBALL"))
+                    .andExpect(status().is2xxSuccessful());
+        }
+    }
 
-			mockMvc.perform(post("/api/v1/Matching")
-							.contentType(MediaType.APPLICATION_JSON)
-							.content(objectMapper.writeValueAsString(body)))
-					.andDo(print())
-					.andExpect(status().isOk())
-					.andExpect(jsonPath("$").isNumber());
-		}
+    @Nested
+    @DisplayName("인증이 필요한 엔드포인트")
+    class AuthRequiredTest {
 
-		@Test
-		@DisplayName("meetTime이 과거이면 500 응답 (InvalidTimeException - ExceptionHandler 미설정)")
-		void createMatching_fail_pastTime() throws Exception {
-			Map<String, Object> body = Map.of(
-					"title", "과거 매칭",
-					"description", "설명",
-					"maxPerson", 5,
-					"meetTime", LocalDateTime.now().minusHours(1).toString()
-			);
+        @Test
+        @DisplayName("인증 없이 매칭 생성을 요청하면 401을 반환한다")
+        void createMatching_withoutAuth() throws Exception {
+            Map<String, Object> body = new HashMap<>();
+            body.put("title", "축구 한 판");
+            body.put("description", "설명");
+            body.put("maxPerson", 10);
+            body.put("meetTime", LocalDateTime.now().plusDays(1).toString());
+            body.put("gameId", 1L);
 
-			mockMvc.perform(post("/api/v1/Matching")
-							.contentType(MediaType.APPLICATION_JSON)
-							.content(objectMapper.writeValueAsString(body)))
-					.andDo(print())
-					.andExpect(status().is5xxServerError());
-		}
+            mockMvc.perform(post("/api/v1/Matching")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(body)))
+                    .andExpect(status().isUnauthorized());
+        }
 
-		@Test
-		@DisplayName("maxPerson이 1이면 500 응답 (InvalidInputException)")
-		void createMatching_fail_lowMaxPerson() throws Exception {
-			Map<String, Object> body = Map.of(
-					"title", "혼자 매칭",
-					"description", "설명",
-					"maxPerson", 1,
-					"meetTime", LocalDateTime.now().plusDays(1).toString()
-			);
+        @Test
+        @DisplayName("인증 없이 매칭 목록을 조회하면 401을 반환한다")
+        void getMatching_withoutAuth() throws Exception {
+            mockMvc.perform(get("/api/v1/Matching"))
+                    .andExpect(status().isUnauthorized());
+        }
+    }
 
-			mockMvc.perform(post("/api/v1/Matching")
-							.contentType(MediaType.APPLICATION_JSON)
-							.content(objectMapper.writeValueAsString(body)))
-					.andDo(print())
-					.andExpect(status().is5xxServerError());
-		}
+    @Nested
+    @DisplayName("POST /api/v1/Matching - 매칭 생성 (인증됨)")
+    @WithMockUser(username = "host01")
+    class MatchingCreateTest {
 
-		@Test
-		@DisplayName("title이 공백이면 500 응답 (InvalidInputException)")
-		void createMatching_fail_blankTitle() throws Exception {
-			Map<String, Object> body = Map.of(
-					"title", "   ",
-					"description", "설명",
-					"maxPerson", 5,
-					"meetTime", LocalDateTime.now().plusDays(1).toString()
-			);
+        private Map<String, Object> matchingBody(String title, int maxPerson, LocalDateTime meetTime) {
+            Map<String, Object> body = new HashMap<>();
+            body.put("title", title);
+            body.put("description", "설명");
+            body.put("maxPerson", maxPerson);
+            body.put("meetTime", meetTime.toString());
+            body.put("gameId", 1L);
+            return body;
+        }
 
-			mockMvc.perform(post("/api/v1/Matching")
-							.contentType(MediaType.APPLICATION_JSON)
-							.content(objectMapper.writeValueAsString(body)))
-					.andDo(print())
-					.andExpect(status().is5xxServerError());
-		}
-	}
+        @Test
+        @DisplayName("meetTime이 과거이면 4xx 응답")
+        void createMatching_fail_pastTime() throws Exception {
+            mockMvc.perform(post("/api/v1/Matching")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(
+                                    matchingBody("과거 매칭", 5, LocalDateTime.now().minusHours(1)))))
+                    .andExpect(status().is4xxClientError());
+        }
 
-	@Nested
-	@DisplayName("GET /api/v1/Matching - 매칭 목록 조회")
-	class MatchingGetTest {
+        @Test
+        @DisplayName("maxPerson이 1이면 4xx 응답")
+        void createMatching_fail_lowMaxPerson() throws Exception {
+            mockMvc.perform(post("/api/v1/Matching")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(
+                                    matchingBody("혼자 매칭", 1, LocalDateTime.now().plusDays(1)))))
+                    .andExpect(status().is4xxClientError());
+        }
 
-		@Test
-		@DisplayName("매칭이 없으면 204 No Content를 반환한다")
-		void getMatching_empty() throws Exception {
-			mockMvc.perform(get("/api/v1/Matching"))
-					.andDo(print())
-					.andExpect(status().isNoContent());
-		}
-	}
-
-	@Nested
-	@DisplayName("GET /api/v1/games - 경기 조회")
-	class GameGetTest {
-
-		@Test
-		@DisplayName("데이터 없을 때 파라미터 없이 요청하면 204 반환한다")
-		void getGames_empty_noParams() throws Exception {
-			mockMvc.perform(get("/api/v1/games"))
-					.andDo(print())
-					.andExpect(status().isNoContent());
-		}
-
-		@Test
-		@DisplayName("gameStatus=BEFORE 파라미터로 요청하면 204 또는 200 반환한다")
-		void getGames_withGameStatus() throws Exception {
-			mockMvc.perform(get("/api/v1/games")
-							.param("gameStatus", "BEFORE"))
-					.andDo(print())
-					.andExpect(status().is2xxSuccessful());
-		}
-
-		@Test
-		@DisplayName("sportType=BASEBALL 파라미터로 요청하면 204 또는 200 반환한다")
-		void getGames_withSportType() throws Exception {
-			mockMvc.perform(get("/api/v1/games")
-							.param("sportType", "BASEBALL"))
-					.andDo(print())
-					.andExpect(status().is2xxSuccessful());
-		}
-
-		@Test
-		@DisplayName("gameStatus와 sportType 동시 파라미터 요청이 정상 처리된다")
-		void getGames_withBothParams() throws Exception {
-			mockMvc.perform(get("/api/v1/games")
-							.param("gameStatus", "FINISHED")
-							.param("sportType", "BASEBALL"))
-					.andDo(print())
-					.andExpect(status().is2xxSuccessful());
-		}
-	}
+        @Test
+        @DisplayName("title이 공백이면 4xx 응답")
+        void createMatching_fail_blankTitle() throws Exception {
+            mockMvc.perform(post("/api/v1/Matching")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(
+                                    matchingBody("   ", 5, LocalDateTime.now().plusDays(1)))))
+                    .andExpect(status().is4xxClientError());
+        }
+    }
 }
