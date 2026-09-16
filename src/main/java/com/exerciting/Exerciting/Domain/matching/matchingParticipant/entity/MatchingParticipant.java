@@ -2,6 +2,7 @@ package com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity;
 
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.user.entity.User;
+import com.exerciting.Exerciting.Exception.InvalidInputException;
 import com.exerciting.Exerciting.Infrastructure.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -25,6 +26,7 @@ public class MatchingParticipant extends BaseEntity {
     private Matching matching;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ParticipantStatus status;
 
     private LocalDateTime lastReadAt;
@@ -39,20 +41,24 @@ public class MatchingParticipant extends BaseEntity {
     public void updateLastReadAt(LocalDateTime time) {
         this.lastReadAt = time;
     }
-
     public void leave() {
+        if (this.status != ParticipantStatus.JOINED) {
+            throw new InvalidInputException();
+        }
         this.status = ParticipantStatus.LEFT;
     }
 
     public void markAttended() {
+        if (this.status != ParticipantStatus.JOINED) {
+            throw new InvalidInputException();
+        }
         this.status = ParticipantStatus.ATTENDED;
     }
 
     public void markNoShow() {
+        if (this.status != ParticipantStatus.JOINED) {
+            throw new InvalidInputException();
+        }
         this.status = ParticipantStatus.NO_SHOW;
-    }
-
-    public boolean isActive() {
-        return this.status == ParticipantStatus.JOINED;
     }
 }

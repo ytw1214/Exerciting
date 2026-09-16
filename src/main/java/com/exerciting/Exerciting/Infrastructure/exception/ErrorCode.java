@@ -21,10 +21,13 @@ public enum ErrorCode {
     //MatchingChatRoom
     MATCHING_CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 채팅방을 찾을 수 없습니다."),
 
+    //Team
+    TEAM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 팀을 찾을 수 없습니다."),
+
     INVALID_INPUT(HttpStatus.BAD_REQUEST,"잘못된 입력입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"서버 오류가 발생했습니다."),
 
-    CRAWLING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "크롤링 중 오류가 발생했습니다."),
+    CRAWLING_ERROR(HttpStatus.BAD_GATEWAY, "크롤링 중 오류가 발생했습니다."),
     UNSUPPORTEDYEAR_ERROR(HttpStatus.BAD_REQUEST,"지원하지 않는 연도입니다. 2000년부터 현재 연도까지 조회 가능합니다.");
 
     private final HttpStatus status;

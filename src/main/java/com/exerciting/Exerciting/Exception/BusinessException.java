@@ -4,7 +4,7 @@ import com.exerciting.Exerciting.Infrastructure.exception.ErrorCode;
 import lombok.Getter;
 
 @Getter
-public class BusinessException extends RuntimeException {
+public abstract class BusinessException extends RuntimeException {
     private final ErrorCode errorCode;
 
     protected BusinessException(ErrorCode errorCode) {
