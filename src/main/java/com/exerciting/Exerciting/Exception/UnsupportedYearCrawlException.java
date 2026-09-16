@@ -4,11 +4,8 @@ import com.exerciting.Exerciting.Infrastructure.exception.ErrorCode;
 import lombok.Getter;
 
 @Getter
-public class UnsupportedYearCrawlException extends RuntimeException {
-    private final ErrorCode errorCode;
-
+public class UnsupportedYearCrawlException extends BusinessException {
     public UnsupportedYearCrawlException() {
-        super(ErrorCode.UNSUPPORTEDYEAR_ERROR.getMessage());
-        this.errorCode = ErrorCode.UNSUPPORTEDYEAR_ERROR;
+        super(ErrorCode.UNSUPPORTEDYEAR_ERROR);
     }
 }
