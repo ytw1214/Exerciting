@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(indexes = @Index(
+        name = "idx_chat_room_send_at",
+        columnList = "chatroom_id, send_at"))
 public class MatchingChat {
 
     @Id
