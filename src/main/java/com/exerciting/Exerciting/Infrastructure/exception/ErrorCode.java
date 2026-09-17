@@ -13,6 +13,12 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(HttpStatus.CONFLICT,"이미 사용중인 이메일 입니다."),
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT,"이미 사용중인 닉네임 입니다."),
 
+    AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),
+    ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+
+    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다. 다시 로그인해주세요."),
+    TOKEN_REUSE_DETECTED(HttpStatus.UNAUTHORIZED, "보안을 위해 로그아웃되었습니다. 다시 로그인해주세요."),
     //Matching
     MATCHING_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 매칭을 찾을 수 없습니다."),
     INVALID_TIME(HttpStatus.BAD_REQUEST,"유효하지 않은 시간입니다."),
