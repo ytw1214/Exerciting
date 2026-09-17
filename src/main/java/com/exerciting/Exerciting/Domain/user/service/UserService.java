@@ -7,9 +7,7 @@ import com.exerciting.Exerciting.Domain.user.dto.response.*;
 import com.exerciting.Exerciting.Domain.user.entity.RefreshToken;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.RefreshTokenRepository;
-import com.exerciting.Exerciting.Exception.DuplicateResourceException;
-import com.exerciting.Exerciting.Exception.InvalidInputException;
-import com.exerciting.Exerciting.Exception.UserNotFoundException;
+import com.exerciting.Exerciting.Exception.*;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Infrastructure.exception.ErrorCode;
 import com.exerciting.Exerciting.Infrastructure.security.JwtTokenProvider;
@@ -68,57 +66,56 @@ public class UserService {
         return UserUpdateResponseDto.of(user.getId());
     }
     @Transactional
-    public TokenResponseDto login(String userId, String pw) {
+    public TokenPairDto login(String userId, String pw) {
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserNotFoundException());
+                .orElseThrow(LoginFailedException::new);
 
         if (!passwordEncoder.matches(pw, user.getPw())) {
-            throw new InvalidInputException();
+            throw new LoginFailedException();
         }
+        return issueTokens(user);
+    }
+    @Transactional(noRollbackFor = TokenReuseDetectedException.class)
+    public TokenPairDto reissue(String refreshToken) {
+        if (!jwtTokenProvider.validateRefreshToken(refreshToken)) {
+            throw new InvalidTokenException();
+        }
+        String userId = jwtTokenProvider.getUserId(refreshToken);
+
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(InvalidTokenException::new);
+        RefreshToken savedToken = refreshTokenRepository.findByUser(user)
+                .orElseThrow(InvalidTokenException::new);
+
+        String incomingHash = jwtTokenProvider.hashToken(refreshToken);
+        if (!savedToken.hasSameHash(incomingHash)) {
+            refreshTokenRepository.delete(savedToken);
+            log.warn("refresh token 재사용 감지 - userId: {}, 세션 강제 무효화", userId);
+            throw new TokenReuseDetectedException();
+        }
+        if (savedToken.isExpired(LocalDateTime.now())) {
+            throw new InvalidTokenException();
+        }
+        return issueTokens(user);
+    }
+    private TokenPairDto issueTokens(User user) {
         String accessToken = jwtTokenProvider.createToken(user.getUserId());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getUserId());
+        String refreshTokenHash = jwtTokenProvider.hashToken(refreshToken);
+        LocalDateTime expiresAt = jwtTokenProvider.getRefreshTokenExpiresAt();
+
         refreshTokenRepository.findByUser(user)
                 .ifPresentOrElse(
-                        token -> token.updateToken(refreshToken, jwtTokenProvider.getRefreshTokenExpiresAt()),
+                        token -> token.updateToken(refreshTokenHash, expiresAt),
                         () -> refreshTokenRepository.save(
                                 RefreshToken.builder()
                                         .user(user)
-                                        .tokenHash(refreshToken)
-                                        .expiresAt(jwtTokenProvider.getRefreshTokenExpiresAt())
+                                        .tokenHash(refreshTokenHash)
+                                        .expiresAt(expiresAt)
                                         .build()
                         )
                 );
-        return new TokenResponseDto(accessToken, refreshToken);
-    }
-    @Transactional
-    public TokenReissuePairDto reissue(String refreshToken) {
-        if (!jwtTokenProvider.validateToken(refreshToken)) {
-            throw new InvalidInputException();
-        }
-        String userId = jwtTokenProvider.getUserId(refreshToken);
-        String incomingHash = jwtTokenProvider.hashToken(refreshToken);
-
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserNotFoundException());
-
-        RefreshToken savedToken = refreshTokenRepository.findByUser(user)
-                .orElseThrow(() -> new InvalidInputException());
-        if (!savedToken.getTokenHash().equals(incomingHash)) {
-            refreshTokenRepository.deleteByUser(user);
-            log.warn("{} refresh token 재사용 감지 - 세션 강제 무효화", userId);
-            throw new InvalidInputException();
-        }
-
-        if (savedToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new InvalidInputException();
-        }
-        String newAccessToken = jwtTokenProvider.createToken(userId);
-        String newRefreshToken = jwtTokenProvider.createRefreshToken(userId);
-        String newRefreshTokenHash = jwtTokenProvider.hashToken(newRefreshToken);
-
-        savedToken.updateToken(newRefreshTokenHash, jwtTokenProvider.getRefreshTokenExpiresAt());
-
-        return new TokenReissuePairDto(newAccessToken, newRefreshToken);
+        return new TokenPairDto(accessToken, refreshToken);
     }
     public UserResponseDto getUser(String userId) {
         User user = userRepository.findByUserId(userId)

@@ -5,8 +5,12 @@ import com.exerciting.Exerciting.Domain.user.dto.request.LoginRequestDto;
 import com.exerciting.Exerciting.Domain.user.dto.request.UserSignUpRequestDto;
 import com.exerciting.Exerciting.Domain.user.dto.request.UserUpdateRequestDto;
 import com.exerciting.Exerciting.Domain.user.dto.response.*;
+import com.exerciting.Exerciting.Domain.user.entity.RefreshToken;
 import com.exerciting.Exerciting.Domain.user.entity.UserDetails;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
+import com.exerciting.Exerciting.Exception.InvalidInputException;
+import com.exerciting.Exerciting.Exception.InvalidTokenException;
+import com.exerciting.Exerciting.Infrastructure.security.RefreshTokenCookieProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -20,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;
-    private static final String REFRESH_TOKEN_COOKIE = "REFERSH_TOKEN";
+    private final RefreshTokenCookieProvider refreshTokenCookieProvider;
 
     @PostMapping("/signup")
     public ResponseEntity<UserSignUpResponseDto> signup(@RequestBody @Valid UserSignUpRequestDto dto) {
@@ -39,8 +43,10 @@ public class UserController {
     }
     @PostMapping("/login")
     public ResponseEntity<TokenResponseDto> login(@RequestBody LoginRequestDto dto) {
-        TokenResponseDto token = userService.login(dto.userId(),dto.password());
-        return ResponseEntity.ok(token);
+        TokenPairDto token = userService.login(dto.userId(),dto.password());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookieProvider.create(token.refreshToken()).toString())
+                .body(new TokenResponseDto(token.accessToken()));
     }
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> getMe(@AuthenticationPrincipal UserDetails userDetails) {
@@ -51,36 +57,18 @@ public class UserController {
     public ResponseEntity<Void> logout(@AuthenticationPrincipal UserDetails userDetails) {
         userService.logout(userDetails.getUserId());
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, expireRefreshTokenCookie().toString())
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookieProvider.expire().toString())
                 .build();
     }
     @PostMapping("/reissue")
-    public ResponseEntity<TokenResponseDto> reissue(@CookieValue(name = "REFRESH_TOKEN", required = false) String refreshToken) {
-        if (refreshToken == null) {
-            return ResponseEntity.status(401).build();
+    public ResponseEntity<TokenResponseDto> reissue(
+            @CookieValue(name = RefreshTokenCookieProvider.COOKIE_NAME, required = false) String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new InvalidTokenException();
         }
-        TokenReissuePairDto tokenPair = userService.reissue(refreshToken);
+        TokenPairDto tokenPair = userService.reissue(refreshToken);
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(tokenPair.refreshToken()).toString())
-                .body(new TokenResponseDto(tokenPair.accessToken(), tokenPair.refreshToken()));
-    }
-    private ResponseCookie buildRefreshTokenCookie(String refreshToken) {
-        return ResponseCookie.from(REFRESH_TOKEN_COOKIE,refreshToken)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
-                .path("/user")
-                .maxAge(java.time.Duration.ofDays(14))
-                .build();
-    }
-
-    private ResponseCookie expireRefreshTokenCookie() {
-        return ResponseCookie.from(REFRESH_TOKEN_COOKIE, "")
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
-                .path("/user")
-                .maxAge(0)
-                .build();
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookieProvider.create(tokenPair.refreshToken()).toString())
+                .body(new TokenResponseDto(tokenPair.accessToken()));
     }
 }

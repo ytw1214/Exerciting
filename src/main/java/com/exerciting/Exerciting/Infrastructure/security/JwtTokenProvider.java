@@ -1,5 +1,6 @@
 package com.exerciting.Exerciting.Infrastructure.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -9,76 +10,99 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HexFormat;
 import java.util.UUID;
 
 @Component
 @Slf4j
 public class JwtTokenProvider {
 
+    private static final String TOKEN_TYPE_CLAIM = "token_type";
+    private static final String ACCESS = "access";
+    private static final String REFRESH = "refresh";
+
+    private static final Duration ACCESS_TOKEN_VALIDITY = Duration.ofMinutes(30);
+    private static final Duration REFRESH_TOKEN_VALIDITY = Duration.ofDays(14);
+
     private final Key key;
-    private final long accessTokenExpiration = 1000 * 60 * 30; // 30분
-    private final long refreshTokenExpiration = 1000L * 60 * 60 * 24 * 14;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secret) {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
 
     public String createToken(String userId) {
+        return build(userId, ACCESS, ACCESS_TOKEN_VALIDITY);
+    }
+
+    public String createRefreshToken(String userId) {
+        return build(userId, REFRESH, REFRESH_TOKEN_VALIDITY);
+    }
+
+    private String build(String userId, String type, Duration validity) {
+        Date now = new Date();
         return Jwts.builder()
                 .setId(UUID.randomUUID().toString())
                 .setSubject(userId)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
+                .claim(TOKEN_TYPE_CLAIM, type)
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + validity.toMillis()))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
-    public String createRefreshToken(String userId) {
-        return Jwts.builder()
-                .setSubject(userId)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+    public String getUserId(String token) {
+        return parse(token).getSubject();
     }
 
-    public String getUserId(String token) {
+    /** API 요청과 WebSocket 연결에는 access 토큰만 허용한다. */
+    public boolean validateAccessToken(String token) {
+        return hasType(token, ACCESS);
+    }
+
+    /** 재발급(/user/reissue)에는 refresh 토큰만 허용한다. */
+    public boolean validateRefreshToken(String token) {
+        return hasType(token, REFRESH);
+    }
+
+    private boolean hasType(String token, String expectedType) {
+        try {
+            Claims claims = parse(token);
+            return expectedType.equals(claims.get(TOKEN_TYPE_CLAIM, String.class));
+        } catch (JwtException | IllegalArgumentException e) {
+            log.debug("유효하지 않은 토큰: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    private Claims parse(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+                .getBody();
     }
 
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
-            log.info("토큰 검증 성공");
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
+    public Duration getRefreshTokenValidity() {
+        return REFRESH_TOKEN_VALIDITY;
     }
+
     public LocalDateTime getRefreshTokenExpiresAt() {
-        return LocalDateTime.now().plusWeeks(2);
+        return LocalDateTime.now().plus(REFRESH_TOKEN_VALIDITY);
     }
 
+    /** DB에는 refresh 토큰 원문 대신 SHA-256 해시(지문)만 저장한다. */
     public String hashToken(String token) {
         try {
-            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = digest.digest(token.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (java.security.NoSuchAlgorithmException e) {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hashBytes);
+        } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("해시 알고리즘을 찾을 수 없습니다.", e);
         }
     }
