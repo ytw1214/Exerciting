@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
 
 @Entity
@@ -33,5 +35,18 @@ public class RefreshToken {
     public void updateToken(String tokenHash, LocalDateTime expiresAt) {
         this.tokenHash = tokenHash;
         this.expiresAt = expiresAt;
+    }
+
+    public boolean hasSameHash(String otherHash) {
+        if (otherHash == null) {
+            return false;
+        }
+        return MessageDigest.isEqual(
+                this.tokenHash.getBytes(StandardCharsets.UTF_8),
+                otherHash.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public boolean isExpired(LocalDateTime now) {
+        return expiresAt.isBefore(now);
     }
 }

@@ -45,7 +45,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
                 if(accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
                     String token = accessor.getFirstNativeHeader("Authorization");
-                    if(token == null || !jwtTokenProvider.validateToken(token.replace("Bearer ", ""))) {
+                    if(token == null || !jwtTokenProvider.validateAccessToken(token.replace("Bearer ", ""))) {
                         throw new MessagingException("인증에 실패했습니다.");
                     }
                     String userId = jwtTokenProvider.getUserId(token.replace("Bearer ", ""));
@@ -54,6 +54,5 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 return message;
             }
         });
-
     }
 }

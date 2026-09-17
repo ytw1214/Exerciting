@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailServiceImpl userDetailService;
+    private final JwtSecurityErrorHandler securityErrorHandler;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -26,14 +28,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(securityErrorHandler)   // 401
+                        .accessDeniedHandler(securityErrorHandler))       // 403
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/chat_test.html", "/ws/**", "/css/**", "/js/**","/ws-raw/**").permitAll()
-                        .requestMatchers("/user/login", "/user/signup", "/user/reissue").permitAll()   
+                        .requestMatchers("/chat_test.html", "/ws/**", "/ws-raw/**", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/user/login", "/user/signup", "/user/reissue").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/games/**", "/games/**").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
@@ -43,5 +50,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 }

@@ -127,7 +127,7 @@ class ExercitingApplicationTests {
             body.put("meetTime", LocalDateTime.now().plusDays(1).toString());
             body.put("gameId", 1L);
 
-            mockMvc.perform(post("/api/v1/Matching")
+            mockMvc.perform(post("/api/v1/matching")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(body)))
                     .andExpect(status().isUnauthorized());
@@ -136,7 +136,7 @@ class ExercitingApplicationTests {
         @Test
         @DisplayName("인증 없이 매칭 목록을 조회하면 401을 반환한다")
         void getMatching_withoutAuth() throws Exception {
-            mockMvc.perform(get("/api/v1/Matching"))
+            mockMvc.perform(get("/api/v1/matching"))
                     .andExpect(status().isUnauthorized());
         }
     }
