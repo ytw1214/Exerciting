@@ -87,6 +87,7 @@ class MatchingChatPerformanceTest {
         );
         createRooms();
         insertMessages();
+        jdbcTemplate.execute("ANALYZE TABLE matching_chat");
     }
 
     private void createRooms() {
@@ -111,7 +112,7 @@ class MatchingChatPerformanceTest {
     }
 
     private void insertMessages() {
-        long insertCountBefore = globalStatus("Com_select");
+        long insertCountBefore = globalStatus("Com_insert");
         long start = System.nanoTime();
 
         List<MatchingChat> chunk = new ArrayList<>(CHUNK_SIZE);
@@ -174,6 +175,13 @@ class MatchingChatPerformanceTest {
         matchingChatRepository.findByMatchingChatRoomOrderBySendAtDesc(targetRoom, pageable);
         log.info("[MySQL] 조회 1회당 SELECT 문: {}회", globalStatus("Com_select") - selectBefore);
 
+        String hibernateSql = "SELECT mc.id, mc.chatroom_id, mc.message, mc.send_at, "
+                + "s.id, s.email, s.name, s.nickname, s.pw, s.user_id "
+                + "FROM matching_chat mc JOIN users s ON s.id = mc.sender_id "
+                + "WHERE mc.chatroom_id = ? ORDER BY mc.send_at DESC LIMIT 51";
+        List<String> plan = jdbcTemplate.queryForList(
+                "EXPLAIN FORMAT=TREE " + hibernateSql, String.class, targetRoom.getId());
+        log.info("[MySQL] 측정 시점 실행 계획:\n{}", String.join("\n", plan));
         // 1) JPA 레포지토리 조회
         double avg = QueryTimer.averageMillis(() ->
                 matchingChatRepository.findByMatchingChatRoomOrderBySendAtDesc(targetRoom, pageable));
