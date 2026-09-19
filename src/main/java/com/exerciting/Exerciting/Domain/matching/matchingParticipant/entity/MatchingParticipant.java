@@ -2,7 +2,9 @@ package com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity;
 
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.user.entity.User;
+import com.exerciting.Exerciting.Exception.AlreadyJoinedException;
 import com.exerciting.Exerciting.Exception.InvalidInputException;
+import com.exerciting.Exerciting.Exception.InvalidStateTransitionException;
 import com.exerciting.Exerciting.Infrastructure.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -14,13 +16,21 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(
+        name = "matching_participant",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_matching_participant_matching_user",
+                columnNames = {"matching_id", "user_id"})
+)
 public class MatchingParticipant extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id")
     private User user;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="matching_id")
     private Matching matching;
@@ -43,21 +53,32 @@ public class MatchingParticipant extends BaseEntity {
     }
     public void leave() {
         if (this.status != ParticipantStatus.JOINED) {
-            throw new InvalidInputException();
+            throw new InvalidStateTransitionException();
         }
         this.status = ParticipantStatus.LEFT;
     }
 
+    public void rejoin () {
+        if (this.status == ParticipantStatus.JOINED) {
+            throw new AlreadyJoinedException();
+        }
+        if (this.status != ParticipantStatus.LEFT) {
+            throw new InvalidStateTransitionException();
+        }
+        this.status = ParticipantStatus.JOINED;
+    }
+
+
     public void markAttended() {
         if (this.status != ParticipantStatus.JOINED) {
-            throw new InvalidInputException();
+            throw new InvalidStateTransitionException();
         }
         this.status = ParticipantStatus.ATTENDED;
     }
 
     public void markNoShow() {
         if (this.status != ParticipantStatus.JOINED) {
-            throw new InvalidInputException();
+            throw new InvalidStateTransitionException();
         }
         this.status = ParticipantStatus.NO_SHOW;
     }
