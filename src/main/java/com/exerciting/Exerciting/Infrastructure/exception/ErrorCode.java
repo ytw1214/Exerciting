@@ -21,6 +21,13 @@ public enum ErrorCode {
     TOKEN_REUSE_DETECTED(HttpStatus.UNAUTHORIZED, "보안을 위해 로그아웃되었습니다. 다시 로그인해주세요."),
     //Matching
     MATCHING_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 매칭을 찾을 수 없습니다."),
+    MATCHING_FULL(HttpStatus.CONFLICT,"정원이 가득 찬 매칭입니다."),
+    MATCHING_NOT_RECRUITING(HttpStatus.CONFLICT,"모집 중인 매칭이 아닙니다."),
+    ALREADY_JOINED(HttpStatus.CONFLICT,"이미 참가한 매칭입니다."),
+    NOT_PARTICIPANT(HttpStatus.BAD_REQUEST,"참가하지 않은 매칭입니다."),
+    HOST_CANNOT_LEAVE(HttpStatus.BAD_REQUEST,"호스트는 매칭을 나갈 수 없습니다. 매칭 취소를 이용해주세요."),
+    INVALID_STATE_TRANSITION(HttpStatus.CONFLICT,"현재 매칭 상태에서는 할 수 없는 요청입니다."),
+    INVALID_CAPACITY(HttpStatus.BAD_REQUEST,"정원은 2명 이상이어야 하며, 현재 참가 인원보다 적을 수 없습니다."),
     INVALID_TIME(HttpStatus.BAD_REQUEST,"유효하지 않은 시간입니다."),
     DISMATCHED_SIZE(HttpStatus.BAD_REQUEST,"인원 수가 맞지 않습니다."),
 
