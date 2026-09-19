@@ -20,6 +20,7 @@ import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingRequestDto
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRepository;
 import com.exerciting.Exerciting.Exception.*;
+import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -72,7 +73,13 @@ public class MatchingService {
                         .matching(savedMatching)
                         .build()
         );
-        savedMatching.refreshCapacityStatus(1);
+        matchingParticipantRepository.save(
+                MatchingParticipant.builder()
+                        .user(host)
+                        .matching(savedMatching)
+                        .build()
+        );
+        savedMatching.refreshCapacityStatus(1 );
         log.info("매칭 생성 완료 - matchingId: {}, host: {}", savedMatching.getId(), host.getUserId());
         return MatchingCreateResponseDto.of(savedMatching, chatRoom.getId(), 1);
     }
@@ -87,23 +94,23 @@ public class MatchingService {
                 .orElseThrow(MatchingNotFoundException::new);
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
-
+        if(!matching.isRecruiting()) {
+            throw new InvalidInputException();
+        }
         long currentCount = matchingParticipantRepository.countByMatchingAndStatus(matching, ParticipantStatus.JOINED);
-        // 상태와 인원을 한 번에 검증한다. 락으로 동시성을, 이 검증으로 도메인 불변식을 지킨다.
         matching.validateJoinable(currentCount);
 
-        matchingParticipantRepository.findByMatchingAndUser(matching, user)
-                .ifPresentOrElse(
-                        MatchingParticipant::rejoin,   // 나갔던 사람은 기존 행을 되살린다
-                        () -> matchingParticipantRepository.save(
-                                MatchingParticipant.builder()
-                                        .user(user)
-                                        .matching(matching)
-                                        .build()));
+        matchingParticipantRepository.findByMatchingAndUser(matching,user)
+                        .ifPresentOrElse(
+                                MatchingParticipant::rejoin,
+                                ()->matchingParticipantRepository.save(
+                                        MatchingParticipant.builder()
+                                                .user(user)
+                                                .matching(matching)
+                                                .build()));
 
         matching.refreshCapacityStatus(currentCount + 1);
         log.info("매칭 참가 - matchingId: {}, userId: {}, 현재인원: {}/{}", matchingId, userId, currentCount + 1, matching.getMaxPerson());
-        return MatchingStatusResponseDto.of(matching, currentCount + 1);
     }
 
     public Page<MatchingQueryResponseDto> getAllMatching(int page, int size) {
@@ -207,13 +214,12 @@ public class MatchingService {
                 .orElseThrow(() -> new MatchingNotFoundException());
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException());
-        if (matching.isHost(userId)) {
-            // 호스트는 나갈 수 없다. 매칭 자체를 취소해야 한다.
+        if(matching.isHost(userId)) {
             throw new HostCannotLeaveException();
         }
         MatchingParticipant participant = matchingParticipantRepository
-                .findByMatchingAndUserAndStatus(matching, user, ParticipantStatus.JOINED)
-                .orElseThrow(NotParticipantException::new);
+                .findByMatchingAndUser(matching, user)
+                .orElseThrow(InvalidInputException::new);
         // 기존: matchingParticipantRepository.delete(participant) — 이탈 이력이 사라져
         // "마감 직전 이탈" 같은 평판 신호를 만들 근거 데이터가 없어짐. 상태 전환으로 대체.
         participant.leave();
