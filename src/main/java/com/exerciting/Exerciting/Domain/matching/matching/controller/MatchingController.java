@@ -1,13 +1,12 @@
 package com.exerciting.Exerciting.Domain.matching.matching.controller;
 
+import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingCreateResponseDto;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingQueryResponseDto;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingRequestDto;
-import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingStatusResponseDto;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingCustomCond;
 import com.exerciting.Exerciting.Domain.matching.matching.service.MatchingService;
-import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingResponseDto;
-import com.exerciting.Exerciting.Domain.user.entity.UserDetails;
-import com.exerciting.Exerciting.Domain.user.service.UserService;
+import com.exerciting.Exerciting.Infrastructure.security.LoginUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -22,72 +21,63 @@ import java.util.List;
 @RequestMapping("/api/v1/matching")
 public class MatchingController {
     private final MatchingService matchingService;
-    private final UserService userService;
+
     @PostMapping
-    public ResponseEntity<Long> saveMatching(
+    public ResponseEntity<MatchingCreateResponseDto> saveMatching(
             @RequestBody MatchingRequestDto dto,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
-        Long matchingId = matchingService.createMatching(dto, userId);
-        return ResponseEntity.ok(matchingId);
+            @AuthenticationPrincipal LoginUser loginUser) {
+        return ResponseEntity.ok(matchingService.createMatching(dto, loginUser.getId()));
     }
+
     @GetMapping
     public ResponseEntity<Page<MatchingQueryResponseDto>> getMatching(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(matchingService.getAllMatching(page,size));
+        return ResponseEntity.ok(matchingService.getAllMatching(page, size));
     }
+
     @PostMapping("/{matchingId}/join")
-    public ResponseEntity<Void> joinMatching(
+    public ResponseEntity<MatchingStatusResponseDto> joinMatching(
             @PathVariable Long matchingId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
-        matchingService.joinMatching(matchingId, userId);
-        return ResponseEntity.ok().build();
+            @AuthenticationPrincipal LoginUser loginUser) {
+        return ResponseEntity.ok(matchingService.joinMatching(matchingId, loginUser.getId()));
     }
+
     @PatchMapping("/{matchingId}/reopen")
-    public ResponseEntity<Void> reopenMatching(
+    public ResponseEntity<MatchingStatusResponseDto> reopenMatching(
             @PathVariable Long matchingId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
-        matchingService.reopenMatching(matchingId, userId);
-        return ResponseEntity.ok().build();
+            @AuthenticationPrincipal LoginUser loginUser) {
+        return ResponseEntity.ok(matchingService.reopenMatching(matchingId, loginUser.getId()));
     }
-    @PatchMapping("{matchingId}/close")
-    public ResponseEntity<Void> closeMatching(
+
+    @PatchMapping("/{matchingId}/close")
+    public ResponseEntity<MatchingStatusResponseDto> closeMatching(
             @PathVariable Long matchingId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
-        matchingService.closeMatching(matchingId, userId);
-        return ResponseEntity.ok().build();
+            @AuthenticationPrincipal LoginUser loginUser) {
+        return ResponseEntity.ok(matchingService.closeMatching(matchingId, loginUser.getId()));
     }
 
     @PatchMapping("/{matchingId}")
-    public ResponseEntity<Void> updateMatching(
+    public ResponseEntity<MatchingStatusResponseDto> updateMatching(
             @PathVariable Long matchingId,
             @RequestBody MatchingRequestDto dto,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
-        matchingService.updateMatching(matchingId, userId, dto);
-        return ResponseEntity.ok().build();
+            @AuthenticationPrincipal LoginUser loginUser) {
+        return ResponseEntity.ok(matchingService.updateMatching(matchingId, loginUser.getId(), dto));
     }
 
     @DeleteMapping("/{matchingId}")
-    public ResponseEntity<Void> deleteMatching(
+    public ResponseEntity<MatchingStatusResponseDto> deleteMatching(
             @PathVariable Long matchingId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
-        matchingService.deleteMatching(matchingId, userId);
-        return ResponseEntity.ok().build();
+            @AuthenticationPrincipal LoginUser loginUser) {
+        return ResponseEntity.ok(matchingService.deleteMatching(matchingId, loginUser.getId()));
     }
+
     @DeleteMapping("/{matchingId}/leave")
-    public ResponseEntity<Void> leaveMatching(
+    public ResponseEntity<MatchingStatusResponseDto> leaveMatching(
             @PathVariable Long matchingId,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
-        matchingService.leaveMatching(matchingId, userId);
-        return ResponseEntity.ok().build();
+            @AuthenticationPrincipal LoginUser loginUser) {
+        return ResponseEntity.ok(matchingService.leaveMatching(matchingId, loginUser.getId()));
     }
 
     @GetMapping("/search")
@@ -95,13 +85,8 @@ public class MatchingController {
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String description,
             @RequestParam(required = false) String teamName,
-            @RequestParam(required = false) LocalDateTime meetTime,
-            @AuthenticationPrincipal UserDetails userDetails) {
-        Long userId = userService.getUserByUserId(userDetails.getUserId()).getId();
+            @RequestParam(required = false) LocalDateTime meetTime) {
         MatchingCustomCond cond = new MatchingCustomCond(title, description, teamName, meetTime);
-        List<MatchingQueryResponseDto> matching = matchingService.searchDetailMatching(cond, userId);
-
-        return ResponseEntity.ok(matching);
+        return ResponseEntity.ok(matchingService.searchDetailMatching(cond));
     }
-
 }
