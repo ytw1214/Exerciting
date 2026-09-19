@@ -17,6 +17,6 @@ public interface MatchingParticipantRepository extends JpaRepository<MatchingPar
 
     long countByMatchingAndStatus(Matching matching, ParticipantStatus status);
     Optional<MatchingParticipant> findByMatchingAndUser(Matching matching, User user);
-
+    Optional<MatchingParticipant> findByMatchingAndUserAndStatus(Matching matching, User user, ParticipantStatus status);
     List<MatchingParticipant> findByMatchingAndStatus(Matching matching, ParticipantStatus status);
 }
