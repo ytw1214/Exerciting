@@ -18,6 +18,7 @@ import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingRequestDto
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRepository;
 import com.exerciting.Exerciting.Exception.*;
+import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -70,7 +71,13 @@ public class MatchingService {
                         .matching(savedMatching)
                         .build()
         );
-        savedMatching.checkAndFull(1);
+        matchingParticipantRepository.save(
+                MatchingParticipant.builder()
+                        .user(host)
+                        .matching(savedMatching)
+                        .build()
+        );
+        savedMatching.refreshCapacityStatus(1 );
         log.info("매칭 생성 완료 - matchingId: {}, host: {}", savedMatching.getId(), host.getUserId());
         return savedMatching.getId();
     }
@@ -82,24 +89,26 @@ public class MatchingService {
     @Transactional
     public void joinMatching(Long matchingId, Long userId) {
         Matching matching = matchingRepository.findByIdWithLock(matchingId)
-                .orElseThrow(()->new MatchingNotFoundException());
+                .orElseThrow(MatchingNotFoundException::new);
+        User user = userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
         if(!matching.isRecruiting()) {
             throw new InvalidInputException();
         }
-        User user = userRepository.findById(userId)
-                .orElseThrow(()->new UserNotFoundException());
-        if(matchingParticipantRepository.existsByMatchingAndUserAndStatus(matching, user, ParticipantStatus.JOINED)) {
-            throw new InvalidInputException();
-        }
-        matchingParticipantRepository.save(
-                MatchingParticipant.builder()
-                        .user(user)
-                        .matching(matching)
-                        .build()
-        );
-        long count = matchingParticipantRepository.countByMatchingAndStatus(matching, ParticipantStatus.JOINED);
-        matching.checkAndFull(count);
-        log.info("매칭 참가 - matchingId: {}, userId: {}, 현재인원: {}/{}", matchingId, userId, count, matching.getMaxPerson());
+        long currentCount = matchingParticipantRepository.countByMatchingAndStatus(matching, ParticipantStatus.JOINED);
+        matching.validateJoinable(currentCount);
+
+        matchingParticipantRepository.findByMatchingAndUser(matching,user)
+                        .ifPresentOrElse(
+                                MatchingParticipant::rejoin,
+                                ()->matchingParticipantRepository.save(
+                                        MatchingParticipant.builder()
+                                                .user(user)
+                                                .matching(matching)
+                                                .build()));
+
+        matching.refreshCapacityStatus(currentCount + 1);
+        log.info("매칭 참가 - matchingId: {}, userId: {}, 현재인원: {}/{}", matchingId, userId, currentCount + 1, matching.getMaxPerson());
     }
 
     public Page<MatchingQueryResponseDto> getAllMatching(int page, int size) {
@@ -152,23 +161,24 @@ public class MatchingService {
     @Transactional
     public void updateMatching(Long matchingId, Long currentUserId, MatchingRequestDto changedDto) {
         Matching matching = findMatchingByHost(matchingId, currentUserId);
+        long currentCount = matchingParticipantRepository.countByMatchingAndStatus(matching, ParticipantStatus.JOINED);
         matching.update(
                 changedDto.getTitle(),
                 changedDto.getDescription(),
                 changedDto.getMaxPerson(),
-                changedDto.getMeetTime());
+                changedDto.getMeetTime(),
+                currentCount);
     }
     @Transactional
     public void reopenMatching(Long matchingId, Long currentUserId) {
         Matching matching = findMatchingByHost(matchingId,currentUserId);
-        matching.reopen();
+        long currentCount = matchingParticipantRepository.countByMatchingAndStatus(matching, ParticipantStatus.JOINED);
+        matching.reopen(currentCount);
         log.info("매칭 - {} 재오픈",matching.getId());
     }
     @Transactional(readOnly = true)
     public List<MatchingQueryResponseDto> searchDetailMatching(MatchingCustomCond cond, Long currentUserId) {
-        if (!userRepository.existsById(currentUserId)) {
-            throw new UnauthorizedUserException();
-        }
+
         return matchingRepository.search(cond);
 
     }
@@ -176,7 +186,7 @@ public class MatchingService {
     private Matching findMatchingByHost(Long matchingId, Long currentUserId) {
         Matching matching = matchingRepository.findById(matchingId)
                 .orElseThrow(() -> new MatchingNotFoundException());
-        if (!matching.getUser().getId().equals(currentUserId)) {
+        if (!matching.isHost(currentUserId)) {
             log.warn("매칭 접근 권한 없음 - matchingId: {}, userId: {}", matchingId, currentUserId);
             throw new UnauthorizedUserException();
         }
@@ -189,17 +199,17 @@ public class MatchingService {
                 .orElseThrow(() -> new MatchingNotFoundException());
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException());
-        if(matching.getUser().getId().equals(userId)) {
-            throw new UnauthorizedUserException();
+        if(matching.isHost(userId)) {
+            throw new HostCannotLeaveException();
         }
         MatchingParticipant participant = matchingParticipantRepository
-                .findByMatchingAndUserAndStatus(matching, user, ParticipantStatus.JOINED)
+                .findByMatchingAndUser(matching, user)
                 .orElseThrow(InvalidInputException::new);
         // 기존: matchingParticipantRepository.delete(participant) — 이탈 이력이 사라져
         // "마감 직전 이탈" 같은 평판 신호를 만들 근거 데이터가 없어짐. 상태 전환으로 대체.
         participant.leave();
         long count = matchingParticipantRepository.countByMatchingAndStatus(matching, ParticipantStatus.JOINED);
-        matching.checkAndReopen(count);
+        matching.refreshCapacityStatus(count);
         log.info("유저 {} - 매칭 {} 나감", userId, matchingId);
     }
     @Transactional(readOnly = true)

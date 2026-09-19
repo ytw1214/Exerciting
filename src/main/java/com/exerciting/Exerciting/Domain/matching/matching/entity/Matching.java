@@ -3,7 +3,7 @@ package com.exerciting.Exerciting.Domain.matching.matching.entity;
 import com.exerciting.Exerciting.Domain.game.entity.Game;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.MatchingChatRoom;
 import com.exerciting.Exerciting.Domain.user.entity.User;
-import com.exerciting.Exerciting.Exception.InvalidInputException;
+import com.exerciting.Exerciting.Exception.*;
 import com.exerciting.Exerciting.Infrastructure.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name="matching")
 public class Matching extends BaseEntity {
+    public static final int MIN_PERSON = 2;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -50,50 +52,64 @@ public class Matching extends BaseEntity {
         this.status = MatchingStatus.RECRUITING;
     }
 
-    public void update(String title, String description, int maxPerson, LocalDateTime meetTime) {
-        if (maxPerson < 2) {
-            throw new InvalidInputException();
+    public void validateJoinable(long currentCount) {
+        if (status != MatchingStatus.RECRUITING && status != MatchingStatus.FULL) {
+            throw new MatchingNotRecruitingException();
         }
-
+        if (currentCount >= maxPerson) {
+            throw new MatchingFullException();
+        }
+    }
+    public void refreshCapacityStatus(long currentCount) {
+        if(status != MatchingStatus.RECRUITING && status != MatchingStatus.FULL) {
+            return;
+        }
+        this.status = (currentCount >= maxPerson)
+                ? MatchingStatus.FULL
+                : MatchingStatus.RECRUITING;
+    }
+    public void update(String title, String description, int maxPerson, LocalDateTime meetTime, long currentCount) {
+        if (isTerminal()) {
+            throw new InvalidStateTransitionException();
+        }
+        if(maxPerson < MIN_PERSON || maxPerson < currentCount) {
+            throw new InvalidCapacityException();
+        }
+        if(meetTime == null || meetTime.isBefore(LocalDateTime.now())) {
+            throw new InvalidTimeException();
+        }
         this.title = title;
         this.description = description;
         this.maxPerson = maxPerson;
         this.meetTime = meetTime;
-    }
-    public void checkAndFull(long currentCount) {
-        if(currentCount >= this.getMaxPerson()) {
-            this.status = MatchingStatus.FULL;
-        }
-    }
-    public void checkAndReopen(long currentCount) {
-        if(this.status == MatchingStatus.FULL && currentCount < this.maxPerson) {
-            this.status = MatchingStatus.RECRUITING;
-        }
+        refreshCapacityStatus(currentCount);
     }
     public void close() {
-        if(this.status == MatchingStatus.CLOSED || isTerminal()) {
-            throw new InvalidInputException();
+        if(status != MatchingStatus.RECRUITING && status != MatchingStatus.FULL) {
+            throw new InvalidStateTransitionException();
         }
         this.status = MatchingStatus.CLOSED;
     }
-
+    public void reopen(long currentCount) {
+        if(status != MatchingStatus.CLOSED) {
+            throw new InvalidStateTransitionException();
+        }
+        if(currentCount >= maxPerson) {
+            throw new MatchingFullException();
+        }
+        this.status = MatchingStatus.RECRUITING;
+    }
     public void complete() {
         if(isTerminal()) {
-            throw new InvalidInputException();
+            throw new InvalidStateTransitionException();
         }
         this.status = MatchingStatus.COMPLETED;
     }
     public void cancel() {
-        if(this.status == MatchingStatus.COMPLETED) {
-            throw new InvalidInputException();
+        if(isTerminal()) {
+            throw new InvalidStateTransitionException();
         }
         this.status = MatchingStatus.CANCELLED;
-    }
-    public void reopen() {
-        if(this.status==MatchingStatus.RECRUITING) {
-            throw new InvalidInputException();
-        }
-        this.status = MatchingStatus.RECRUITING;
     }
     public boolean isRecruiting() {
         return this.status == MatchingStatus.RECRUITING;
@@ -102,4 +118,8 @@ public class Matching extends BaseEntity {
     public boolean isTerminal() {
         return this.status == MatchingStatus.COMPLETED || this.status == MatchingStatus.CANCELLED;
     }
+    public boolean isHost(Long userId) {
+        return this.user != null && this.user.getId().equals(userId);
+    }
+
 }
