@@ -2,7 +2,6 @@ package com.exerciting.Exerciting.Domain.matching.matchingParticipant.controller
 
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.dto.MatchingParticipantDto;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.service.MatchingParticipantService;
-import com.exerciting.Exerciting.Domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +16,7 @@ import java.util.List;
 @RequestMapping("/api/v1/participant")
 public class MatchingParticipantController {
     private final MatchingParticipantService matchingParticipantService;
-    private final UserService userService;
+
     @GetMapping("/{matchingId}")
     public ResponseEntity<List<MatchingParticipantDto>> getParticipants(
             @PathVariable Long matchingId) {
