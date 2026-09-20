@@ -24,7 +24,10 @@ import java.util.UUID;
 @Slf4j
 public class JwtTokenProvider {
 
+    // 토큰에 붙이는 "이름표". access 토큰과 refresh 토큰을 구분한다.
     private static final String TOKEN_TYPE_CLAIM = "token_type";
+    // 사용자 PK. 숫자를 문자열로 담아 파싱 방식에 따른 타입 문제를 피한다.
+    private static final String USER_PK_CLAIM = "uid";
     private static final String ACCESS = "access";
     private static final String REFRESH = "refresh";
 
@@ -37,27 +40,53 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
 
-    public String createToken(String userId) {
-        return build(userId, ACCESS, ACCESS_TOKEN_VALIDITY);
-    }
-
-    public String createRefreshToken(String userId) {
-        return build(userId, REFRESH, REFRESH_TOKEN_VALIDITY);
-    }
-
-    private String build(String userId, String type, Duration validity) {
-        Date now = new Date();
+    /** access 토큰에는 사용자 PK를 함께 담아, 요청마다 DB를 조회하지 않게 한다. */
+    public String createToken(String userId, Long userPk) {
         return Jwts.builder()
+                .claim(USER_PK_CLAIM, String.valueOf(userPk))
                 .setId(UUID.randomUUID().toString())
                 .setSubject(userId)
-                .claim(TOKEN_TYPE_CLAIM, type)
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + validity.toMillis()))
+                .claim(TOKEN_TYPE_CLAIM, ACCESS)
+                .setIssuedAt(new Date())
+                .setExpiration(expirationFrom(ACCESS_TOKEN_VALIDITY))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    /** refresh 토큰은 재발급에만 쓰이고, 그때 DB에서 사용자를 찾으므로 PK를 담지 않는다. */
+    public String createRefreshToken(String userId) {
+        return Jwts.builder()
+                .setId(UUID.randomUUID().toString())
+                .setSubject(userId)
+                .claim(TOKEN_TYPE_CLAIM, REFRESH)
+                .setIssuedAt(new Date())
+                .setExpiration(expirationFrom(REFRESH_TOKEN_VALIDITY))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    private Date expirationFrom(Duration validity) {
+        return new Date(System.currentTimeMillis() + validity.toMillis());
+    }
+
     public String getUserId(String token) {
         return parse(token).getSubject();
+    }
+
+    /** 토큰만으로 출입증을 만든다. PK가 없는 옛 토큰이면 null을 반환한다. */
+    public LoginUser getLoginUser(String token) {
+        Claims claims = parse(token);
+        String userPk = claims.get(USER_PK_CLAIM, String.class);
+        if (userPk == null) {
+            log.debug("사용자 PK가 없는 토큰입니다. 다시 로그인이 필요합니다.");
+            return null;
+        }
+        try {
+            return new LoginUser(Long.valueOf(userPk), claims.getSubject());
+        } catch (NumberFormatException e) {
+            log.debug("사용자 PK 형식이 올바르지 않습니다: {}", userPk);
+            return null;
+        }
     }
 
     /** API 요청과 WebSocket 연결에는 access 토큰만 허용한다. */

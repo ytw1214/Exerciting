@@ -99,7 +99,7 @@ public class UserService {
         return issueTokens(user);
     }
     private TokenPairDto issueTokens(User user) {
-        String accessToken = jwtTokenProvider.createToken(user.getUserId());
+        String accessToken = jwtTokenProvider.createToken(user.getUserId(), user.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getUserId());
         String refreshTokenHash = jwtTokenProvider.hashToken(refreshToken);
         LocalDateTime expiresAt = jwtTokenProvider.getRefreshTokenExpiresAt();
@@ -122,6 +122,10 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException());
 
         return UserResponseDto.from(user);
+    }
+    public User getById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(UserNotFoundException::new);
     }
     public User getUserByUserId(String userId) {
         return userRepository.findByUserId(userId)
