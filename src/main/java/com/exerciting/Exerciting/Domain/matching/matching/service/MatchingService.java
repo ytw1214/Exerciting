@@ -94,23 +94,22 @@ public class MatchingService {
                 .orElseThrow(MatchingNotFoundException::new);
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
-        if(!matching.isRecruiting()) {
-            throw new InvalidInputException();
-        }
         long currentCount = matchingParticipantRepository.countByMatchingAndStatus(matching, ParticipantStatus.JOINED);
+        // 상태와 인원을 한 번에 검증한다. 락으로 동시성을, 이 검증으로 도메인 불변식을 지킨다.
         matching.validateJoinable(currentCount);
 
-        matchingParticipantRepository.findByMatchingAndUser(matching,user)
-                        .ifPresentOrElse(
-                                MatchingParticipant::rejoin,
-                                ()->matchingParticipantRepository.save(
-                                        MatchingParticipant.builder()
-                                                .user(user)
-                                                .matching(matching)
-                                                .build()));
+        matchingParticipantRepository.findByMatchingAndUser(matching, user)
+                .ifPresentOrElse(
+                        MatchingParticipant::rejoin,
+                        () -> matchingParticipantRepository.save(
+                                MatchingParticipant.builder()
+                                        .user(user)
+                                        .matching(matching)
+                                        .build()));
 
         matching.refreshCapacityStatus(currentCount + 1);
         log.info("매칭 참가 - matchingId: {}, userId: {}, 현재인원: {}/{}", matchingId, userId, currentCount + 1, matching.getMaxPerson());
+        return MatchingStatusResponseDto.of(matching, currentCount + 1);
     }
 
     public Page<MatchingQueryResponseDto> getAllMatching(int page, int size) {
