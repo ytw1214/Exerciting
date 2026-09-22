@@ -6,7 +6,7 @@ import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.service.Match
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.MatchingChatRoom;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.service.MatchingChatRoomService;
 import com.exerciting.Exerciting.Domain.user.entity.User;
-import com.exerciting.Exerciting.Domain.user.entity.UserDetails;
+import com.exerciting.Exerciting.Infrastructure.security.LoginUser;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -46,11 +46,11 @@ public class MatchingChatController {
     @ResponseBody
     public ResponseEntity<List<ChatMessageResponseDto>> getMessages(
             @PathVariable Long chatRoomId,
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal LoginUser loginUser,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size) {
         MatchingChatRoom chatRoom = matchingChatRoomService.findByRoomId(chatRoomId);
-        User user = userService.getUserByUserId(userDetails.getUsername());
+        User user = userService.getById(loginUser.getId());
         Pageable pageable = PageRequest.of(page, size);
         List<ChatMessageResponseDto> messages = matchingChatService.getMessages(chatRoom, user, pageable);
         if (messages.isEmpty()) {
