@@ -42,21 +42,22 @@ public class GameRepositoryCustomImpl implements GameRepositoryCustom {
                 .where(
                         eqSportType(gameCustomCond),
                         eqGameStatus(gameCustomCond),
-                        eqDateTime(gameCustomCond.startTime()),
+                        betweenStartTime(start, end),
                         eqTeamName(gameCustomCond)
                 )
                 .orderBy(game.gameStatus.asc(), game.gameStartTime.asc())
                 .fetch();
 
     }
-    private BooleanExpression eqDateTime(LocalDate localDate) {
-        if(localDate == null) {
+    /**
+     * 조회 구간은 서비스가 정한다(일별: 그날 하루, 월별: 그달 전체).
+     * 예전에는 start/end를 받고도 쓰지 않아 '월별' 조회가 하루만 걸러지거나 전 시즌을 돌려줬다.
+     */
+    private BooleanExpression betweenStartTime(LocalDateTime start, LocalDateTime end) {
+        if (start == null || end == null) {
             return null;
         }
-        LocalDateTime startDate = localDate.atStartOfDay();
-        LocalDateTime endDate = localDate.atTime(LocalTime.MAX);
-
-        return game.gameStartTime.between(startDate, endDate);
+        return game.gameStartTime.between(start, end);
     }
     private BooleanExpression eqSportType(GameCustomCond cond) {
         if (cond.sportType() == null) {
