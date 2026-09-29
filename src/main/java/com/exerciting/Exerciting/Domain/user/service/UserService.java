@@ -1,5 +1,8 @@
 package com.exerciting.Exerciting.Domain.user.service;
 
+import com.exerciting.Exerciting.Domain.matching.matching.entity.MatchingStatus;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.ParticipantStatus;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
 import com.exerciting.Exerciting.Domain.user.dto.*;
 import com.exerciting.Exerciting.Domain.user.dto.request.UserSignUpRequestDto;
 import com.exerciting.Exerciting.Domain.user.dto.request.UserUpdateRequestDto;
@@ -18,15 +21,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class UserService {
+    // 아직 끝나지 않은 매칭 상태. 여기에 참가 중이면 탈퇴를 막는다.
+    private static final List<MatchingStatus> ACTIVE_MATCHING_STATUSES =
+            List.of(MatchingStatus.RECRUITING, MatchingStatus.FULL, MatchingStatus.CLOSED);
+
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final MatchingParticipantRepository matchingParticipantRepository;
 
     @Transactional
     public UserSignUpResponseDto signUp(UserSignUpRequestDto dto) {
@@ -44,13 +53,23 @@ public class UserService {
         return UserSignUpResponseDto.of(user);
 
     }
+
+    /**
+     * 회원 탈퇴 = 개인정보 익명화 + 로그인 수단 제거.
+     * 행을 지우면 매칭·참가·채팅 이력이 FK로 물려 있어 실패했다(기존: 사실상 항상 500).
+     * 진행 중인 매칭에 참가 중이면 남은 참가자와 약속이 깨지므로 먼저 나가거나 취소하게 한다.
+     */
     @Transactional
     public UserDeleteResponseDto deleteUser(String userId) {
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserNotFoundException());
-
-        log.info("{} 회원 탈퇴 완료",user.getUserId());
-        userRepository.delete(user);
+                .orElseThrow(UserNotFoundException::new);
+        if (matchingParticipantRepository.existsByUser_IdAndStatusAndMatching_StatusIn(
+                user.getId(), ParticipantStatus.JOINED, ACTIVE_MATCHING_STATUSES)) {
+            throw new WithdrawalBlockedException();
+        }
+        refreshTokenRepository.deleteByUser(user);
+        user.withdraw(LocalDateTime.now());
+        log.info("회원 탈퇴(개인정보 익명화) 완료 - id: {}", user.getId());
         return UserDeleteResponseDto.of(user.getId());
     }
     @Transactional

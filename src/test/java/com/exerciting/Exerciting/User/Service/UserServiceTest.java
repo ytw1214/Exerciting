@@ -1,5 +1,7 @@
 package com.exerciting.Exerciting.User.Service;
 
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.ParticipantStatus;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
 import com.exerciting.Exerciting.Domain.user.dto.TokenPairDto;
 import com.exerciting.Exerciting.Domain.user.dto.request.UserSignUpRequestDto;
 import com.exerciting.Exerciting.Domain.user.entity.RefreshToken;
@@ -11,6 +13,7 @@ import com.exerciting.Exerciting.Exception.DuplicateResourceException;
 import com.exerciting.Exerciting.Exception.InvalidTokenException;
 import com.exerciting.Exerciting.Exception.LoginFailedException;
 import com.exerciting.Exerciting.Exception.TokenReuseDetectedException;
+import com.exerciting.Exerciting.Exception.WithdrawalBlockedException;
 import com.exerciting.Exerciting.Infrastructure.security.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -46,6 +50,9 @@ class UserServiceTest {
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Mock
+    private MatchingParticipantRepository matchingParticipantRepository;
 
     @InjectMocks
     private UserService userService;
@@ -224,6 +231,53 @@ class UserServiceTest {
                     .isInstanceOf(InvalidTokenException.class);
 
             verify(userRepository, never()).findByUserId(anyString());
+        }
+    }
+
+    @Nested
+    @DisplayName("deleteUser - 회원 탈퇴(익명화)")
+    class WithdrawTest {
+
+        private User activeUser() {
+            User user = User.builder()
+                    .userId("leaver").pw("encodedPw").nickname("떠나는사람").name("홍길동").email("leaver@test.com")
+                    .build();
+            ReflectionTestUtils.setField(user, "id", 7L);
+            return user;
+        }
+
+        @Test
+        @DisplayName("진행 중인 매칭에 참가 중이면 탈퇴를 막고 개인정보를 건드리지 않는다")
+        void withdraw_blocked_whenInActiveMatching() {
+            User user = activeUser();
+            given(userRepository.findByUserId("leaver")).willReturn(Optional.of(user));
+            given(matchingParticipantRepository.existsByUser_IdAndStatusAndMatching_StatusIn(
+                    eq(7L), eq(ParticipantStatus.JOINED), any())).willReturn(true);
+
+            assertThatThrownBy(() -> userService.deleteUser("leaver"))
+                    .isInstanceOf(WithdrawalBlockedException.class);
+
+            assertThat(user.isWithdrawn()).isFalse();
+            assertThat(user.getEmail()).isEqualTo("leaver@test.com");
+            verify(refreshTokenRepository, never()).deleteByUser(any());
+        }
+
+        @Test
+        @DisplayName("탈퇴하면 행은 남기되 아이디·이메일·실명을 지우고 refresh 토큰을 삭제한다")
+        void withdraw_anonymizes() {
+            User user = activeUser();
+            given(userRepository.findByUserId("leaver")).willReturn(Optional.of(user));
+            given(matchingParticipantRepository.existsByUser_IdAndStatusAndMatching_StatusIn(
+                    eq(7L), eq(ParticipantStatus.JOINED), any())).willReturn(false);
+
+            userService.deleteUser("leaver");
+
+            assertThat(user.isWithdrawn()).isTrue();
+            assertThat(user.getUserId()).isEqualTo("withdrawn_7");
+            assertThat(user.getEmail()).doesNotContain("leaver");
+            assertThat(user.getName()).isNull();
+            verify(refreshTokenRepository).deleteByUser(user);
+            verify(userRepository, never()).delete(any(User.class));
         }
     }
 }

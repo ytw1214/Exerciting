@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -25,6 +27,8 @@ public class User {
     private String name;
     @Column(unique=true)
     private String email;
+    // 탈퇴 시각. null이면 활동 중인 회원
+    private LocalDateTime deletedAt;
     /*
     @OneToMany(mappedBy="user")
     private Matching matching;
@@ -38,6 +42,23 @@ public class User {
         this.nickname = nickname;
         this.name = name;
         this.email = email;
+    }
+
+    public boolean isWithdrawn() {
+        return deletedAt != null;
+    }
+
+    /**
+     * 회원 탈퇴. 행을 지우면 매칭·참가·채팅이 FK로 물려 있어 삭제가 실패하므로(기존 500의 원인)
+     * 행은 남기고 개인정보만 복구할 수 없게 지운다. 로그인 아이디·이메일은 다른 사람이 다시 쓸 수 있게 비운다.
+     */
+    public void withdraw(LocalDateTime now) {
+        this.userId = "withdrawn_" + id;
+        this.email = "withdrawn_" + id + "@withdrawn.invalid";
+        this.nickname = "탈퇴회원#" + id;
+        this.name = null;
+        this.pw = "{withdrawn}"; // BCrypt 형식이 아니라 어떤 비밀번호로도 로그인되지 않는다
+        this.deletedAt = now;
     }
 
     public void update(UserUpdateRequestDto dto, String encodedPw) {

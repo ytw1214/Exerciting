@@ -1,12 +1,14 @@
 package com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository;
 
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.matching.matching.entity.MatchingStatus;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.MatchingParticipant;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.ParticipantStatus;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,4 +23,7 @@ public interface MatchingParticipantRepository extends JpaRepository<MatchingPar
     List<MatchingParticipant> findByMatchingAndStatus(Matching matching, ParticipantStatus status);
 
     boolean existsByMatching_IdAndUser_IdAndStatus(Long matchingId, Long userId, ParticipantStatus status);
+
+    // 탈퇴 가능 여부: 아직 끝나지 않은 매칭에 참가 중인지
+    boolean existsByUser_IdAndStatusAndMatching_StatusIn(Long userId, ParticipantStatus status, Collection<MatchingStatus> matchingStatuses);
 }
