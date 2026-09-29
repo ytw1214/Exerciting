@@ -35,7 +35,9 @@ public class MatchingParticipantService {
     }
     public List<MatchingParticipantDto> getParticipants(Long matchingId) {
         Matching matching = matchingService.findById(matchingId);
-        return matchingParticipantRepository.findByMatchingId(matching.getId())
+        // 나간(LEFT) 사람은 빼고, 참가 중·출석 처리된 사람만 보여준다
+        return matchingParticipantRepository
+                .findByMatching_IdAndStatusIn(matching.getId(), List.of(ParticipantStatus.JOINED, ParticipantStatus.ATTENDED))
                 .stream()
                 .map(MatchingParticipantDto::from)
                 .toList();

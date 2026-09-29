@@ -34,7 +34,8 @@ public class MatchingController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(matchingService.getAllMatching(page, size));
+        // size 상한이 없으면 한 번의 요청으로 전체 매칭과 연관 엔티티를 메모리에 올릴 수 있다
+        return ResponseEntity.ok(matchingService.getAllMatching(Math.max(page, 0), Math.min(Math.max(size, 1), 100)));
     }
 
     @PostMapping("/{matchingId}/join")

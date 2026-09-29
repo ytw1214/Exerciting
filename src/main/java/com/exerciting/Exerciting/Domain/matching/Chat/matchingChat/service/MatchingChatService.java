@@ -4,6 +4,7 @@ import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.dto.ChatMessa
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.entity.MatchingChat;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChat.repository.MatchingChatRepository;
 import com.exerciting.Exerciting.Domain.matching.Chat.matchingChatRoom.entity.MatchingChatRoom;
+import com.exerciting.Exerciting.Domain.matching.matching.entity.MatchingStatus;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.MatchingParticipant;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.ParticipantStatus;
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
@@ -36,8 +37,10 @@ public class MatchingChatService {
         if (message == null || message.isBlank() || message.length() > MatchingChat.MAX_MESSAGE_LENGTH) {
             throw new InvalidInputException();
         }
-        if (!matchingParticipantRepository.existsByMatchingAndUserAndStatus(
-                chatRoom.getMatching(), sender, ParticipantStatus.JOINED)) {
+        // 끝나지 않은 매칭의 참가자만 보낼 수 있다(취소된 매칭에서 대화가 이어지던 문제).
+        // chatRoom.getMatching()은 지연 로딩 프록시라 id만 꺼내 쓴다(WebSocket 스레드에는 OSIV가 없다).
+        if (!matchingParticipantRepository.existsByMatching_IdAndUser_IdAndStatusAndMatching_StatusIn(
+                chatRoom.getMatching().getId(), sender.getId(), ParticipantStatus.JOINED, MatchingStatus.ACTIVE_STATUSES)) {
             throw new UnauthorizedUserException();
         }
         MatchingChat chat = matchingChatRepository.save(MatchingChat.builder()

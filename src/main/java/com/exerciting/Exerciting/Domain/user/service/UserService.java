@@ -22,16 +22,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class UserService {
-    // 아직 끝나지 않은 매칭 상태. 여기에 참가 중이면 탈퇴를 막는다.
-    private static final List<MatchingStatus> ACTIVE_MATCHING_STATUSES =
-            List.of(MatchingStatus.RECRUITING, MatchingStatus.FULL, MatchingStatus.CLOSED);
-
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -65,7 +60,7 @@ public class UserService {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(UserNotFoundException::new);
         if (matchingParticipantRepository.existsByUser_IdAndStatusAndMatching_StatusIn(
-                user.getId(), ParticipantStatus.JOINED, ACTIVE_MATCHING_STATUSES)) {
+                user.getId(), ParticipantStatus.JOINED, MatchingStatus.ACTIVE_STATUSES)) {
             throw new WithdrawalBlockedException();
         }
         refreshTokenRepository.deleteByUser(user);

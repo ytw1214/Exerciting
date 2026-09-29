@@ -18,6 +18,7 @@ import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingRequestDto;
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.matching.matching.entity.MatchingStatus;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRepository;
 import com.exerciting.Exerciting.Exception.*;
 import lombok.RequiredArgsConstructor;
@@ -105,9 +106,10 @@ public class MatchingService {
         return MatchingStatusResponseDto.of(matching, currentCount + 1);
     }
 
+    /** 취소·완료된 매칭은 목록에서 뺀다(소프트 삭제된 매칭이 계속 보이던 문제). */
     public Page<MatchingQueryResponseDto> getAllMatching(int page, int size) {
-        Pageable pageable = PageRequest.of(page,size, Sort.by("createdAt").descending());
-        return matchingRepository.findAll(pageable)
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return matchingRepository.findAllByStatusIn(MatchingStatus.ACTIVE_STATUSES, pageable)
                 .map(MatchingQueryResponseDto::from);
     }
     @Transactional
@@ -228,7 +230,7 @@ public class MatchingService {
                 .orElseThrow(UserNotFoundException::new);
 
         List<MatchingParticipantDto> participants = matchingParticipantRepository
-                .findByMatchingId(matchingId)
+                .findByMatching_IdAndStatusIn(matchingId, List.of(ParticipantStatus.JOINED, ParticipantStatus.ATTENDED))
                 .stream()
                 .map(MatchingParticipantDto::from)
                 .toList();

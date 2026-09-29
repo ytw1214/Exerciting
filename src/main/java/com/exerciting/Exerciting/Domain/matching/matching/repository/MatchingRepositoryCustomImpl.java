@@ -2,6 +2,7 @@ package com.exerciting.Exerciting.Domain.matching.matching.repository;
 import com.exerciting.Exerciting.Domain.game.entity.QGame;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingQueryResponseDto;
 
+import com.exerciting.Exerciting.Domain.matching.matching.entity.MatchingStatus;
 import com.exerciting.Exerciting.Domain.matching.matching.entity.QMatching;
 import com.exerciting.Exerciting.Domain.stadium.entity.QStadium;
 import com.exerciting.Exerciting.Domain.team.entity.QTeam;
@@ -58,7 +59,8 @@ public class MatchingRepositoryCustomImpl implements MatchingRepositoryCustom {
                 .leftJoin(game.homeTeam, homeTeam)
                 .leftJoin(game.awayTeam, awayTeam)
                 .leftJoin(game.stadium, stadium)
-                .where(titleContains(cond.title()),
+                .where(matching.status.in(MatchingStatus.ACTIVE_STATUSES),
+                        titleContains(cond.title()),
                         descriptionContains(cond.description()),
                         meetTimeContains(cond.meetTime()),
                         teamNameContains(cond.teamName())

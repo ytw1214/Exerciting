@@ -24,6 +24,13 @@ public interface MatchingParticipantRepository extends JpaRepository<MatchingPar
 
     boolean existsByMatching_IdAndUser_IdAndStatus(Long matchingId, Long userId, ParticipantStatus status);
 
+    // 채팅 전송 권한: 끝나지 않은 매칭에 참가 중인지
+    boolean existsByMatching_IdAndUser_IdAndStatusAndMatching_StatusIn(Long matchingId, Long userId, ParticipantStatus status,
+                                                                     Collection<MatchingStatus> matchingStatuses);
+
+    // 참가자 목록: 나간(LEFT) 사람은 빼고 보여준다
+    List<MatchingParticipant> findByMatching_IdAndStatusIn(Long matchingId, Collection<ParticipantStatus> statuses);
+
     // 탈퇴 가능 여부: 아직 끝나지 않은 매칭에 참가 중인지
     boolean existsByUser_IdAndStatusAndMatching_StatusIn(Long userId, ParticipantStatus status, Collection<MatchingStatus> matchingStatuses);
 }
