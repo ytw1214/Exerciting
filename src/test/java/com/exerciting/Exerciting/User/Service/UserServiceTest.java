@@ -114,7 +114,7 @@ class UserServiceTest {
 
             given(userRepository.findByUserId(userId)).willReturn(Optional.of(user));
             given(passwordEncoder.matches(rawPw, "encodedPw")).willReturn(true);
-            given(jwtTokenProvider.createToken(userId)).willReturn("mock-access-token");
+            given(jwtTokenProvider.createToken(userId, null)).willReturn("mock-access-token");
             given(jwtTokenProvider.createRefreshToken(userId)).willReturn("mock-refresh-token");
             given(jwtTokenProvider.hashToken("mock-refresh-token")).willReturn("hashed-refresh");
             given(jwtTokenProvider.getRefreshTokenExpiresAt())
@@ -156,7 +156,7 @@ class UserServiceTest {
             assertThatThrownBy(() -> userService.login(userId, "wrongPw"))
                     .isInstanceOf(LoginFailedException.class);
 
-            verify(jwtTokenProvider, never()).createToken(anyString());
+            verify(jwtTokenProvider, never()).createToken(anyString(), any());
         }
     }
 
@@ -185,7 +185,7 @@ class UserServiceTest {
             given(userRepository.findByUserId(userId)).willReturn(Optional.of(user));
             given(refreshTokenRepository.findByUser(user)).willReturn(Optional.of(saved));
             given(jwtTokenProvider.hashToken("old-refresh")).willReturn("old-hash");
-            given(jwtTokenProvider.createToken(userId)).willReturn("new-access");
+            given(jwtTokenProvider.createToken(userId, null)).willReturn("new-access");
             given(jwtTokenProvider.createRefreshToken(userId)).willReturn("new-refresh");
             given(jwtTokenProvider.hashToken("new-refresh")).willReturn("new-hash");
             given(jwtTokenProvider.getRefreshTokenExpiresAt()).willReturn(LocalDateTime.now().plusDays(14));
@@ -212,7 +212,7 @@ class UserServiceTest {
                     .isInstanceOf(TokenReuseDetectedException.class);
 
             verify(refreshTokenRepository).delete(saved);
-            verify(jwtTokenProvider, never()).createToken(anyString());
+            verify(jwtTokenProvider, never()).createToken(anyString(), any());
         }
 
         @Test
