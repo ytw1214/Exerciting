@@ -107,6 +107,7 @@ public class MatchingService {
     }
 
     /** 취소·완료된 매칭은 목록에서 뺀다(소프트 삭제된 매칭이 계속 보이던 문제). */
+    @Transactional(readOnly = true)
     public Page<MatchingQueryResponseDto> getAllMatching(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return matchingRepository.findAllByStatusIn(MatchingStatus.ACTIVE_STATUSES, pageable)

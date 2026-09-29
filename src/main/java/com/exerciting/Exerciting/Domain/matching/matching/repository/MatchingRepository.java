@@ -5,6 +5,7 @@ import com.exerciting.Exerciting.Domain.matching.matching.entity.MatchingStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -19,6 +20,9 @@ import java.util.Optional;
 @Repository
 public interface MatchingRepository extends JpaRepository<Matching, Long>, MatchingRepositoryCustom {
     List<Matching> findByMeetTimeBefore(LocalDateTime meetTime);
+    // 목록 DTO가 game·팀·경기장을 모두 읽으므로 한 번에 가져온다(모두 ManyToOne이라 페이징과 함께 써도 안전).
+    // 없으면 매칭 1건마다 game/homeTeam/awayTeam/stadium 지연 로딩 쿼리가 따로 나간다(N+1).
+    @EntityGraph(attributePaths = {"game", "game.homeTeam", "game.awayTeam", "game.stadium"})
     Page<Matching> findAllByStatusIn(Collection<MatchingStatus> statuses, Pageable pageable);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT m FROM Matching m WHERE m.id = :id")
