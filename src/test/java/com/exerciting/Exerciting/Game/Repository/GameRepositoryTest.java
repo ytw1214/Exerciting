@@ -7,7 +7,6 @@ import com.exerciting.Exerciting.Domain.game.repository.GameRepository;
 import com.exerciting.Exerciting.Domain.global.SportType;
 import com.exerciting.Exerciting.Domain.stadium.entity.Stadium;
 import com.exerciting.Exerciting.Domain.team.entity.Team;
-import com.exerciting.Exerciting.ExercitingApplication;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +21,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,7 +30,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@ContextConfiguration(classes = ExercitingApplication.class)
 @ActiveProfiles("test")
 @Import(GameRepositoryTest.TestConfig.class)
 @DisplayName("GameRepository 통합 테스트")

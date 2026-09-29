@@ -11,6 +11,7 @@ import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Support.QueryTimer;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +38,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * perf 프로필은 별도 DB(exerciting_perf)를 쓰고 실행마다 테이블을 새로 만들기 때문에
  * 개발용 로컬 데이터는 건드리지 않는다.
  */
+@Tag("perf") // 기본 test에서 제외, ./gradlew perfTest 로 실행 (로컬 MySQL 필요)
 @SpringBootTest
-@ActiveProfiles({"local", "perf"})
+@ActiveProfiles("perf")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Slf4j
 class MatchingChatPerformanceTest {

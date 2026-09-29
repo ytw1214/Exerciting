@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import com.exerciting.Exerciting.Infrastructure.security.LoginUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -142,9 +143,11 @@ class ExercitingApplicationTests {
     }
 
     @Nested
-    @DisplayName("POST /api/v1/Matching - 매칭 생성 (인증됨)")
-    @WithMockUser(username = "host01")
+    @DisplayName("POST /api/v1/matching - 매칭 생성 (인증됨)")
     class MatchingCreateTest {
+
+        // 컨트롤러는 @AuthenticationPrincipal LoginUser를 받으므로 @WithMockUser(스프링 User)로는 null이 된다
+        private static final LoginUser HOST = new LoginUser(1L, "host01");
 
         private Map<String, Object> matchingBody(String title, int maxPerson, LocalDateTime meetTime) {
             Map<String, Object> body = new HashMap<>();
@@ -159,7 +162,8 @@ class ExercitingApplicationTests {
         @Test
         @DisplayName("meetTime이 과거이면 4xx 응답")
         void createMatching_fail_pastTime() throws Exception {
-            mockMvc.perform(post("/api/v1/Matching")
+            mockMvc.perform(post("/api/v1/matching")
+                            .with(user(HOST))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(
                                     matchingBody("과거 매칭", 5, LocalDateTime.now().minusHours(1)))))
@@ -169,7 +173,8 @@ class ExercitingApplicationTests {
         @Test
         @DisplayName("maxPerson이 1이면 4xx 응답")
         void createMatching_fail_lowMaxPerson() throws Exception {
-            mockMvc.perform(post("/api/v1/Matching")
+            mockMvc.perform(post("/api/v1/matching")
+                            .with(user(HOST))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(
                                     matchingBody("혼자 매칭", 1, LocalDateTime.now().plusDays(1)))))
@@ -179,7 +184,8 @@ class ExercitingApplicationTests {
         @Test
         @DisplayName("title이 공백이면 4xx 응답")
         void createMatching_fail_blankTitle() throws Exception {
-            mockMvc.perform(post("/api/v1/Matching")
+            mockMvc.perform(post("/api/v1/matching")
+                            .with(user(HOST))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(
                                     matchingBody("   ", 5, LocalDateTime.now().plusDays(1)))))
