@@ -1,6 +1,27 @@
 # Exerciting
 
+[![CI](https://github.com/ytw1214/Exerciting/actions/workflows/ci.yml/badge.svg)](https://github.com/ytw1214/Exerciting/actions/workflows/ci.yml)
+
 스포츠 팀 랭킹 크롤링 + 실시간 매칭/채팅 서비스
+
+## 실행 방법
+
+필요: JDK 17, Docker
+
+```bash
+cp .env.example .env          # JWT_SECRET, DB_PASSWORD, DB_ROOT_PASSWORD 채우기
+docker compose up -d          # MySQL 8.0
+./gradlew bootRun             # http://localhost:8080/swagger-ui/index.html
+```
+
+## 테스트와 검증
+
+| 명령 | 내용 |
+|---|---|
+| `./gradlew test` | 단위·통합 테스트 (H2, CI에서 실행) |
+| `./gradlew perfTest` | 채팅 대량 삽입 성능 측정 (로컬 MySQL 필요) |
+| `k6 run -e GAME_ID=1 k6/smoke.js` | 실행 중인 서버의 핵심 흐름 스모크 테스트 |
+| `k6 run -e GAME_ID=1 k6/join-concurrency.js` | 실제 MySQL에서 동시 참가 정원 보장 확인 |
 
 ## 기술 스택
 
