@@ -50,6 +50,7 @@ public class KboRankFetcher implements Fetcher {
                     }
 
                     rankings.add(TeamRankCrawlDto.builder()
+                            .sportType(SportType.BASEBALL)
                             .rank(Integer.parseInt(cells.get(0).text()))
                             .teamName(cells.get(1).text())
                             .games(Integer.parseInt(cells.get(2).text()))
@@ -69,10 +70,7 @@ public class KboRankFetcher implements Fetcher {
             log.error("크롤링 오류" + e.getMessage());
             throw new CrawlingException();
         }
-        log.info("크롤링 완료");
-        for(TeamRankCrawlDto s : rankings) {
-            System.out.println(s);
-        }
+        log.info("KBO 순위 크롤링 완료 - {}팀", rankings.size());
         return rankings;
     }
     public boolean supports(SportType sportType) {
