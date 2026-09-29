@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * MySQL(JPA) 채팅 메시지 삽입/조회 성능 측정.
- * 100개 방 x 방당 1,000건 = 총 10만 건. 비교 대상: MatchingChatMongoPerformanceTest
+ * 100개 방 x 방당 1,000건 = 총 10만 건. MongoDB 비교 실험은 spike/mongo-comparision 브랜치에 있다.
  *
  * perf 프로필은 별도 DB(exerciting_perf)를 쓰고 실행마다 테이블을 새로 만들기 때문에
  * 개발용 로컬 데이터는 건드리지 않는다.
