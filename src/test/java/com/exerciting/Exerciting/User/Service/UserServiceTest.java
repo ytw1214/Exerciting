@@ -4,12 +4,14 @@ import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.Part
 import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
 import com.exerciting.Exerciting.Domain.user.dto.TokenPairDto;
 import com.exerciting.Exerciting.Domain.user.dto.request.UserSignUpRequestDto;
+import com.exerciting.Exerciting.Domain.user.dto.request.UserUpdateRequestDto;
 import com.exerciting.Exerciting.Domain.user.entity.RefreshToken;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.RefreshTokenRepository;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
 import com.exerciting.Exerciting.Exception.DuplicateResourceException;
+import com.exerciting.Exerciting.Exception.InvalidCurrentPasswordException;
 import com.exerciting.Exerciting.Exception.InvalidTokenException;
 import com.exerciting.Exerciting.Exception.LoginFailedException;
 import com.exerciting.Exerciting.Exception.TokenReuseDetectedException;
@@ -278,6 +280,71 @@ class UserServiceTest {
             assertThat(user.getName()).isNull();
             verify(refreshTokenRepository).deleteByUser(user);
             verify(userRepository, never()).delete(any(User.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("updateUserDetail - 회원 정보 수정")
+    class UpdateTest {
+
+        private User user() {
+            return User.builder()
+                    .userId("me").pw("encodedPw").nickname("나").name("홍길동").email("me@test.com")
+                    .build();
+        }
+
+        @Test
+        @DisplayName("현재 비밀번호 없이 비밀번호를 바꾸려 하면 거절한다")
+        void changePassword_withoutCurrentPw_rejected() {
+            User user = user();
+            given(userRepository.findByUserId("me")).willReturn(Optional.of(user));
+
+            assertThatThrownBy(() -> userService.updateUserDetail("me",
+                    new UserUpdateRequestDto(null, "NewPass1!", null, null)))
+                    .isInstanceOf(InvalidCurrentPasswordException.class);
+
+            assertThat(user.getPw()).isEqualTo("encodedPw");
+            verify(passwordEncoder, never()).encode(anyString());
+        }
+
+        @Test
+        @DisplayName("현재 비밀번호가 틀리면 이메일도 바꿀 수 없다")
+        void changeEmail_withWrongCurrentPw_rejected() {
+            User user = user();
+            given(userRepository.findByUserId("me")).willReturn(Optional.of(user));
+            given(passwordEncoder.matches("wrong", "encodedPw")).willReturn(false);
+
+            assertThatThrownBy(() -> userService.updateUserDetail("me",
+                    new UserUpdateRequestDto("wrong", null, null, "attacker@test.com")))
+                    .isInstanceOf(InvalidCurrentPasswordException.class);
+
+            assertThat(user.getEmail()).isEqualTo("me@test.com");
+        }
+
+        @Test
+        @DisplayName("현재 비밀번호가 맞으면 바꾸고, 다른 기기의 refresh 토큰을 끊는다")
+        void changePassword_success_revokesRefreshToken() {
+            User user = user();
+            given(userRepository.findByUserId("me")).willReturn(Optional.of(user));
+            given(passwordEncoder.matches("encodedPwRaw", "encodedPw")).willReturn(true);
+            given(passwordEncoder.encode("NewPass1!")).willReturn("newEncoded");
+
+            userService.updateUserDetail("me", new UserUpdateRequestDto("encodedPwRaw", "NewPass1!", null, null));
+
+            assertThat(user.getPw()).isEqualTo("newEncoded");
+            verify(refreshTokenRepository).deleteByUser(user);
+        }
+
+        @Test
+        @DisplayName("닉네임만 바꿀 때는 현재 비밀번호가 필요 없다")
+        void changeNickname_only() {
+            User user = user();
+            given(userRepository.findByUserId("me")).willReturn(Optional.of(user));
+            given(userRepository.existsByNickname("새닉")).willReturn(false);
+
+            userService.updateUserDetail("me", new UserUpdateRequestDto(null, null, "새닉", null));
+
+            assertThat(user.getNickname()).isEqualTo("새닉");
         }
     }
 }

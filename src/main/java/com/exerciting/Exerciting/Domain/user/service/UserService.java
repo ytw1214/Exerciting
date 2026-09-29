@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -72,13 +73,37 @@ public class UserService {
         log.info("회원 탈퇴(개인정보 익명화) 완료 - id: {}", user.getId());
         return UserDeleteResponseDto.of(user.getId());
     }
+
+    /**
+     * 비밀번호·이메일 변경에는 현재 비밀번호를 요구한다.
+     * 예전에는 access 토큰만 있으면 바로 바꿀 수 있어, 토큰 하나가 새면 계정 전체를 빼앗길 수 있었다.
+     */
     @Transactional
     public UserUpdateResponseDto updateUserDetail(String userId, UserUpdateRequestDto dto) {
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserNotFoundException());
+                .orElseThrow(UserNotFoundException::new);
+
+        boolean changesPassword = StringUtils.hasText(dto.pw());
+        boolean changesEmail = StringUtils.hasText(dto.email()) && !dto.email().equals(user.getEmail());
+        boolean changesNickname = StringUtils.hasText(dto.nickname()) && !dto.nickname().equals(user.getNickname());
+
+        if ((changesPassword || changesEmail)
+                && (dto.currentPw() == null || !passwordEncoder.matches(dto.currentPw(), user.getPw()))) {
+            throw new InvalidCurrentPasswordException();
+        }
+        // 유니크 컬럼은 DB 예외(500)로 터지기 전에 409로 알려준다
+        if (changesEmail && userRepository.existsByEmail(dto.email())) {
+            throw new DuplicateResourceException(ErrorCode.DUPLICATE_EMAIL);
+        }
+        if (changesNickname && userRepository.existsByNickname(dto.nickname())) {
+            throw new DuplicateResourceException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+
         String encodedPw = null;
-        if (dto.pw() != null && !dto.pw().isEmpty()) {
+        if (changesPassword) {
             encodedPw = passwordEncoder.encode(dto.pw());
+            // 비밀번호가 바뀌면 다른 기기의 로그인 유지(refresh 토큰)를 끊는다
+            refreshTokenRepository.deleteByUser(user);
         }
         user.update(dto, encodedPw);
         log.info("{} 유저 정보 변경 완료", userId);
