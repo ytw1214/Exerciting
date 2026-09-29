@@ -8,14 +8,14 @@ public record ChatMessageResponseDto(
         Long senderId,
         String message,
         LocalDateTime sendAt,
-        String senderName
+        String senderName   // 닉네임. 가입 때 받은 실명(name)은 채팅에 노출하지 않는다
 ) {
     public static ChatMessageResponseDto from(MatchingChat chat) {
         return new ChatMessageResponseDto(
                 chat.getSender().getId(),
                 chat.getMessage(),
                 chat.getSendAt(),
-                chat.getSender().getName()
+                chat.getSender().getNickname()
         );
     }
 }

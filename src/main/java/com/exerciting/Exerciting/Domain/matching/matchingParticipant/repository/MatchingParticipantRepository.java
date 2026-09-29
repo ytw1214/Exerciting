@@ -19,4 +19,6 @@ public interface MatchingParticipantRepository extends JpaRepository<MatchingPar
     Optional<MatchingParticipant> findByMatchingAndUser(Matching matching, User user);
     Optional<MatchingParticipant> findByMatchingAndUserAndStatus(Matching matching, User user, ParticipantStatus status);
     List<MatchingParticipant> findByMatchingAndStatus(Matching matching, ParticipantStatus status);
+
+    boolean existsByMatching_IdAndUser_IdAndStatus(Long matchingId, Long userId, ParticipantStatus status);
 }
