@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 
@@ -29,6 +30,12 @@ public class User {
     private String email;
     // 탈퇴 시각. null이면 활동 중인 회원
     private LocalDateTime deletedAt;
+
+    // 기존 행에도 USER가 채워지도록 DB 기본값을 둔다 (ddl-auto=update로 컬럼이 추가될 때)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @ColumnDefault("'USER'")
+    private Role role = Role.USER;
     /*
     @OneToMany(mappedBy="user")
     private Matching matching;

@@ -40,6 +40,8 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/user/login", "/user/signup", "/user/reissue").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/games/**", "/games/**").permitAll()
+                        // 헤드리스 Chrome을 띄우는 운영 작업. 예전에는 가입만 하면 누구나 호출할 수 있었다
+                        .requestMatchers("/crawl/**", "/api/ranks/sync").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

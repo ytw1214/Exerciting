@@ -138,7 +138,7 @@ public class UserService {
         return issueTokens(user);
     }
     private TokenPairDto issueTokens(User user) {
-        String accessToken = jwtTokenProvider.createToken(user.getUserId(), user.getId());
+        String accessToken = jwtTokenProvider.createToken(user.getUserId(), user.getId(), user.getRole());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getUserId());
         String refreshTokenHash = jwtTokenProvider.hashToken(refreshToken);
         LocalDateTime expiresAt = jwtTokenProvider.getRefreshTokenExpiresAt();
