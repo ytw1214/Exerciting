@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(uniqueConstraints = @UniqueConstraint(name = "uk_team_rank_team_name", columnNames = "team_name"))
 public class TeamRank {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -25,6 +26,7 @@ public class TeamRank {
     private SportType sportType;
 
     private int teamRank;
+    @Column(name = "team_name")
     private String teamName;
     private int games;
     private int wins;
@@ -38,10 +40,17 @@ public class TeamRank {
     private String dataSource;
     private LocalDateTime crawledAt;
 
-    public boolean isChanged(TeamRankCrawlDto dto) {
-        return !(dto.getGames() == this.games) ||
-                !(dto.getWins() == this.wins) ||
-                !(dto.getLosses() == this.losses) ||
-                !(dto.getWinRate() == this.winRate);
+    /** 같은 팀의 최신 크롤링 결과로 덮어쓴다 (upsert의 update 쪽). */
+    public void updateFrom(TeamRankCrawlDto dto) {
+        this.sportType = dto.getSportType();
+        this.teamRank = dto.getRank();
+        this.games = dto.getGames();
+        this.wins = dto.getWins();
+        this.losses = dto.getLosses();
+        this.draws = dto.getDraws();
+        this.winRate = dto.getWinRate();
+        this.gamesBehind = dto.getGamesBehind();
+        this.dataSource = dto.getDataSource();
+        this.crawledAt = dto.getCrawledAt();
     }
 }

@@ -1,5 +1,6 @@
 package com.exerciting.Exerciting.Infrastructure.security;
 
+import com.exerciting.Exerciting.Domain.user.entity.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -28,6 +29,8 @@ public class JwtTokenProvider {
     private static final String TOKEN_TYPE_CLAIM = "token_type";
     // 사용자 PK. 숫자를 문자열로 담아 파싱 방식에 따른 타입 문제를 피한다.
     private static final String USER_PK_CLAIM = "uid";
+    // 권한. 토큰만으로 ADMIN 여부를 판단한다(권한이 바뀌면 다시 로그인해야 반영된다)
+    private static final String ROLE_CLAIM = "role";
     private static final String ACCESS = "access";
     private static final String REFRESH = "refresh";
 
@@ -41,9 +44,10 @@ public class JwtTokenProvider {
     }
 
     /** access 토큰에는 사용자 PK를 함께 담아, 요청마다 DB를 조회하지 않게 한다. */
-    public String createToken(String userId, Long userPk) {
+    public String createToken(String userId, Long userPk, Role role) {
         return Jwts.builder()
                 .claim(USER_PK_CLAIM, String.valueOf(userPk))
+                .claim(ROLE_CLAIM, (role == null ? Role.USER : role).name())
                 .setId(UUID.randomUUID().toString())
                 .setSubject(userId)
                 .claim(TOKEN_TYPE_CLAIM, ACCESS)
@@ -82,10 +86,22 @@ public class JwtTokenProvider {
             return null;
         }
         try {
-            return new LoginUser(Long.valueOf(userPk), claims.getSubject());
+            return new LoginUser(Long.valueOf(userPk), claims.getSubject(), roleOf(claims.get(ROLE_CLAIM, String.class)));
         } catch (NumberFormatException e) {
             log.debug("사용자 PK 형식이 올바르지 않습니다: {}", userPk);
             return null;
+        }
+    }
+
+    // role 클레임이 없는 예전 토큰이나 알 수 없는 값은 일반 사용자로 본다
+    private Role roleOf(String value) {
+        if (value == null) {
+            return Role.USER;
+        }
+        try {
+            return Role.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return Role.USER;
         }
     }
 

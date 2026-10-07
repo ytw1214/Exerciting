@@ -1,66 +1,61 @@
 package com.exerciting.Exerciting.Domain.team.service;
 
-import com.exerciting.Exerciting.Domain.global.SportType;
 import com.exerciting.Exerciting.Domain.team.dto.TeamRankCrawlDto;
 import com.exerciting.Exerciting.Domain.team.entity.TeamRank;
 import com.exerciting.Exerciting.Domain.team.repository.TeamRankRepository;
-import com.exerciting.Exerciting.Infrastructure.crawler.CrawlerHelper;
+import com.exerciting.Exerciting.Exception.CrawlingException;
 import com.exerciting.Exerciting.Infrastructure.crawler.fetcher.KboRankFetcher;
-import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class TeamRankService {
-    private final CrawlerHelper crawlerHelper;
     private final TeamRankRepository teamRankRepository;
     private final KboRankFetcher kboRankFetcher;
-    public TeamRankService(CrawlerHelper crawlerHelper, TeamRankRepository teamRankRepository, KboRankFetcher kboRankFetcher) {
-        this.crawlerHelper = crawlerHelper;
-        this.teamRankRepository = teamRankRepository;
-        this.kboRankFetcher = kboRankFetcher;
-    }
 
     public List<TeamRank> getAllTeamByRank() {
         return teamRankRepository.findAllByOrderByTeamRankAsc();
     }
+
+    /**
+     * 순위 동기화 = 팀 이름 기준 upsert.
+     * 예전에는 호출할 때마다 새 행을 saveAll 해서, 5번 동기화하면 순위표에 1위가 5번 나왔다.
+     */
     @Transactional
     public int updateTeamRank() {
-        List<TeamRankCrawlDto> arr = kboRankFetcher.fetch();
-        List<TeamRank> arr1 = new ArrayList<>();
-        for(TeamRankCrawlDto dto : arr) {
-            arr1.add(dto.toEntity());
+        List<TeamRankCrawlDto> crawled = kboRankFetcher.fetch();
+        if (crawled.isEmpty()) {
+            // 순위 표를 못 찾으면 빈 목록이 온다. "0개팀 수정 완료(200)"로 넘기지 않고 실패로 알린다.
+            throw new CrawlingException();
         }
-        teamRankRepository.saveAll(arr1);
-        return arr1.size();
-    }
-    public List<TeamRank> getTeamContainingName(String name) {
-        return teamRankRepository.findByTeamNameContaining(name)
-                .stream()
-                .toList();
-    }
+        List<String> teamNames = crawled.stream().map(TeamRankCrawlDto::getTeamName).toList();
+        Map<String, TeamRank> saved = teamRankRepository.findAllByTeamNameIn(teamNames).stream()
+                .collect(Collectors.toMap(TeamRank::getTeamName, Function.identity(), (first, duplicate) -> first));
 
-    public List<TeamRank> comparingData() {
-        List<TeamRankCrawlDto> rankings = kboRankFetcher.fetch();
-        List<TeamRank> changeLists = new ArrayList<>();
-        List<String> teamNames = rankings.stream()
-                .map(TeamRankCrawlDto::getTeamName)
-                .toList();
-
-        Map<String,TeamRank> map = teamRankRepository.findAllByTeamNameIn(teamNames)
-                .stream()
-                .collect(Collectors.toMap(TeamRank::getTeamName, team -> team));
-
-        for(TeamRankCrawlDto dto : rankings) {
-            TeamRank crawlingTeamRank = map.get(dto.getTeamName());
-            if(crawlingTeamRank == null || crawlingTeamRank.isChanged(dto)) {
-                changeLists.add(dto.toEntity());
+        int inserted = 0;
+        for (TeamRankCrawlDto dto : crawled) {
+            TeamRank existing = saved.get(dto.getTeamName());
+            if (existing == null) {
+                teamRankRepository.save(dto.toEntity());
+                inserted++;
+            } else {
+                existing.updateFrom(dto);
             }
         }
-        return changeLists;
+        log.info("팀 순위 동기화 - 신규 {}팀, 갱신 {}팀", inserted, crawled.size() - inserted);
+        return crawled.size();
     }
 
+    public List<TeamRank> getTeamContainingName(String name) {
+        return teamRankRepository.findByTeamNameContaining(name);
+    }
 }

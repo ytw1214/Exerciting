@@ -1,16 +1,22 @@
 package com.exerciting.Exerciting.User.Service;
 
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.entity.ParticipantStatus;
+import com.exerciting.Exerciting.Domain.matching.matchingParticipant.repository.MatchingParticipantRepository;
 import com.exerciting.Exerciting.Domain.user.dto.TokenPairDto;
 import com.exerciting.Exerciting.Domain.user.dto.request.UserSignUpRequestDto;
+import com.exerciting.Exerciting.Domain.user.dto.request.UserUpdateRequestDto;
 import com.exerciting.Exerciting.Domain.user.entity.RefreshToken;
+import com.exerciting.Exerciting.Domain.user.entity.Role;
 import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.RefreshTokenRepository;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.user.service.UserService;
 import com.exerciting.Exerciting.Exception.DuplicateResourceException;
+import com.exerciting.Exerciting.Exception.InvalidCurrentPasswordException;
 import com.exerciting.Exerciting.Exception.InvalidTokenException;
 import com.exerciting.Exerciting.Exception.LoginFailedException;
 import com.exerciting.Exerciting.Exception.TokenReuseDetectedException;
+import com.exerciting.Exerciting.Exception.WithdrawalBlockedException;
 import com.exerciting.Exerciting.Infrastructure.security.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,6 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -46,6 +53,9 @@ class UserServiceTest {
 
     @Mock
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Mock
+    private MatchingParticipantRepository matchingParticipantRepository;
 
     @InjectMocks
     private UserService userService;
@@ -114,7 +124,7 @@ class UserServiceTest {
 
             given(userRepository.findByUserId(userId)).willReturn(Optional.of(user));
             given(passwordEncoder.matches(rawPw, "encodedPw")).willReturn(true);
-            given(jwtTokenProvider.createToken(userId)).willReturn("mock-access-token");
+            given(jwtTokenProvider.createToken(userId, null, Role.USER)).willReturn("mock-access-token");
             given(jwtTokenProvider.createRefreshToken(userId)).willReturn("mock-refresh-token");
             given(jwtTokenProvider.hashToken("mock-refresh-token")).willReturn("hashed-refresh");
             given(jwtTokenProvider.getRefreshTokenExpiresAt())
@@ -156,7 +166,7 @@ class UserServiceTest {
             assertThatThrownBy(() -> userService.login(userId, "wrongPw"))
                     .isInstanceOf(LoginFailedException.class);
 
-            verify(jwtTokenProvider, never()).createToken(anyString());
+            verify(jwtTokenProvider, never()).createToken(anyString(), any(), any());
         }
     }
 
@@ -185,7 +195,7 @@ class UserServiceTest {
             given(userRepository.findByUserId(userId)).willReturn(Optional.of(user));
             given(refreshTokenRepository.findByUser(user)).willReturn(Optional.of(saved));
             given(jwtTokenProvider.hashToken("old-refresh")).willReturn("old-hash");
-            given(jwtTokenProvider.createToken(userId)).willReturn("new-access");
+            given(jwtTokenProvider.createToken(userId, null, Role.USER)).willReturn("new-access");
             given(jwtTokenProvider.createRefreshToken(userId)).willReturn("new-refresh");
             given(jwtTokenProvider.hashToken("new-refresh")).willReturn("new-hash");
             given(jwtTokenProvider.getRefreshTokenExpiresAt()).willReturn(LocalDateTime.now().plusDays(14));
@@ -212,7 +222,7 @@ class UserServiceTest {
                     .isInstanceOf(TokenReuseDetectedException.class);
 
             verify(refreshTokenRepository).delete(saved);
-            verify(jwtTokenProvider, never()).createToken(anyString());
+            verify(jwtTokenProvider, never()).createToken(anyString(), any(), any());
         }
 
         @Test
@@ -224,6 +234,118 @@ class UserServiceTest {
                     .isInstanceOf(InvalidTokenException.class);
 
             verify(userRepository, never()).findByUserId(anyString());
+        }
+    }
+
+    @Nested
+    @DisplayName("deleteUser - 회원 탈퇴(익명화)")
+    class WithdrawTest {
+
+        private User activeUser() {
+            User user = User.builder()
+                    .userId("leaver").pw("encodedPw").nickname("떠나는사람").name("홍길동").email("leaver@test.com")
+                    .build();
+            ReflectionTestUtils.setField(user, "id", 7L);
+            return user;
+        }
+
+        @Test
+        @DisplayName("진행 중인 매칭에 참가 중이면 탈퇴를 막고 개인정보를 건드리지 않는다")
+        void withdraw_blocked_whenInActiveMatching() {
+            User user = activeUser();
+            given(userRepository.findByUserId("leaver")).willReturn(Optional.of(user));
+            given(matchingParticipantRepository.existsByUser_IdAndStatusAndMatching_StatusIn(
+                    eq(7L), eq(ParticipantStatus.JOINED), any())).willReturn(true);
+
+            assertThatThrownBy(() -> userService.deleteUser("leaver"))
+                    .isInstanceOf(WithdrawalBlockedException.class);
+
+            assertThat(user.isWithdrawn()).isFalse();
+            assertThat(user.getEmail()).isEqualTo("leaver@test.com");
+            verify(refreshTokenRepository, never()).deleteByUser(any());
+        }
+
+        @Test
+        @DisplayName("탈퇴하면 행은 남기되 아이디·이메일·실명을 지우고 refresh 토큰을 삭제한다")
+        void withdraw_anonymizes() {
+            User user = activeUser();
+            given(userRepository.findByUserId("leaver")).willReturn(Optional.of(user));
+            given(matchingParticipantRepository.existsByUser_IdAndStatusAndMatching_StatusIn(
+                    eq(7L), eq(ParticipantStatus.JOINED), any())).willReturn(false);
+
+            userService.deleteUser("leaver");
+
+            assertThat(user.isWithdrawn()).isTrue();
+            assertThat(user.getUserId()).isEqualTo("withdrawn_7");
+            assertThat(user.getEmail()).doesNotContain("leaver");
+            assertThat(user.getName()).isNull();
+            verify(refreshTokenRepository).deleteByUser(user);
+            verify(userRepository, never()).delete(any(User.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("updateUserDetail - 회원 정보 수정")
+    class UpdateTest {
+
+        private User user() {
+            return User.builder()
+                    .userId("me").pw("encodedPw").nickname("나").name("홍길동").email("me@test.com")
+                    .build();
+        }
+
+        @Test
+        @DisplayName("현재 비밀번호 없이 비밀번호를 바꾸려 하면 거절한다")
+        void changePassword_withoutCurrentPw_rejected() {
+            User user = user();
+            given(userRepository.findByUserId("me")).willReturn(Optional.of(user));
+
+            assertThatThrownBy(() -> userService.updateUserDetail("me",
+                    new UserUpdateRequestDto(null, "NewPass1!", null, null)))
+                    .isInstanceOf(InvalidCurrentPasswordException.class);
+
+            assertThat(user.getPw()).isEqualTo("encodedPw");
+            verify(passwordEncoder, never()).encode(anyString());
+        }
+
+        @Test
+        @DisplayName("현재 비밀번호가 틀리면 이메일도 바꿀 수 없다")
+        void changeEmail_withWrongCurrentPw_rejected() {
+            User user = user();
+            given(userRepository.findByUserId("me")).willReturn(Optional.of(user));
+            given(passwordEncoder.matches("wrong", "encodedPw")).willReturn(false);
+
+            assertThatThrownBy(() -> userService.updateUserDetail("me",
+                    new UserUpdateRequestDto("wrong", null, null, "attacker@test.com")))
+                    .isInstanceOf(InvalidCurrentPasswordException.class);
+
+            assertThat(user.getEmail()).isEqualTo("me@test.com");
+        }
+
+        @Test
+        @DisplayName("현재 비밀번호가 맞으면 바꾸고, 다른 기기의 refresh 토큰을 끊는다")
+        void changePassword_success_revokesRefreshToken() {
+            User user = user();
+            given(userRepository.findByUserId("me")).willReturn(Optional.of(user));
+            given(passwordEncoder.matches("encodedPwRaw", "encodedPw")).willReturn(true);
+            given(passwordEncoder.encode("NewPass1!")).willReturn("newEncoded");
+
+            userService.updateUserDetail("me", new UserUpdateRequestDto("encodedPwRaw", "NewPass1!", null, null));
+
+            assertThat(user.getPw()).isEqualTo("newEncoded");
+            verify(refreshTokenRepository).deleteByUser(user);
+        }
+
+        @Test
+        @DisplayName("닉네임만 바꿀 때는 현재 비밀번호가 필요 없다")
+        void changeNickname_only() {
+            User user = user();
+            given(userRepository.findByUserId("me")).willReturn(Optional.of(user));
+            given(userRepository.existsByNickname("새닉")).willReturn(false);
+
+            userService.updateUserDetail("me", new UserUpdateRequestDto(null, null, "새닉", null));
+
+            assertThat(user.getNickname()).isEqualTo("새닉");
         }
     }
 }

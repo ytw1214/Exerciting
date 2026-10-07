@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<UserUpdateResponseDto> updateUser(@AuthenticationPrincipal LoginUser loginUser, @RequestBody UserUpdateRequestDto dto) {
+    public ResponseEntity<UserUpdateResponseDto> updateUser(@AuthenticationPrincipal LoginUser loginUser, @RequestBody @Valid UserUpdateRequestDto dto) {
         UserUpdateResponseDto result = userService.updateUserDetail(loginUser.getLoginId(),dto);
         return ResponseEntity.ok(result);
     }

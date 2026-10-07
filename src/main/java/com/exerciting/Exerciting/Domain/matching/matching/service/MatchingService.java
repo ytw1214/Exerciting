@@ -18,9 +18,9 @@ import com.exerciting.Exerciting.Domain.user.entity.User;
 import com.exerciting.Exerciting.Domain.user.repository.UserRepository;
 import com.exerciting.Exerciting.Domain.matching.matching.dto.MatchingRequestDto;
 import com.exerciting.Exerciting.Domain.matching.matching.entity.Matching;
+import com.exerciting.Exerciting.Domain.matching.matching.entity.MatchingStatus;
 import com.exerciting.Exerciting.Domain.matching.matching.repository.MatchingRepository;
 import com.exerciting.Exerciting.Exception.*;
-import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -73,13 +73,7 @@ public class MatchingService {
                         .matching(savedMatching)
                         .build()
         );
-        matchingParticipantRepository.save(
-                MatchingParticipant.builder()
-                        .user(host)
-                        .matching(savedMatching)
-                        .build()
-        );
-        savedMatching.refreshCapacityStatus(1 );
+        savedMatching.refreshCapacityStatus(1);
         log.info("매칭 생성 완료 - matchingId: {}, host: {}", savedMatching.getId(), host.getUserId());
         return MatchingCreateResponseDto.of(savedMatching, chatRoom.getId(), 1);
     }
@@ -112,9 +106,11 @@ public class MatchingService {
         return MatchingStatusResponseDto.of(matching, currentCount + 1);
     }
 
+    /** 취소·완료된 매칭은 목록에서 뺀다(소프트 삭제된 매칭이 계속 보이던 문제). */
+    @Transactional(readOnly = true)
     public Page<MatchingQueryResponseDto> getAllMatching(int page, int size) {
-        Pageable pageable = PageRequest.of(page,size, Sort.by("createdAt").descending());
-        return matchingRepository.findAll(pageable)
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return matchingRepository.findAllByStatusIn(MatchingStatus.ACTIVE_STATUSES, pageable)
                 .map(MatchingQueryResponseDto::from);
     }
     @Transactional
@@ -213,12 +209,13 @@ public class MatchingService {
                 .orElseThrow(() -> new MatchingNotFoundException());
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException());
-        if(matching.isHost(userId)) {
+        if (matching.isHost(userId)) {
+            // 호스트는 나갈 수 없다. 매칭 자체를 취소해야 한다.
             throw new HostCannotLeaveException();
         }
         MatchingParticipant participant = matchingParticipantRepository
-                .findByMatchingAndUser(matching, user)
-                .orElseThrow(InvalidInputException::new);
+                .findByMatchingAndUserAndStatus(matching, user, ParticipantStatus.JOINED)
+                .orElseThrow(NotParticipantException::new);
         // 기존: matchingParticipantRepository.delete(participant) — 이탈 이력이 사라져
         // "마감 직전 이탈" 같은 평판 신호를 만들 근거 데이터가 없어짐. 상태 전환으로 대체.
         participant.leave();
@@ -234,7 +231,7 @@ public class MatchingService {
                 .orElseThrow(UserNotFoundException::new);
 
         List<MatchingParticipantDto> participants = matchingParticipantRepository
-                .findByMatchingId(matchingId)
+                .findByMatching_IdAndStatusIn(matchingId, List.of(ParticipantStatus.JOINED, ParticipantStatus.ATTENDED))
                 .stream()
                 .map(MatchingParticipantDto::from)
                 .toList();

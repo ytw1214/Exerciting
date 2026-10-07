@@ -49,8 +49,10 @@ public class GameService {
     }
     //일별 경기 조회
     public List<GameQueryResponseDto> getDailyGames(GameCustomCond cond) {
-        LocalDateTime start = cond.startTime().atStartOfDay();
-        LocalDateTime end = cond.startTime().atTime(LocalTime.MAX);
+        // 날짜를 주지 않으면 오늘 경기를 보여준다 (예전에는 NPE로 500)
+        LocalDate target = cond.startTime() != null ? cond.startTime() : LocalDate.now();
+        LocalDateTime start = target.atStartOfDay();
+        LocalDateTime end = target.atTime(LocalTime.MAX);
         log.info("일별 경기 조회 - 시작: {}, 종료: {}", start, end);
         return gameRepository.search(cond,start,end);
     }

@@ -249,7 +249,7 @@
     <div class="sidebar">
         <div>
             <div class="section-label">서버 설정</div>
-            <input type="text" id="serverUrl" value="http://localhost:8080/websocket" placeholder="WebSocket URL">
+            <input type="text" id="serverUrl" value="http://localhost:8080/ws" placeholder="WebSocket URL">
         </div>
 
         <div>
@@ -347,6 +347,12 @@
           document.getElementById('connectBtn').disabled = true;
           document.getElementById('disconnectBtn').disabled = false;
           document.getElementById('subscribeBtn').disabled = false;
+          // 전송 실패(권한 없음, 길이 초과 등)는 나에게만 온다
+          stompClient.subscribe('/user/queue/errors', function(message) {
+            const body = JSON.parse(message.body);
+            log(`전송 실패: ${body.code} - ${body.message}`, 'error');
+            addMessage(`전송 실패: ${body.message}`, 'system');
+          });
         },
         function(error) {
           log(`연결 실패: ${error}`, 'error');

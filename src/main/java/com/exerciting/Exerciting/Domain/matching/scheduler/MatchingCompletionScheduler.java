@@ -26,9 +26,10 @@ public class MatchingCompletionScheduler {
 
     @Scheduled(fixedDelay = 5 * 60 * 1000)
     public void completeExpiredMatchings() {
+        // CLOSED(호스트가 마감한, 즉 실제로 성사된 매칭)도 완료 대상이다. 예전에는 빠져 있어 영원히 CLOSED로 남았다.
         List<Long> targetIds = matchingRepository.findIdsToComplete(
                 LocalDateTime.now(),
-                List.of(MatchingStatus.RECRUITING, MatchingStatus.FULL)
+                MatchingStatus.ACTIVE_STATUSES
         );
         if (targetIds.isEmpty()) return;
 
