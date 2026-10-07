@@ -59,6 +59,7 @@ dependencies {
 	testAnnotationProcessor 'org.projectlombok:lombok'
 	testRuntimeOnly 'com.h2database:h2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 }
 
 // 기본 테스트: H2만으로 도는 테스트 (CI에서 실행)
