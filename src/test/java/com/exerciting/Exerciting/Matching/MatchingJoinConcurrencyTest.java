@@ -36,7 +36,7 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * README §1 "동시에 참가 요청이 몰려도 정원을 넘지 않는다"를 증명하는 테스트.
+ * README §3 "동시에 참가 요청이 몰려도 정원을 넘지 않는다"를 증명하는 테스트.
  *
  * 스레드 100개가 출발 신호(CountDownLatch)를 기다렸다가 같은 매칭에 동시에 참가를 요청한다.
  * 비관적 락(SELECT ... FOR UPDATE)이 없다면 여러 스레드가 같은 인원 수를 읽고 동시에 참가해 정원을 넘는다.
