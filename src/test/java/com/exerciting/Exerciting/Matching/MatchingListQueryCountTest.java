@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * README §2 "N+1 개선 전/후 쿼리 수"를 숫자로 남기는 테스트.
+ * README §4 "N+1 개선 전/후 쿼리 수"를 숫자로 남기는 테스트.
  *
  * 서로 다른 경기·팀·경기장을 가진 매칭 10건의 목록을 한 페이지로 조회하고, 실행된 SQL 수를 센다.
  * 개선 전 수치가 궁금하면 MatchingRepository.findAllByStatusIn의 @EntityGraph를 잠깐 주석 처리하고 실행한다
